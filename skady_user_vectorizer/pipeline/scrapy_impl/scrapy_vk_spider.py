@@ -24,40 +24,30 @@ class ScrapyVkSpider(CrawlSpider):
         self.cookies = {}
         self.is_authorized = False
 
-    # @classmethod
-    # def from_crawler(cls, crawler, *args, **kwargs):
-    #     spider = super().from_crawler(crawler, *args, **kwargs)
-    #     crawler.signals.connect(spider.authorize, scrapy.signals.engine_started)
-    #     return spider
-
-    # def authorize(self):
-    #     login_creds = {"email": "79600988916", "pass": 'bQ30BIcK'}
-    #     resp = requests.post("https://login.vk.com/?act=login", data=login_creds)
-    #     print(resp.request.url)
-    #     print("authorize response", resp.status_code, resp.url)
-
-        # form_request = FormRequest.from_response(response,
-        #                                          formid="login_form",
-        #                                          formdata={"email": "79600988916",
-        #                                                    "pass": 'bQ30BIcK'},
-        #                                          callback=self.check_login_response,
-        #                                          cookies=self.cookies)
-
     def start_requests(self):
+        # print(self.crawler.engine.schedule(self.init_request(), self))
         yield self.init_request()
-        yield Request(url=self.start_url, callback=self.parse)
+        # sleep(3)
+        # yield Request(url=self.start_url, callback=self.parse)
 
     def init_request(self):
-        return Request(url=self.vk_login_page_url, callback=self.login)
+        return Request(url=self.vk_login_page_url, callback=self.login_and_schedule_start_requests)
 
-    def login(self, response):
+    def login_and_schedule_start_requests(self, log_in_page_resp):
+        yield self.login_and_start_parsing(log_in_page_resp)
+
+    def login_and_start_parsing(self, response):
         form_request = FormRequest.from_response(response,
                                                  formid="login_form",
                                                  formdata={"email": "79600988916",
                                                            "pass": 'bQ30BIcK'},
-                                                 callback=self.check_login_response,
+                                                 callback=self.check_login_and_start_crawling,
                                                  cookies=self.cookies)
-        yield form_request
+        return form_request
+
+    def check_login_and_start_crawling(self, login_result_resp):
+        self.check_login_response(login_result_resp)
+        yield Request(url=self.start_url, callback=self.parse)
 
     def check_login_response(self, response):
         print("time obtaining login response", time())
@@ -65,7 +55,6 @@ class ScrapyVkSpider(CrawlSpider):
         print("login response", response.url)
         print("Cookies list:", response.headers.getlist("Set-Cookie"))
         # an example request to page to check that authorized successfully
-        yield Request("https://vk.com/s0sed0v", callback=self.parse)
 
     def parse(self, response, **kwargs):
         print("Yay we parsing someone")
