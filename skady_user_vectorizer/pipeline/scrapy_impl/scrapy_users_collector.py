@@ -17,5 +17,6 @@ class ScrapyUsersCollector(UsersCollector):
               ):
         # self.process.crawl(scrapy_info_retriever)
         process = CrawlerProcess(self.crawler_settings)
-        process.crawl(ScrapyVkSpider, start_user=start_user, storage=users_storage)
+        process.crawl(ScrapyVkSpider, start_user=start_user, storage=users_storage,
+                      nb_processed_friends=nb_processed_friends, users_needed=need_to_obtain)
         process.start()

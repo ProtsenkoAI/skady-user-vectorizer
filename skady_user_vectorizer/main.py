@@ -9,5 +9,5 @@ if __name__ == "__main__":
     info_retriever = MockInfoRetriever(read_config())
     users_storage = ListUsersStorage()
     user = User("https://vk.com/gushchin_d")
-    ScrapyUsersCollector(Settings({"COOKIES_ENABLED": True})).start(user, users_storage, 1000, 10)
+    ScrapyUsersCollector(Settings({"COOKIES_ENABLED": True, "DOWNLOAD_DELAY": 1})).start(user, users_storage, 1000, 100)
     print(users_storage.get_all()[:10])

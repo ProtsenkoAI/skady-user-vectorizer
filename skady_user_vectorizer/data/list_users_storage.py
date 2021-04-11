@@ -14,3 +14,6 @@ class ListUsersStorage(UsersStorage):
 
     def get_all(self):
         return self.users
+
+    def __contains__(self, item):
+        return item in self.users

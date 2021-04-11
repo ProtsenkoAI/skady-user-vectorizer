@@ -14,3 +14,7 @@ class UsersStorage(ABC):
     @abstractmethod
     def get_all(self) -> Users:
         ...
+
+    @abstractmethod
+    def __contains__(self, item):
+        ...
