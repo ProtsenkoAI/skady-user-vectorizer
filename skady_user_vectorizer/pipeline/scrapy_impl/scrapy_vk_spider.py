@@ -75,6 +75,15 @@ class ScrapyVkSpider(CrawlSpider):
         return len(links_to_friends) > 0
 
     def _parse_user_friends_list(self, response: Response):
+        # print("Full friends page text", response.text)
+        show_more_friends_href = response.xpath("//a[@class='_show_more Btn Btn_stretch Btn_theme_secondary']/@href").get()
+        print("show more", show_more_friends_href)
+        if show_more_friends_href:
+            print("yielding show more")
+            show_more_friends_url = "https://vk.com" + show_more_friends_href
+            yield Request(show_more_friends_url, callback=self._parse_user_friends_list, dont_filter=True, method="POST",
+                          )
+
         # TODO: limit number of added and requested friends
         friends_rel_links = response.xpath("//a[@class='OwnerAvatar__link']/@href").getall()
         friends_urls = []
@@ -83,15 +92,15 @@ class ScrapyVkSpider(CrawlSpider):
                 friend_url = "https://vk.com" + link
                 friends_urls.append(friend_url)
 
-            if len(friends_urls) >= self.nb_processed_friends:
-                break
-
+            # if len(friends_urls) >= self.nb_processed_friends:
+            #     break
+        print("friends urls", len(friends_urls), friends_urls)
         self.storage.extend(friends_urls)
-
-        for url in friends_urls:
-            # friend_url = response.url + link
-            print("friend url", url)
-            yield Request(url, callback=self._parse_user)
+        # TODO: uncomment
+        # for url in friends_urls:
+        #     # friend_url = response.url + link
+        #     print("friend url", url)
+        #     yield Request(url, callback=self._parse_user)
 
     def _stop_if_needed(self):
         if len(self.storage) >= self.users_needed:
