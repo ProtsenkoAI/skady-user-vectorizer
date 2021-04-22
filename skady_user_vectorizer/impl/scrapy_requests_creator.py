@@ -2,7 +2,7 @@ from typing import Callable
 from scrapy import Request, FormRequest
 from scrapy.http import Response
 
-from ..interfaces import RequestsCreator, User, Credentials
+from interfaces import RequestsCreator, User, Credentials
 
 
 class ScrapyRequestsCreator(RequestsCreator):
@@ -22,7 +22,7 @@ class ScrapyRequestsCreator(RequestsCreator):
             form_request = FormRequest.from_response(login_page_response,
                                                      formid="login_form",
                                                      formdata={"email": self.creds.email,
-                                                               "password": self.creds.password},
+                                                               "pass": self.creds.password},
                                                      callback=callback,
                                                      )
             return form_request
@@ -51,7 +51,7 @@ class ScrapyRequestsCreator(RequestsCreator):
                           )
         return request
 
-    def wrap_callback(self, callback: Callable) -> Callable:
+    def _wrap_callback(self, callback: Callable) -> Callable:
         """To schedule new requests in scrapy you need to return them from callback
         thus the wrapped callback will receive new requests and return it"""
         def wrapped_callback(*args, **kwargs):
