@@ -6,5 +6,5 @@ from .parsed_processor import ParsedProcessor
 from .requests_creator import RequestsCreator
 from .access_error_listener import AccessErrorListener
 from .data_manager import DataManager
-from .parsing_progress_tracker import ParsingProgressTracker
+from .tracker import Tracker
 from .parse_statuses import *

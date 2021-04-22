@@ -1,11 +1,11 @@
 from typing import List
 
-from ..interfaces import ParsedProcessor, DataManager, FriendsParseRes, GroupsParseRes, User, ParsingProgressTracker
-from ..interfaces import SuccessParseStatus, AccessErrorStatus, ParseStatus
+from interfaces import ParsedProcessor, DataManager, FriendsParseRes, GroupsParseRes, User, Tracker
+from interfaces import SuccessParseStatus, AccessErrorStatus, ParseStatus
 
 
 class ParsedProcessorImpl(ParsedProcessor):
-    def __init__(self, data_manager: DataManager, progress_tracker: ParsingProgressTracker):
+    def __init__(self, data_manager: DataManager, progress_tracker: Tracker):
         self.data_manager = data_manager
         self.tracker = progress_tracker
         self.parse_candidates = []
@@ -16,6 +16,8 @@ class ParsedProcessorImpl(ParsedProcessor):
         if status == SuccessParseStatus:
             friends = friends_res.friends
             self.data_manager.save_user_friends(friends_res.user, friends)
+            unparsed_friends = self.data_manager.filter_already_seen_users(friends)
+            self.parse_candidates += unparsed_friends
             self.tracker.friends_added(len(friends))
         else:
             self._proc_non_success_status(status)

@@ -12,3 +12,7 @@ class DataManager(ABC):
     @abstractmethod
     def save_user_groups(self, user: User, groups: List[Group]):
         ...
+
+    @abstractmethod
+    def filter_already_seen_users(self, users: List[User]) -> List[User]:
+        ...

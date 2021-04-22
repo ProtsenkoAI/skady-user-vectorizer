@@ -1,6 +1,6 @@
 from typing import Iterable
 
-from ..interfaces import Requester, Parser, ParsedProcessor, User, RequestsCreator, AccessErrorListener
+from interfaces import Requester, Parser, ParsedProcessor, User, RequestsCreator, AccessErrorListener
 
 
 class CallbackRequester(Requester, AccessErrorListener):

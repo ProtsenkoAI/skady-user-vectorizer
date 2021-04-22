@@ -1,6 +1,6 @@
 from scrapy.http import Response
 
-from ..interfaces import Parser, FriendsParseRes, GroupsParseRes
+from interfaces import Parser, FriendsParseRes, GroupsParseRes
 
 
 class ScrapyParser(Parser):
