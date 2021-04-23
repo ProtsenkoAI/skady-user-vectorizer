@@ -5,6 +5,7 @@ from interfaces import Parser, FriendsParseRes, GroupsParseRes
 
 class ScrapyParser(Parser):
     def parse_friends(self, response: Response) -> FriendsParseRes:
+        print(response.request.headers)
         print("friends response", response.text)
         raise NotImplementedError
 
@@ -13,4 +14,4 @@ class ScrapyParser(Parser):
         raise NotImplementedError
 
     def check_auth_success(self, response: Response) -> bool:
-        return response.url == "https://m.vk.com/feed"
+        return response.url == "https://m.vk.com/feed"  # TODO: it's mobile version, replace with desktop one!
