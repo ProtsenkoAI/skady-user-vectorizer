@@ -1,16 +1,16 @@
-from impl.callback_requester import CallbackRequester
-from impl.scrapy_parser import ScrapyParser
-from impl.parsed_processor_impl import ParsedProcessorImpl
-from impl.scrapy_requests_creator import ScrapyRequestsCreator
-from impl.ram_data_manager import RAMDataManager
-from impl.stdout_tracker import StdOutTracker
-from impl.spider import Spider
+from common_components import CallbackRequester
+from scrapy_impl.scrapy_parser import ScrapyParser
+from common_components import ParsedProcessorImpl
+from scrapy_impl.scrapy_requests_creator import ScrapyRequestsCreator
+from common_components import RAMDataManager
+from common_components import StdOutTracker
+from scrapy_impl.spider import Spider
 from interfaces import Credentials, User
-from impl.utils import run_crawl
+from scrapy_impl.utils import run_crawl
 import util
 
 
-if __name__ == "__main__":
+def run():
     config = util.read_config()
     # just instantiate spider with all needed objects
     parser = ScrapyParser()
@@ -24,3 +24,7 @@ if __name__ == "__main__":
 
     start_user = User(id="371492632")
     run_crawl(Spider, requester, start_user)
+
+
+if __name__ == "__main__":
+    run()

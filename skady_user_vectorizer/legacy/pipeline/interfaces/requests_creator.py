@@ -7,7 +7,7 @@ from global_types import User
 
 
 class RequestsCreator(ABC):
-    # TODO: make abstract and move specifics to impl
+    # TODO: make abstract and move specifics to scrapy_impl
     Request = Any
 
     def __init__(self, user_friends_hook: Callable, user_groups_hook: Callable):
@@ -36,7 +36,7 @@ class RequestsCreator(ABC):
             out.append(self.make_groups_request(user))
         return out
 
-    # TODO: maybe move these to impl
+    # TODO: maybe move these to scrapy_impl
     @abstractmethod
     def make_friends_request(self, user: User) -> Request:
         ...

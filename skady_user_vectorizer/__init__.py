@@ -1,3 +1,3 @@
 from . import util
 from . import interfaces
-from . import impl
+from . import scrapy_impl
