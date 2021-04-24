@@ -1,6 +1,6 @@
 from typing import List
 
-from interfaces import ParsedProcessor, DataManager, FriendsParseRes, GroupsParseRes, User, Tracker
+from interfaces import ParsedProcessor, DataManager, User, Tracker, FriendsParseRes, GroupsParseRes
 from interfaces import SuccessParseStatus, AccessErrorStatus, ParseStatus
 
 

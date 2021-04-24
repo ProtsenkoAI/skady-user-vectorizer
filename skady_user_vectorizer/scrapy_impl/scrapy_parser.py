@@ -1,6 +1,7 @@
 from scrapy.http import Response
 
-from interfaces import Parser, FriendsParseRes, GroupsParseRes
+from interfaces import Parser
+from .parse_res import FriendsParseRes, GroupsParseRes
 
 
 class ScrapyParser(Parser):
@@ -14,4 +15,5 @@ class ScrapyParser(Parser):
         raise NotImplementedError
 
     def check_auth_success(self, response: Response) -> bool:
+        # TODO: delete this method (interface doesn't have it)
         return response.url == "https://m.vk.com/feed"  # TODO: it's mobile version, replace with desktop one!

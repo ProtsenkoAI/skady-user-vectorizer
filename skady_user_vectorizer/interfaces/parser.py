@@ -1,16 +1,13 @@
 from abc import ABC, abstractmethod
-from .parse_res import FriendsParseRes, GroupsParseRes
+from typing import Optional
+from .top_level_types import User
 
 
 class Parser(ABC):
     @abstractmethod
-    def parse_friends(self, response) -> FriendsParseRes:
+    def parse_friends(self, response, user: User):
         ...
 
     @abstractmethod
-    def parse_groups(self, response) -> GroupsParseRes:
-        ...
-
-    @abstractmethod
-    def check_auth_success(self, response) -> bool:
+    def parse_groups(self, response, user: User):
         ...

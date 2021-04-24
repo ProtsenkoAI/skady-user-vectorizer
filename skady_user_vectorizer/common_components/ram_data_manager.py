@@ -27,3 +27,6 @@ class RAMDataManager(DataManager):
     def filter_already_seen_users(self, users: List[User]) -> List[User]:
         unseen_users = [user for user in users if user not in self.users]
         return unseen_users
+
+    def get_num_users(self):
+        return len(self.users)

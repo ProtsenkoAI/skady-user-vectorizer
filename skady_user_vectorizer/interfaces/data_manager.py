@@ -16,3 +16,7 @@ class DataManager(ABC):
     @abstractmethod
     def filter_already_seen_users(self, users: List[User]) -> List[User]:
         ...
+
+    @abstractmethod
+    def get_num_users(self):
+        ...

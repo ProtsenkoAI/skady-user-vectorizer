@@ -6,6 +6,8 @@ from interfaces import Requester, Parser, ParsedProcessor, User, RequestsCreator
 class CallbackRequester(Requester, AccessErrorListener):
     # TODO: this class does not have any dependencies from scrapy, later I'll try to union it with  vk api
     #   implementation of requester
+    # TODO: problem: can't get User whose groups/friends are parsed from parsed response thus can't save
+    #   the user in parsed processor
     """Requests info about new users and sets it's own methods as request callbacks to get new users
     and the request them"""
     def __init__(self, parser: Parser, parsed_processor: ParsedProcessor, requests_creator: RequestsCreator):
@@ -19,7 +21,7 @@ class CallbackRequester(Requester, AccessErrorListener):
 
         self.parsed_processor.register_access_error_listener(self)
 
-    def access_error_occurred(self):
+    def access_error_occurred(self, *args, **kwargs):
         self.is_authorized = False
         self.requests_creator.change_proxy()
         self.dumped_candidates = self.parse_candidates

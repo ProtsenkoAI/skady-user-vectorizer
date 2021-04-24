@@ -1,7 +1,7 @@
 from typing import List
 
-from .parse_statuses import UnknownStatus, AccessErrorStatus, SuccessParseStatus, ParseStatus
-from .top_level_types import User, Group
+from interfaces.parse_statuses import UnknownStatus, AccessErrorStatus, SuccessParseStatus
+from interfaces.top_level_types import User, Group
 
 
 class ParseRes:

@@ -3,10 +3,10 @@ from interfaces import Tracker
 
 class StdOutTracker(Tracker):
     # TODO: refactor and add more functionality
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, print_every=30, **kwargs):
         self.friends_added_total = 0
         self.cnt_users_whose_friends_added = 0
-        super().__init__(*args, **kwargs)
+        super().__init__(*args, print_every=print_every, **kwargs)
 
         self.next_print_friends_nb = self.print_every
 

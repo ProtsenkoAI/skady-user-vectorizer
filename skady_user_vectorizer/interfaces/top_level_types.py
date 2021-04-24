@@ -2,5 +2,5 @@ from typing import NamedTuple, Any
 
 
 User = NamedTuple("User", [("id", str)])
-Group = Any  # TODO: make some fields for groups
+Group = NamedTuple("Group", [("id", str)])
 Credentials = NamedTuple("Credentials", [("email", str), ("password", str)])
