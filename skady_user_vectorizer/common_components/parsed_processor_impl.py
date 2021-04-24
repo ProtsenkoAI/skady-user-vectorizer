@@ -5,6 +5,7 @@ from interfaces import SuccessParseStatus, AccessErrorStatus, ParseStatus
 
 
 class ParsedProcessorImpl(ParsedProcessor):
+    # TODO: stop parsing if parsed enough users
     def __init__(self, data_manager: DataManager, progress_tracker: Tracker):
         self.data_manager = data_manager
         self.tracker = progress_tracker

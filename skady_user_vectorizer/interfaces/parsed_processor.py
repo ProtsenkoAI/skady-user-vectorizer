@@ -1,15 +1,17 @@
 from abc import ABC, abstractmethod
 from typing import List
 
-from .access_error_listener import AccessErrorListener
 from .top_level_types import User
 from .parse_res import FriendsParseRes, GroupsParseRes
+from .parsed_enough_notifier import ParsedEnoughNotifier
+from .access_error_notifier import AccessErrorNotifier
 
 
-class ParsedProcessor(ABC):
+class ParsedProcessor(ABC, ParsedEnoughNotifier, AccessErrorNotifier):
     def __init__(self):
-        self.access_error_listeners: List[AccessErrorListener] = []
-
+        ParsedEnoughNotifier.__init__(self)
+        AccessErrorNotifier.__init__(self)
+        
     @abstractmethod
     def proc_friends(self, friends: FriendsParseRes):
         ...
@@ -21,10 +23,3 @@ class ParsedProcessor(ABC):
     @abstractmethod
     def get_new_parse_candidates(self) -> List[User]:
         ...
-
-    def register_access_error_listener(self, listener: AccessErrorListener):
-        self.access_error_listeners.append(listener)
-
-    def notify_access_error_listeners(self):
-        for listener in self.access_error_listeners:
-            listener.access_error_occurred()

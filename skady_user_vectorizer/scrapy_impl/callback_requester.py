@@ -4,6 +4,8 @@ from interfaces import Requester, Parser, ParsedProcessor, User, RequestsCreator
 
 
 class CallbackRequester(Requester, AccessErrorListener):
+    # TODO: this class does not have any dependencies from scrapy, later I'll try to union it with  vk api
+    #   implementation of requester
     """Requests info about new users and sets it's own methods as request callbacks to get new users
     and the request them"""
     def __init__(self, parser: Parser, parsed_processor: ParsedProcessor, requests_creator: RequestsCreator):

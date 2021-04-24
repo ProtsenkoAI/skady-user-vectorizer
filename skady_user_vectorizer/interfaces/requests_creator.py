@@ -4,6 +4,7 @@ from .top_level_types import User
 
 
 class RequestsCreator(ABC):
+    # TODO: add return typings
     @abstractmethod
     def friends_request(self, candidate: User, callback: Callable):
         ...
