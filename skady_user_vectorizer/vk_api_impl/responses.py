@@ -25,7 +25,6 @@ class FriendsResponse(Response):
     def parse(self, parser: Parser) -> FriendsParseRes:
         if self.check_error_occurred():
             return parser.parse_friends(ResponseObj(value=self.get_error(), is_error=True), user=self.user)
-        # print("result", dir(self.request_result.result))
         return parser.parse_friends(ResponseObj(value=self.request_result.result, is_error=False), user=self.user)
 
 

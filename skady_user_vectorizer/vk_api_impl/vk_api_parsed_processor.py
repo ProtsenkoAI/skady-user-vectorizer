@@ -28,6 +28,7 @@ class VkApiParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
                 self._proc_friends(parsed_results)
             elif parsed_results.request_type == "groups":
                 parsed_results: GroupsParseRes
+                self._proc_groups(parsed_results)
             else:
                 raise ValueError(f"Unknown request_type: {parsed_results.request_type}")
 

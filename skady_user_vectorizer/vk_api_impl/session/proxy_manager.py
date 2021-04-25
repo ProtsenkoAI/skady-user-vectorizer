@@ -1,19 +1,22 @@
 from interfaces import Proxy
 from .proxy_storage_interface import ProxyStorage
 from .records import ProxyRecord
+from ..events_tracker import EventsTracker
 from .consts import PROXY_RELOAD_TIME
 
 
 class ProxyManager:
-    def __init__(self, proxy_storage: ProxyStorage, events_tracker):
+    def __init__(self, proxy_storage: ProxyStorage, events_tracker: EventsTracker):
         self.tracker = events_tracker
         self.storage = proxy_storage
-        self.proxy_record = self._get_new_proxy_record()
+        self.proxy_record = None
 
     def _get_new_proxy_record(self) -> ProxyRecord:
         for proxy_record in self.storage.get_proxy_records():
             if self._check_usable_proxy(proxy_record):
                 return proxy_record
+        else:
+            raise RuntimeError("Out of proxies")
 
     def _check_usable_proxy(self, proxy_record: ProxyRecord) -> bool:
         return (proxy_record.status_ok or
@@ -30,5 +33,6 @@ class ProxyManager:
                 usable_proxy_left += 1
 
         self.tracker.proxy_report(proxy_left, usable_proxy_left, changed=True)
-        self.storage.set_proxy_worked_out(self.proxy_record)
+        if self.proxy_record is not None:
+            self.storage.set_proxy_worked_out(self.proxy_record)
         self.proxy_record = self._get_new_proxy_record()

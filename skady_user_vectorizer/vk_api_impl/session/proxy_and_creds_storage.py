@@ -41,7 +41,7 @@ class ProxyAndCredsStorage(ProxyStorage, CredsStorage):
             res.append(ProxyRecord(status_ok=status_ok, status_worked_out=status_worked_out,
                                    time_since_status_change=time_since_last_change,
                                    proxy=Proxy(address=proxy["address"], protocols=proxy["protocols"]),
-                                   id=idx))
+                                   obj_id=idx))
         return res
 
     def _parse_loaded_creds(self, creds_lst: List[CredsDict]) -> List[CredsRecord]:
@@ -62,7 +62,7 @@ class ProxyAndCredsStorage(ProxyStorage, CredsStorage):
             res.append(CredsRecord(status_ok=status_ok, status_worked_out=status_worked_out,
                                    time_since_status_change=time_since_last_change,
                                    creds=Credentials(email=creds["email"], password=creds["password"]),
-                                   id=idx))
+                                   obj_id=idx))
         return res
 
     def get_proxy_records(self) -> List[ProxyRecord]:
@@ -70,7 +70,7 @@ class ProxyAndCredsStorage(ProxyStorage, CredsStorage):
 
     def set_proxy_worked_out(self, worked_out_proxy: ProxyRecord):
         for proxy in self.proxies:
-            if worked_out_proxy.id == proxy.id:
+            if worked_out_proxy.obj_id == proxy.obj_id:
                 proxy.status_ok = False
                 proxy.status_worked_out = True
                 self._dump_state()
@@ -81,7 +81,7 @@ class ProxyAndCredsStorage(ProxyStorage, CredsStorage):
 
     def set_creds_worked_out(self, worked_out_creds: CredsRecord):
         for user_creds in self.creds:
-            if worked_out_creds.id == user_creds.id:
+            if worked_out_creds.obj_id == user_creds.obj_id:
                 user_creds.status_ok = False
                 user_creds.status_worked_out = True
                 user_creds.time_since_status_change = 0
@@ -97,7 +97,7 @@ class ProxyAndCredsStorage(ProxyStorage, CredsStorage):
                 status = PROXY_WORKED_OUT_STATUS
             else:
                 raise ValueError(f"Unknown status of proxy. Proxy: {proxy}")
-            status_change_time = time.time() - proxy.time_since_status_change
+            status_change_time = int(time.time() - proxy.time_since_status_change)
             proxy_dct = ProxiesDict(status=status,
                                     status_change_time=status_change_time,
                                     proxy=UserProxyDict(address=proxy.proxy.address, protocols=proxy.proxy.protocols))
@@ -110,11 +110,11 @@ class ProxyAndCredsStorage(ProxyStorage, CredsStorage):
                 status = CREDS_WORKED_OUT_STATUS
             else:
                 raise ValueError(f"Unknown status of creds. Creds: {user_creds}")
-            status_change_time = time.time() - user_creds.time_since_status_change
+            status_change_time = int(time.time() - user_creds.time_since_status_change)
             creds_dct = CredsDict(status=status,
                                   status_change_time=status_change_time,
                                   creds=UserCredsDict(email=user_creds.creds.email, password=user_creds.creds.password))
-            state["creds"].append(creds_dct)
+            state["credentials"].append(creds_dct)
 
         with open(self.save_pth, "w") as f:
             json.dump(state, f)

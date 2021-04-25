@@ -1,11 +1,11 @@
 from abc import ABC
 from typing import Optional, List, NamedTuple, Union
-from vk_api.exceptions import ApiHttpError
+from vk_api.exceptions import VkApiError
 
 from interfaces import User, Group
 
 
-VkApiErrorObj = NamedTuple("VkApiErrorObj", [("code", int), ("error", ApiHttpError)])
+VkApiErrorObj = NamedTuple("VkApiErrorObj", [("code", Union[None, int]), ("error", VkApiError)])
 ResponseObj = NamedTuple("ResponseObj", [("value", Union[VkApiErrorObj, dict]), ("is_error", bool)])
 
 

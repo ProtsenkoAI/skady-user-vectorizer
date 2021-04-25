@@ -1,0 +1,230 @@
+ERROR:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:status code: 18, msg: Unknown error occurred: 18User: User(id=165874428), error obj: {'method': 'friends.get', 'error_code': 18, 'error_msg': 'User was deleted or banned'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report. Changed: TrueTotal: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report. Changed: TrueTotal: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State ReportNb users parsed: 0Total errors: 0Errors counts by code: defaultdict(<class 'int'>, {})Number of skipped users: 0Seconds since previous report: 5Total friends: 93Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 30829
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report. Changed: TrueTotal: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report. Changed: TrueTotal: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State ReportNb users parsed: 0Total errors: 0Errors counts by code: defaultdict(<class 'int'>, {})Number of skipped users: 0Seconds since previous report: 5Total friends: 93Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 30829
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 6
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 5
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 5
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 5
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 5
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 5
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 0 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Bad password, notifying
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 0 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Auth error: auth_data = {'email': '79600988916', 'password': 'bQ30BIcK', 'proxy protocols': ['http', 'https'], 'proxy address': '209.127.191.180:9279'}
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 6
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 1
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 5
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 30829
