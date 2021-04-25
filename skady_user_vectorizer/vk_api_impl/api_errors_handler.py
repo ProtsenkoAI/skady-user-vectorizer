@@ -2,6 +2,7 @@ from vk_api import exceptions
 import vk_api
 from typing import Optional
 
+from .error_codes import PROFILE_IS_PRIVATE
 from .parse_res import ParseRes
 from .bad_password import BadPasswordNotifier
 
@@ -23,6 +24,7 @@ class VkApiErrorsHandler(BadPasswordNotifier):
                 session.auth()
 
         elif isinstance(error, exceptions.BadPassword):
+            self.tracker.message("Bad password, notifying")
             self.notify_bad_password()
 
         else:
@@ -33,7 +35,7 @@ class VkApiErrorsHandler(BadPasswordNotifier):
         self.tracker.error_occured(error=error, msg=error_msg_to_log)
 
     def api_response_error(self, parsed_results: ParseRes):
-        if parsed_results.error.code == 30:
+        if parsed_results.error.code == PROFILE_IS_PRIVATE:
             self.tracker.skip_user(user=parsed_results.user, msg=f"Profile is private")
         else:
             msg = (f"Unknown error occurred: {parsed_results.error.code}"

@@ -6,7 +6,7 @@ from .vk_api_parser import VkApiParser
 from .vk_api_pool_executor import VkApiPoolExecutor
 from .vk_api_requester import VkApiRequester
 from .requests_creator import VkApiRequestsCreator
-from .session_manager import SessionManager
+from .session.session_manager import SessionManager
 from .api_errors_handler import VkApiErrorsHandler
 from .util import read_proxies_and_creds
 

@@ -9,10 +9,9 @@ from .creds_manager import CredsManager
 class SessionManager(BadPasswordListener):
     # TODO: add listener that enough requests made with this session and need to create new one
     # TODO: add statistics about requests made from every access_token/ ip, number, speed and time of requests
-    def __init__(self, errors_handler, events_tracker, proxy_manager: ProxyManager, creds_manager: CredsManager):
+    def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager):
         self.session = self._next_session()
         self.errors_handler = errors_handler
-        self.tracker = events_tracker
         self.proxy_manager = proxy_manager
         self.creds_manager = creds_manager
 
