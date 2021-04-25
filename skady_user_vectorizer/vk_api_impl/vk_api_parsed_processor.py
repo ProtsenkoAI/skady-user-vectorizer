@@ -1,16 +1,18 @@
 from typing import List
 
 from .parse_res import ParseRes, FriendsParseRes, GroupsParseRes
-from interfaces import ParsedEnoughNotifier, AccessErrorNotifier, DataManager, Tracker, User
+from interfaces import ParsedEnoughNotifier, AccessErrorNotifier, DataManager, User
 
 from .error_codes import ACCESS_ERROR_CODE
 
 
 class VkApiParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
     # TODO: union with processor impl from common_components/
-    def __init__(self, data_manager: DataManager, progress_tracker: Tracker, max_users: int = 10000):
+    def __init__(self, data_manager: DataManager, progress_tracker, errors_handler,
+                 max_users: int = 10000):
         self.data_manager = data_manager
         self.tracker = progress_tracker
+        self.errors_handler = errors_handler
         self.parse_candidates = []
         self.max_users = max_users
 
@@ -34,9 +36,7 @@ class VkApiParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
             self.notify_access_error_listeners(user=parsed_results.user,
                                                type_of_request=parsed_results.request_type)
         else:
-            # TODO: maybe not rise error, but log (to continue crawl and save results despite raised errors
-            raise ValueError(f"Unknown error occurred: {parsed_results.error.code}.from"
-                             f"User: {parsed_results.user}, Error obj: {parsed_results.error}")
+            self.errors_handler.api_response_error(parsed_results)
 
     def _proc_friends(self, results: FriendsParseRes):
         friends = results.friends
@@ -44,7 +44,7 @@ class VkApiParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
         unparsed_friends = self.data_manager.filter_already_seen_users(friends)
         self.parse_candidates += unparsed_friends
         # TODO: refactor tracker interface
-        self.tracker.friends_added(len(friends))
+        self.tracker.friends_added(unparsed_friends)
 
         if self.max_users <= self.data_manager.get_num_users():
             self.notify_parsed_enough_listeners()
@@ -52,9 +52,10 @@ class VkApiParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
     def _proc_groups(self, results: GroupsParseRes):
         groups = results.groups
         self.data_manager.save_user_groups(results.user, groups)
-        self.tracker.groups_added(len(groups))
+        self.tracker.groups_added(groups)
 
     def get_new_parse_candidates(self) -> List[User]:
         val = self.parse_candidates
+        self.tracker.message(f"New cycle of parsing, number of parse candidates: {len(val)}")
         self.parse_candidates = []
         return val

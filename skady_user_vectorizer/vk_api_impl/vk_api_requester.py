@@ -1,16 +1,15 @@
 from typing import List
 
-from interfaces import User, AccessErrorListener
-from .requests import Request, GroupsRequest, FriendsRequest
+from interfaces import User, AccessErrorListener, RequestsCreator
+from .requests import Request
 
 
 class VkApiRequester(AccessErrorListener):
-    # TODO: make requester an access error listener to re-request failed users (need to pass user in notify)
-    # TODO: maybe add maximum of requests per call
-    # TODO: refactor creation of users (use some generative pattern)
-    def __init__(self):
+    # IDEA: maybe add maximum of requests per call
+    def __init__(self, request_creator: RequestsCreator):
         self.users_to_friends_request = []
         self.users_to_groups_request = []
+        self.request_creator = request_creator
 
     def add_users(self, users: List[User]):
         self.users_to_friends_request.extend(users)
@@ -23,10 +22,10 @@ class VkApiRequester(AccessErrorListener):
         requests = []
         while self.users_to_friends_request:
             user = self.users_to_friends_request.pop(0)
-            requests.append(FriendsRequest(user))
+            requests.append(self.request_creator.friends_request(user))
         while self.users_to_friends_request:
             user = self.users_to_groups_request.pop(0)
-            requests.append(GroupsRequest(user))
+            requests.append(self.request_creator.groups_request(user))
         return requests
 
     def access_error_occurred(self, user, type_of_request: str, *args, **kwargs):

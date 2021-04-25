@@ -8,6 +8,7 @@ from interfaces import AccessErrorListener
 
 
 class VkApiPoolExecutor(AccessErrorListener):
+    # TODO: later, if vk will raise speed limit errors, need to throttle requests / manage delays
     def __init__(self, session_manager: SessionManager, max_pool_size=25):
         self.max_pool_size = max_pool_size
         self.session_manager = session_manager

@@ -18,18 +18,19 @@ class Response(ABC):
         return self.request_result.error is not False
 
     def get_error(self) -> VkApiErrorObj:
-        return VkApiErrorObj(code=self.request_result.error.response.status_code, error=self.request_result.error)
+        return VkApiErrorObj(code=self.request_result.error["error_code"], error=self.request_result.error)
 
 
 class FriendsResponse(Response):
     def parse(self, parser: Parser) -> FriendsParseRes:
         if self.check_error_occurred():
             return parser.parse_friends(ResponseObj(value=self.get_error(), is_error=True), user=self.user)
-        return parser.parse_friends(ResponseObj(value=self.request_result.result, is_error=True), user=self.user)
+        # print("result", dir(self.request_result.result))
+        return parser.parse_friends(ResponseObj(value=self.request_result.result, is_error=False), user=self.user)
 
 
 class GroupsResponse(Response):
     def parse(self, parser: Parser) -> GroupsParseRes:
         if self.check_error_occurred():
             return parser.parse_friends(ResponseObj(value=self.get_error(), is_error=True), user=self.user)
-        return parser.parse_groups(ResponseObj(value=self.request_result.result, is_error=True), user=self.user)
+        return parser.parse_groups(ResponseObj(value=self.request_result.result, is_error=False), user=self.user)

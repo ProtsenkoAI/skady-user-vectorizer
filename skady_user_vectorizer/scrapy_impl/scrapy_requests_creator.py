@@ -6,6 +6,11 @@ from interfaces import RequestsCreator, User, Credentials
 
 
 class ScrapyRequestsCreator(RequestsCreator):
+    # TODO: move each request realisation to separate class, thus this component will be abstract fabric
+    # NOTE: we want to use proxies, but FindClone / any search engine somehow crawls a LOT of pages
+    #   so think /read how they do it.
+    # NOTE: at the moment authorization doesn't work properly, but vk_api python wrapper lib has
+    #   ready code for that. Check: https://github.com/python273/vk_api/blob/master/vk_api/vk_api.py
     # TODO: pass creds in more safe way
     # TODO: imitate real requests headers using helper object (user-agent, host etc)
     def __init__(self, creds: Credentials):
