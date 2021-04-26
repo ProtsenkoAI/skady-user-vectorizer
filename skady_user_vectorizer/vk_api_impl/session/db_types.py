@@ -11,13 +11,15 @@ class UserProxyDict(TypedDict):
     protocols: List[str]
 
 
-class CredsDict(TypedDict):
+class AuthResourceDict(TypedDict):
     status: str
     status_change_time: int
+    obj_id: int
+
+
+class CredsDict(AuthResourceDict):
     creds: UserCredsDict
 
 
-class ProxiesDict(TypedDict):
-    status: str
-    status_change_time: int
+class ProxyDict(AuthResourceDict):
     proxy: UserProxyDict

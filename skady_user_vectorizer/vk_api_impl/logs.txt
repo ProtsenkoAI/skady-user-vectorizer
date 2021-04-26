@@ -13,3 +13,18 @@ Seconds since previous report: 4
 Total friends: 93
 Total Groups: 0
 INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Proxy report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:Creds report.
+Changed: True
+Total: 1, 1 of them are marked as usable
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:State Report
+Nb users parsed: 0
+Total errors: 0
+Errors counts by code: defaultdict(<class 'int'>, {})
+Number of skipped users: 0
+Seconds since previous report: 4
+Total friends: 93
+Total Groups: 0
+INFO:skady_user_vectorizer.vk_api_impl.EventsTrackerLogger:New cycle of parsing, number of parse candidates: 93

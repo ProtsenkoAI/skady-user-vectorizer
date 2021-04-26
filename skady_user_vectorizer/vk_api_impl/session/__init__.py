@@ -1,3 +1,5 @@
 from .creds_manager import CredsManager
 from .proxy_manager import ProxyManager
-from .proxy_and_creds_storage import ProxyAndCredsStorage
+from .auth_record_storage import AuthRecordsStorage
+from .auth_records_serializer import ProxyRecordsSerializer, CredsRecordsSerializer
+
