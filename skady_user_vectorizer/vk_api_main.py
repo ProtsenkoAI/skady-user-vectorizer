@@ -1,4 +1,3 @@
-# TODO: need to create better files structure
 from vk_api_impl.vk_api_crawl_runner import VkApiCrawlRunner
 
 

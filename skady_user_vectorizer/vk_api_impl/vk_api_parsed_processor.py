@@ -3,7 +3,7 @@ from typing import List
 from .parse_res import ParseRes, FriendsParseRes, GroupsParseRes
 from interfaces import ParsedEnoughNotifier, AccessErrorNotifier, DataManager, User
 
-from .error_codes import ACCESS_ERROR_CODE
+from .vk_api_specific.error_codes import ACCESS_ERROR_CODE
 
 
 class VkApiParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
@@ -44,7 +44,6 @@ class VkApiParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
         self.data_manager.save_user_friends(results.user, friends)
         unparsed_friends = self.data_manager.filter_already_seen_users(friends)
         self.parse_candidates += unparsed_friends
-        # TODO: refactor tracker interface
         self.tracker.friends_added(unparsed_friends)
 
         if self.max_users <= self.data_manager.get_num_users():

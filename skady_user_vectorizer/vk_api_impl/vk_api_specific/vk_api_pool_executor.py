@@ -1,9 +1,9 @@
 from typing import List
 from vk_api import VkRequestsPool
 
-from .session.session_manager import SessionManager
-from .requests import Request
-from .responses import Response
+from .session_manager import SessionManager
+from ..request import Request
+from ..response import Response
 from interfaces import AccessErrorListener
 
 

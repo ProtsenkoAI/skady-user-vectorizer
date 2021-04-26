@@ -1,7 +1,7 @@
 from typing import List
 
 from interfaces import User, AccessErrorListener, RequestsCreator
-from .requests import Request
+from .request import Request
 
 
 class VkApiRequester(AccessErrorListener):

@@ -3,9 +3,9 @@ import vk_api
 from typing import Optional
 
 from .error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED
-from .parse_res import ParseRes, VkApiErrorObj
-from .bad_password import BadPasswordNotifier
-from .events_tracker import EventsTracker
+from ..parse_res import ParseRes, VkApiErrorObj
+from ..bad_password import BadPasswordNotifier
+from ..events_tracker import EventsTracker
 
 
 class VkApiErrorsHandler(BadPasswordNotifier):
@@ -30,7 +30,7 @@ class VkApiErrorsHandler(BadPasswordNotifier):
             # Funny fact: vk_api can return Bad password even if it's not the problem.
             # One time it returned bad password when we didn't pass User agent in requests session
             # SO if there'll be bugs, consider find REAL root of the problem
-            self.tracker.message("Bad password error occured")
+            self.tracker.message("Bad password error occurred")
             self.notify_bad_password()
 
         else:

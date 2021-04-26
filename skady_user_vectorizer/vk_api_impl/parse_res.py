@@ -1,6 +1,6 @@
 from abc import ABC
 from typing import Optional, List, NamedTuple, Union
-from vk_api.exceptions import VkApiError
+from vk_api.exceptions import VkApiError # TODO: remove dependency from vk_api
 
 from interfaces import User, Group
 

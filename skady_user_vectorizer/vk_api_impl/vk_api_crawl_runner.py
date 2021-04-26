@@ -2,20 +2,22 @@ from interfaces import CrawlRunner
 from common_components import RAMDataManager
 from .vk_api_parsed_processor import VkApiParsedProcessor
 from interfaces import ParsedEnoughListener, User
-from .vk_api_parser import VkApiParser
-from .vk_api_pool_executor import VkApiPoolExecutor
+from vk_api_impl.vk_api_specific.vk_api_pool_executor import VkApiPoolExecutor
 from .vk_api_requester import VkApiRequester
 from .requests_creator import VkApiRequestsCreator
 from .events_tracker import EventsTracker
-from .session import ProxyAndCredsStorage, ProxyManager, CredsManager, SessionManager
-from .api_errors_handler import VkApiErrorsHandler
+from .session import ProxyAndCredsStorage, ProxyManager, CredsManager
+from vk_api_impl.vk_api_specific.session_manager import SessionManager
+from .vk_api_specific.api_errors_handler import VkApiErrorsHandler
+from vk_api_impl.vk_api_responses_factory import VkApiResponsesFactory
 import time
 
 
 class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
-    def __init__(self, start_user_id: str, path_to_proxies_and_creds: str):
-        events_tracker = EventsTracker(log_pth="./logs.txt", report_every_responses_nb=100)
-        requests_creator = VkApiRequestsCreator()
+    def __init__(self, start_user_id: str, path_to_proxies_and_creds: str, logs_pth: str = "./logs.txt"):
+        events_tracker = EventsTracker(log_pth=logs_pth, report_every_responses_nb=100)
+        responses_factory = VkApiResponsesFactory()
+        requests_creator = VkApiRequestsCreator(responses_factory=responses_factory)
         self.requester = VkApiRequester(requests_creator)
 
         errors_handler = VkApiErrorsHandler(events_tracker)
@@ -27,7 +29,6 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
         errors_handler.register_bad_password_listener(session_manager)
         self.executor = VkApiPoolExecutor(session_manager=session_manager)
 
-        self.parser = VkApiParser()
         self.parsed_processor = VkApiParsedProcessor(RAMDataManager(), events_tracker, errors_handler=errors_handler)
 
         self.parsed_processor.register_parsed_enough_listener(self)
@@ -46,7 +47,7 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
             print("requests", len(requests))
             responses = self.executor.execute(requests)
             print("responses", len(responses))
-            parsed = [resp.parse(self.parser) for resp in responses]
+            parsed = [resp.parse() for resp in responses]
             print("parsed", len(parsed))
             for parsed_response in parsed:
                 self.parsed_processor.process(parsed_response)

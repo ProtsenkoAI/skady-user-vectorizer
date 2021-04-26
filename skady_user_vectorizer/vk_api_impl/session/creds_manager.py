@@ -6,7 +6,6 @@ from ..events_tracker import EventsTracker
 
 
 class CredsManager:
-    # TODO: add reasons why reset creds (bad password, unknown, worked out)
     def __init__(self, creds_storage: CredsStorage, events_tracker: EventsTracker):
         self.storage = creds_storage
         self.tracker = events_tracker
@@ -28,6 +27,7 @@ class CredsManager:
         return self.creds_record.creds
 
     def reset(self):
+        # TODO: add reasons why reset creds (bad password, unknown, worked out)
         creds_left, usable_creds_left = 0, 0
         for record in self.storage.get_creds_records():
             creds_left += 1

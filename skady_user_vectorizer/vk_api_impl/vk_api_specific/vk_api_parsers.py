@@ -1,14 +1,14 @@
 from typing import Dict
 
 from interfaces import Parser, User, Group
-from .parse_res import FriendsParseRes, GroupsParseRes
-from .responses import ResponseObj
+from ..parse_res import FriendsParseRes, GroupsParseRes
+from ..parse_res import ResponseObj
 
 ApiResponseResult = Dict
 
 
-class VkApiParser(Parser):
-    def parse_friends(self, response: ResponseObj, user: User) -> FriendsParseRes:
+class FriendsParser(Parser):
+    def parse(self, response: ResponseObj, user: User) -> FriendsParseRes:
         if response.is_error:
             return FriendsParseRes(user=user, error=response.value)
 
@@ -16,7 +16,9 @@ class VkApiParser(Parser):
         friends = [User(id=user_id) for user_id in user_ids]
         return FriendsParseRes(user=user, friends=friends)
 
-    def parse_groups(self, response: ResponseObj, user: User) -> GroupsParseRes:
+
+class GroupsParser(Parser):
+    def parse(self, response: ResponseObj, user: User) -> GroupsParseRes:
         if response.is_error:
             return GroupsParseRes(user=user, error=response.value)
 

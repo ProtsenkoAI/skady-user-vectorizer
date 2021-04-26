@@ -14,7 +14,6 @@ class EventsTracker(metaclass=Singleton):
     #   will sink in problems with rewriting each subclass. It's made in this style because of
     #   simplicity of realisation and ease of use from other objects side.
     # TODO: refactor
-    # TODO: log both in stdout and file
     # TODO: test that if imported in 2 different modules will have only one instance (it's quite unobvious
     #   how this is supposed to work)
     def __init__(self, log_pth: str, report_every_responses_nb: int = 1000):
@@ -69,6 +68,7 @@ class EventsTracker(metaclass=Singleton):
 
     def _state_report(self, time_passed: int):
         # TODO: maybe save full list of skipped users and reasons somewhere
+        # TODO: check that nb users parsed in logs is adequate
         msg_lines = (f"State Report",
                      f"Nb users parsed: {self.groups_responses_cnt}",
                      f"Total errors: {len(self.errors)}",
