@@ -6,4 +6,4 @@
 **/vk_config.*.json
 **/proxies_and_creds.json
 **/logs.txt
-
+**/checkpoint.json

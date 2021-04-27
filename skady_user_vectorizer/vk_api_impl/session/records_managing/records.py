@@ -16,6 +16,7 @@ class ProxyRecord(Record):
 
 
 class CredsRecord(Record):
-    def __init__(self, *args, creds: Credentials, **kwargs):
+    def __init__(self, *args, creds: Credentials, status_bad_password, **kwargs):
         self.creds = creds
+        self.status_bad_password = status_bad_password
         super().__init__(*args, **kwargs)

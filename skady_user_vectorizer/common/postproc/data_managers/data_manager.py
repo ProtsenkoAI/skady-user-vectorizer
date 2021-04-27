@@ -1,12 +1,17 @@
 from abc import ABC, abstractmethod
 from typing import List
 
+from .types import UsersData
 from common.top_level_types import User, Group
 
 
 class DataManager(ABC):
     @abstractmethod
     def save_user_friends(self, user: User, friends: List[User]):
+        ...
+
+    @abstractmethod
+    def get_data(self) -> UsersData:
         ...
 
     @abstractmethod

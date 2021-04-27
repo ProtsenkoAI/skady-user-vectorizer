@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-from typing import Union
 
 from .records import Record
 from .records_storing import AuthRecordsStorage
@@ -12,7 +11,7 @@ class AuthRecordManager(ABC):
         self.storage = storage
         self.tracker = events_tracker
 
-        self.resource: Union[Record, type(None)] = None
+        self.resource = self._get_new_record()
 
     @abstractmethod
     def get(self):
@@ -34,10 +33,12 @@ class AuthRecordManager(ABC):
         return (record.status_ok or
                 record.status_worked_out and record.time_since_status_change >= AUTH_RECORD_RELOAD_TIME)
 
-    def reset(self):
-        # TODO: add reasons why reset (bad password, unknown, worked out)
+    def reset_requests_limit(self):
         if self.resource is not None:
             self.storage.set_worked_out(self.resource)
+        self.reset_resource()
+
+    def reset_resource(self):
         self.resource = self._get_new_record()
         self._prepare_and_send_tracker_reset_message()
 

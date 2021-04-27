@@ -8,6 +8,6 @@ class ParsedEnoughNotifier:
     def register_parsed_enough_listener(self, listener: ParsedEnoughListener):
         self.listeners.append(listener)
 
-    def notify_parsed_enough_listeners(self):
+    def notify_parsed_enough(self):
         for listener in self.listeners:
             listener.parsed_enough()

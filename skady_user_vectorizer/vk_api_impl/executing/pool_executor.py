@@ -29,4 +29,4 @@ class VkApiPoolExecutor(AccessErrorListener):
             session.execute()
 
     def access_error_occurred(self, *args, **kwargs):
-        self.session_manager.reset_session()
+        self.session_manager.reset_session_access_error()

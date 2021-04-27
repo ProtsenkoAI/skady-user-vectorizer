@@ -1,6 +1,6 @@
 from common.crawl_runner import CrawlRunner
-from common.postproc.data_managers.ram_data_manager import RAMDataManager
-from common.postproc import ParsedProcessor
+from common.postproc.data_managers.ram_data_manager_with_checkpoints import RAMDataManagerWithCheckpoints
+from .session_switching_parsed_processor import SessionSwitchingParsedProcessor
 from common.top_level_types import User
 from common.listen_notify import ParsedEnoughListener
 from common.requesting.requester_impl import RequesterImpl
@@ -12,7 +12,7 @@ from .requesting import VkApiRequestsCreator
 from .errors_handler import VkApiErrorsHandler
 from .session.records_managing.proxy_manager import ProxyManager
 from .session.records_managing.creds_manager import CredsManager
-from .session.records_managing.records_storing import AuthRecordsStorage
+from .session.records_managing.records_storing import AuthRecordsStorage, CredsStorage
 from .session.records_managing.records_storing.serializers import ProxyRecordsSerializer, CredsRecordsSerializer
 from .session import SessionManager
 import time
@@ -28,7 +28,7 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
 
         errors_handler = VkApiErrorsHandler(events_tracker)
         proxy_storage = AuthRecordsStorage(proxies_save_pth, ProxyRecordsSerializer())
-        creds_storage = AuthRecordsStorage(creds_save_pth, CredsRecordsSerializer())
+        creds_storage = CredsStorage(creds_save_pth, CredsRecordsSerializer())
 
         proxy_manager = ProxyManager(proxy_storage, events_tracker)
         creds_manager = CredsManager(creds_storage, events_tracker)
@@ -37,8 +37,12 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
         errors_handler.register_bad_password_listener(session_manager)
         self.executor = VkApiPoolExecutor(session_manager=session_manager)
 
-        self.parsed_processor = ParsedProcessor(RAMDataManager(), events_tracker, errors_handler=errors_handler)
+        self.data_manager = RAMDataManagerWithCheckpoints(save_pth="../checkpoint.json", save_every_n_users=1000)
+        self.parsed_processor = SessionSwitchingParsedProcessor(self.data_manager, events_tracker,
+                                                                errors_handler=errors_handler,
+                                                                requests_per_session_limit=30000)
 
+        self.parsed_processor.register_session_limit_notifier(session_manager)
         self.parsed_processor.register_parsed_enough_listener(self)
         self.parsed_processor.register_access_error_listener(self.executor)
 

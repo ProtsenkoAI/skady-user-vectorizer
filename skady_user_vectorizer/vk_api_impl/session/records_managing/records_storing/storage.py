@@ -21,12 +21,15 @@ class AuthRecordsStorage:
         return self.records
 
     def set_worked_out(self, worked_out_record: Record):
+        record = self.get_record_by_id(worked_out_record.obj_id)
+        record.status_ok = False
+        record.status_worked_out = True
+        self._dump_records()
+
+    def get_record_by_id(self, obj_id: int):
         for record in self.records:
-            if record.obj_id == worked_out_record.obj_id:
-                record.status_ok = False
-                record.status_worked_out = True
-                self._dump_records()
-                break
+            if record.obj_id == obj_id:
+                return record
 
     def _dump_records(self):
         serialized = [self.serializer.from_record(rec) for rec in self.records]

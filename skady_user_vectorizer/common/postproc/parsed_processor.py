@@ -51,7 +51,7 @@ class ParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
         self.tracker.friends_added(unparsed_friends)
 
         if self.max_users <= self.data_manager.get_num_users():
-            self.notify_parsed_enough_listeners()
+            self.notify_parsed_enough()
 
     def _proc_groups(self, results: GroupsParseRes):
         groups = results.groups
