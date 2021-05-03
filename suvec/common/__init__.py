@@ -5,5 +5,5 @@ from . import requesting
 from . import postproc
 from . import listen_notify
 from . import external_errors_handling
-from . import crawl_runner
-from . import events_tracker
+from .crawl_runner import CrawlRunner
+from .events_tracking.base_events_tracker import EventsTracker

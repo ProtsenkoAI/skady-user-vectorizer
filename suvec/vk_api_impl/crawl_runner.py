@@ -6,7 +6,7 @@ from .session_switching_parsed_processor import SessionSwitchingParsedProcessor
 from suvec.common.top_level_types import User
 from suvec.common.listen_notify import ParsedEnoughListener
 from suvec.common.requesting.requester_impl import RequesterImpl
-from suvec.common.events_tracker import LogEventsTracker
+from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 
 from .executing.pool_executor import VkApiPoolExecutor
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
@@ -27,9 +27,11 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
                  tracker_response_freq=500, session_request_limit=30000,
                  save_every_n_users_parsed=1000, access_resource_reload_hours=24,
                  max_users=10**7):
+        super().__init__()
 
         if events_tracker is None:
-            events_tracker = LogEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
+            events_tracker = TerminalEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
+        self.events_tracker = events_tracker
 
         responses_factory = VkApiResponsesFactory()
         requests_creator = VkApiRequestsCreator(responses_factory=responses_factory)
@@ -44,7 +46,6 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
                                      hours_for_resource_reload=access_resource_reload_hours)
 
         session_manager = SessionManager(errors_handler, proxy_manager, creds_manager)
-        errors_handler.register_bad_password_listener(session_manager)
         self.executor = VkApiPoolExecutor(session_manager=session_manager)
 
         self.data_manager = RAMDataManagerWithCheckpoints(save_pth=parse_res_save_pth,
@@ -55,9 +56,9 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
                                                                 requests_per_session_limit=session_request_limit,
                                                                 max_users=max_users)
 
-        self.parsed_processor.register_session_limit_notifier(session_manager)
         self.parsed_processor.register_parsed_enough_listener(self)
         self.parsed_processor.register_access_error_listener(self.executor)
+        errors_handler.register_bad_password_listener(session_manager)
 
         self.start_user = User(id=start_user_id)
         self.continue_crawling = True
@@ -66,6 +67,7 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
         candidates = [self.start_user]
 
         while self.continue_crawling:
+            self.events_tracker.loop_started()
             self.requester.add_users(candidates)
             print("added users")
             requests = self.requester.get_requests()
@@ -80,6 +82,10 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
                 self.parsed_processor.process(parsed_response)
 
             candidates = self.parsed_processor.get_new_parse_candidates()
+            self.events_tracker.loop_ended()
 
     def parsed_enough(self):
+        self.continue_crawling = False
+
+    def stop(self):
         self.continue_crawling = False

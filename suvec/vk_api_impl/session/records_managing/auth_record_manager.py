@@ -2,12 +2,12 @@ from abc import ABC, abstractmethod
 
 from .records import Record
 from .records_storing import AuthRecordsStorage
-from suvec.common.events_tracker import LogEventsTracker
+from suvec.common.events_tracking import TerminalEventsTracker
 from .consts import RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
 
 
 class AuthRecordManager(ABC):
-    def __init__(self, storage: AuthRecordsStorage, events_tracker: LogEventsTracker,
+    def __init__(self, storage: AuthRecordsStorage, events_tracker: TerminalEventsTracker,
                  hours_for_resource_reload=24):
         self.storage = storage
         self.tracker = events_tracker

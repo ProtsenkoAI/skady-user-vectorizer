@@ -3,14 +3,14 @@ from vk_api import exceptions
 from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED
 from suvec.common.executing import ParseRes, ErrorObj
 from suvec.common.listen_notify import BadPasswordNotifier
-from suvec.common.events_tracker import LogEventsTracker
+from suvec.common.events_tracking import TerminalEventsTracker
 from suvec.common.external_errors_handling import ExternalErrorsHandler
 
 
 class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier):
     """The class to process errors sent by service (API, website) we work with"""
     # TODO: separate each method to class with method handle()
-    def __init__(self, events_tracker: LogEventsTracker):
+    def __init__(self, events_tracker: TerminalEventsTracker):
         self.tracker = events_tracker
         super().__init__()
 
@@ -24,12 +24,15 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier):
             print("captcha needed")
             print(f"Captcha url: {error.get_url()}")
             captcha_answer = input("Please enter captcha text: \n")
-            error.try_again(captcha_answer)
+            try:
+                error.try_again(captcha_answer)
+            except exceptions.VkApiError as exception:
+                error_obj = ErrorObj(code=None, error=exception)
+                self.tracker.error_occurred(error_obj, msg="can't handle auth error")
             if session is None:
                 raise ValueError("Captcha error occurred, but you have not passed session object, thus can't auth")
             else:
                 session.auth()
-
         elif isinstance(error, exceptions.BadPassword):
             # Funny fact: vk_api can return Bad password even if it's not the problem.
             # One time it returned bad password when we didn't pass User agent in requests session

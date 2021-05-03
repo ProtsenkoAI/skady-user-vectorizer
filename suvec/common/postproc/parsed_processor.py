@@ -48,7 +48,7 @@ class ParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
         self.data_manager.save_user_friends(results.user, friends)
         unparsed_friends = self.data_manager.filter_already_seen_users(friends)
         self.parse_candidates += unparsed_friends
-        self.tracker.friends_added(unparsed_friends)
+        self.tracker.friends_added(friends=unparsed_friends, user=results.user)
 
         if self.max_users <= self.data_manager.get_num_users():
             self.notify_parsed_enough()
@@ -56,7 +56,7 @@ class ParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
     def _proc_groups(self, results: GroupsParseRes):
         groups = results.groups
         self.data_manager.save_user_groups(results.user, groups)
-        self.tracker.groups_added(groups)
+        self.tracker.groups_added(groups=groups, user=results.user)
 
     def get_new_parse_candidates(self) -> List[User]:
         val = self.parse_candidates

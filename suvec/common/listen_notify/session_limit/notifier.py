@@ -5,11 +5,11 @@ from .listener import SessionLimitListener
 
 class SessionLimitNotifier:
     def __init__(self):
-        self.listeners: List[SessionLimitListener] = []
+        self.session_limit_listeners: List[SessionLimitListener] = []
 
     def register_session_limit_notifier(self, listener: SessionLimitListener):
-        self.listeners.append(listener)
+        self.session_limit_listeners.append(listener)
 
     def notify_session_limit(self):
-        for listener in self.listeners:
+        for listener in self.session_limit_listeners:
             listener.session_limit()

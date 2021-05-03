@@ -1,26 +1,22 @@
-import logging
+
 import time
-import sys
 from typing import Optional, List
 from collections import defaultdict
 
-from .executing import ErrorObj
-from .top_level_types import User, Group
-from .utils import Singleton
-from .events_tracker_interface import EventsTracker
+from ..executing import ErrorObj
+from ..top_level_types import User, Group
+from ..utils import Singleton
+from .base_events_tracker import EventsTracker
 
 
-class LogEventsTracker(EventsTracker, metaclass=Singleton):
+class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
     # TODO: if will frequently add new methods for tracking will need to move state object with operations like
     #   log, form request, etc to sep component and create many specific classes for each type of tracking
 
     # TODO: test that if imported in 2 different modules will have only one instance
     def __init__(self, log_pth: str, report_every_responses_nb: int = 1000):
+        super().__init__(log_pth)
         self.report_every_responses_nb = report_every_responses_nb
-
-        logging.basicConfig(filename=log_pth, level="INFO")
-        self.logger = logging.getLogger("suvec.vk_api_impl.EventsTrackerLogger")
-        self.logger.addHandler(logging.StreamHandler(sys.stdout))  # also print logs to stdout
 
         self.errors = []
         self.errors_cnt = defaultdict(int)
@@ -34,7 +30,7 @@ class LogEventsTracker(EventsTracker, metaclass=Singleton):
         self.prev_report_time = time.time()
 
     def error_occurred(self, error: ErrorObj, msg: Optional[str] = None):
-        self.logger.error(f"status code: {error.code}, msg: {msg}, error obj: {error.error}")
+        super().error_occurred(error, msg)
         self.errors_cnt[error.code] += 1
         self.errors.append(error)
 
@@ -42,13 +38,10 @@ class LogEventsTracker(EventsTracker, metaclass=Singleton):
         self.skipped_users.append(user)
         self.skip_user_reasons.append(msg)
 
-    def message(self, msg: str):
-        self.logger.info(msg)
-
-    def friends_added(self, friends: List[User]):
+    def friends_added(self, user: User, friends: List[User]):
         self._request_parsed()
 
-    def groups_added(self, groups: List[Group]):
+    def groups_added(self, user: User, groups: List[Group]):
         self.total_groups_nb += len(groups)
         self.groups_responses_cnt += 1
         self._request_parsed()
@@ -95,3 +88,9 @@ class LogEventsTracker(EventsTracker, metaclass=Singleton):
                      )
         msg = "\n".join(msg_lines)
         self.logger.info(msg)
+
+    def loop_started(self):
+        self.message("Starting new parsing loop")
+
+    def loop_ended(self):
+        self.message("Ending parsing loop")
