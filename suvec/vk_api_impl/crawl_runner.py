@@ -9,20 +9,19 @@ from suvec.common.requesting.requester_impl import RequesterImpl
 from suvec.common.events_tracker import LogEventsTracker
 
 from .executing.pool_executor import VkApiPoolExecutor
+from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
 from .executing.responses_factory import VkApiResponsesFactory
 from .requesting import VkApiRequestsCreator
 from .errors_handler import VkApiErrorsHandler
 from .session.records_managing.proxy_manager import ProxyManager
 from .session.records_managing.creds_manager import CredsManager
-from .session.records_managing.records_storing import AuthRecordsStorage, CredsStorage
-from .session.records_managing.records_storing.serializers import ProxyRecordsSerializer, CredsRecordsSerializer
 from .session import SessionManager
 
 
 class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
     # NOTE: If performance will become a problem, will need to refactor from single-user methods to batch-of-users
     #   methods and use multithreading
-    def __init__(self, start_user_id: str, proxies_save_pth: str, creds_save_pth: str,
+    def __init__(self, start_user_id: str, proxy_storage: ProxyStorage, creds_storage: CredsStorage,
                  parse_res_save_pth: str, logs_pth: str = "../logs.txt",
                  events_tracker=None, requester_max_requests_per_crawl_loop=1000,
                  tracker_response_freq=500, session_request_limit=30000,
@@ -38,8 +37,6 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
                                        max_requests_per_type_per_call=requester_max_requests_per_crawl_loop)
 
         errors_handler = VkApiErrorsHandler(events_tracker)
-        proxy_storage = AuthRecordsStorage(proxies_save_pth, ProxyRecordsSerializer())
-        creds_storage = CredsStorage(creds_save_pth, CredsRecordsSerializer())
 
         proxy_manager = ProxyManager(proxy_storage, events_tracker,
                                      hours_for_resource_reload=access_resource_reload_hours)
