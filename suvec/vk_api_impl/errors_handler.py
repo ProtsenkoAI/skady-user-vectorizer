@@ -3,14 +3,14 @@ from vk_api import exceptions
 from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED
 from suvec.common.executing import ParseRes, ErrorObj
 from suvec.common.listen_notify import BadPasswordNotifier
-from suvec.common.events_tracker import EventsTracker
+from suvec.common.events_tracker import LogEventsTracker
 from suvec.common.external_errors_handling import ExternalErrorsHandler
 
 
 class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier):
     """The class to process errors sent by service (API, website) we work with"""
     # TODO: separate each method to class with method handle()
-    def __init__(self, events_tracker: EventsTracker):
+    def __init__(self, events_tracker: LogEventsTracker):
         self.tracker = events_tracker
         super().__init__()
 

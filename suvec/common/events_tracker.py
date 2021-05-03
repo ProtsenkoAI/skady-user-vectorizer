@@ -7,12 +7,10 @@ from collections import defaultdict
 from .executing import ErrorObj
 from .top_level_types import User, Group
 from .utils import Singleton
+from .events_tracker_interface import EventsTracker
 
 
-class EventsTracker(metaclass=Singleton):
-    # NOTE: it's dirty class with many specific methods, so please don't subclass it, otherwise you
-    #   will sink in problems with rewriting each subclass. It's made in this style because of
-    #   simplicity of realisation and ease of use from other objects side.
+class LogEventsTracker(EventsTracker, metaclass=Singleton):
     # TODO: if will frequently add new methods for tracking will need to move state object with operations like
     #   log, form request, etc to sep component and create many specific classes for each type of tracking
 

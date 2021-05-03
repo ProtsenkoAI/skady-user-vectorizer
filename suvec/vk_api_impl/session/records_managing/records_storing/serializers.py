@@ -5,10 +5,11 @@ from typing import Dict
 from ..session_types import Proxy, Credentials
 from ..records import Record, CredsRecord, ProxyRecord
 from .db_types import AuthResourceDict, CredsDict, ProxyDict, UserProxyDict, UserCredsDict
-from ..consts import RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS, CREDS_BAD_PASSWORD_STATUS, ResourceStatus
 
 
 class AuthRecordsSerializer(ABC):
+    # TODO: time_since_status_change causes errors because it's fixed to time when record was created, need to
+    #   eliminate it
     RecordStatuses = Dict[str, bool]
 
     def __init__(self):

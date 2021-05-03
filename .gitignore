@@ -1,10 +1,8 @@
 **/*.pyc
 .idea
 **/__pycache__
-**/proxies.json
-**/creds.json
+resources/
 **/vk_config.*.json
-**/proxies_and_creds.json
 **/logs.txt
 **/checkpoint.json
 

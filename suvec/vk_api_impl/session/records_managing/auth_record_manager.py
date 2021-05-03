@@ -2,14 +2,16 @@ from abc import ABC, abstractmethod
 
 from .records import Record
 from .records_storing import AuthRecordsStorage
-from suvec.common.events_tracker import EventsTracker
-from .consts import AUTH_RECORD_RELOAD_TIME, RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
+from suvec.common.events_tracker import LogEventsTracker
+from .consts import RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
 
 
 class AuthRecordManager(ABC):
-    def __init__(self, storage: AuthRecordsStorage, events_tracker: EventsTracker):
+    def __init__(self, storage: AuthRecordsStorage, events_tracker: LogEventsTracker,
+                 hours_for_resource_reload=24):
         self.storage = storage
         self.tracker = events_tracker
+        self.hours_for_reload = hours_for_resource_reload
 
         self.resource = self._get_new_record()
 
@@ -32,7 +34,7 @@ class AuthRecordManager(ABC):
     def _check_record_is_usable(self, record: Record):
         return (record.status == RESOURCE_OK_STATUS or
                 record.status == RESOURCE_WORKED_OUT_STATUS and
-                record.time_since_status_change >= AUTH_RECORD_RELOAD_TIME)
+                record.time_since_status_change >= self.hours_for_reload)
 
     def reset_requests_limit(self):
         if self.resource is not None:

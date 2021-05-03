@@ -6,7 +6,7 @@ from .session_switching_parsed_processor import SessionSwitchingParsedProcessor
 from suvec.common.top_level_types import User
 from suvec.common.listen_notify import ParsedEnoughListener
 from suvec.common.requesting.requester_impl import RequesterImpl
-from suvec.common.events_tracker import EventsTracker
+from suvec.common.events_tracker import LogEventsTracker
 
 from .executing.pool_executor import VkApiPoolExecutor
 from .executing.responses_factory import VkApiResponsesFactory
@@ -23,27 +23,40 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
     # NOTE: If performance will become a problem, will need to refactor from single-user methods to batch-of-users
     #   methods and use multithreading
     def __init__(self, start_user_id: str, proxies_save_pth: str, creds_save_pth: str,
-                 logs_pth: str = "../logs.txt"):
-        events_tracker = EventsTracker(log_pth=logs_pth, report_every_responses_nb=500)
+                 parse_res_save_pth: str, logs_pth: str = "../logs.txt",
+                 events_tracker=None, requester_max_requests_per_crawl_loop=1000,
+                 tracker_response_freq=500, session_request_limit=30000,
+                 save_every_n_users_parsed=1000, access_resource_reload_hours=24,
+                 max_users=10**7):
+
+        if events_tracker is None:
+            events_tracker = LogEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
+
         responses_factory = VkApiResponsesFactory()
         requests_creator = VkApiRequestsCreator(responses_factory=responses_factory)
-        self.requester = RequesterImpl(requests_creator, max_requests_per_type_per_call=1000)
+        self.requester = RequesterImpl(requests_creator,
+                                       max_requests_per_type_per_call=requester_max_requests_per_crawl_loop)
 
         errors_handler = VkApiErrorsHandler(events_tracker)
         proxy_storage = AuthRecordsStorage(proxies_save_pth, ProxyRecordsSerializer())
         creds_storage = CredsStorage(creds_save_pth, CredsRecordsSerializer())
 
-        proxy_manager = ProxyManager(proxy_storage, events_tracker)
-        creds_manager = CredsManager(creds_storage, events_tracker)
+        proxy_manager = ProxyManager(proxy_storage, events_tracker,
+                                     hours_for_resource_reload=access_resource_reload_hours)
+        creds_manager = CredsManager(creds_storage, events_tracker,
+                                     hours_for_resource_reload=access_resource_reload_hours)
 
         session_manager = SessionManager(errors_handler, proxy_manager, creds_manager)
         errors_handler.register_bad_password_listener(session_manager)
         self.executor = VkApiPoolExecutor(session_manager=session_manager)
 
-        self.data_manager = RAMDataManagerWithCheckpoints(save_pth="../checkpoint.json", save_every_n_users=1000)
+        self.data_manager = RAMDataManagerWithCheckpoints(save_pth=parse_res_save_pth,
+                                                          save_every_n_users=save_every_n_users_parsed)
+        # TODO: processor shouldn't count requests, move it to requester
         self.parsed_processor = SessionSwitchingParsedProcessor(self.data_manager, events_tracker,
                                                                 errors_handler=errors_handler,
-                                                                requests_per_session_limit=30000)
+                                                                requests_per_session_limit=session_request_limit,
+                                                                max_users=max_users)
 
         self.parsed_processor.register_session_limit_notifier(session_manager)
         self.parsed_processor.register_parsed_enough_listener(self)
