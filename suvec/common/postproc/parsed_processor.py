@@ -3,13 +3,13 @@ from typing import List
 from ..executing import ParseRes, FriendsParseRes, GroupsParseRes
 from ..listen_notify import ParsedEnoughNotifier, AccessErrorNotifier
 from .data_managers import DataManager
-from common.top_level_types import User
+from suvec.common.top_level_types import User
 
 from ..executing import error_codes
 
 
 class ParsedProcessor(ParsedEnoughNotifier, AccessErrorNotifier):
-    # TODO: union with processor impl from common_components/
+    # TODO: union with processor impl from suvec.common_components/
     def __init__(self, data_manager: DataManager, progress_tracker, errors_handler,
                  max_users: int = 10000):
         self.data_manager = data_manager

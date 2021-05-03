@@ -2,9 +2,9 @@ from typing import List
 from vk_api import VkRequestsPool
 
 from ..session.session_manager import SessionManager
-from common.requesting import Request
-from common.executing import Response
-from common.listen_notify import AccessErrorListener
+from suvec.common.requesting import Request
+from suvec.common.executing import Response
+from suvec.common.listen_notify import AccessErrorListener
 
 
 class VkApiPoolExecutor(AccessErrorListener):

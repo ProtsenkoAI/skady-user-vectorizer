@@ -1,5 +1,5 @@
-from common.top_level_types import User
-from common.requesting import RequestsCreator
+from suvec.common.top_level_types import User
+from suvec.common.requesting import RequestsCreator
 from .requests import FriendsRequest, GroupsRequest
 
 

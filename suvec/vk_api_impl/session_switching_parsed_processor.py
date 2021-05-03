@@ -1,6 +1,6 @@
-from common.postproc import ParsedProcessor
-from common.executing import ParseRes
-from common.listen_notify import SessionLimitNotifier
+from suvec.common.postproc import ParsedProcessor
+from suvec.common.executing import ParseRes
+from suvec.common.listen_notify import SessionLimitNotifier
 
 
 class SessionSwitchingParsedProcessor(ParsedProcessor, SessionLimitNotifier):

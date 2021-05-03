@@ -2,10 +2,10 @@ import vk_api
 from vk_api import requests_pool
 import requests
 
-from common.listen_notify import BadPasswordListener
+from suvec.common.listen_notify import BadPasswordListener
 from .records_managing import ProxyManager
 from .records_managing import CredsManager
-from common.listen_notify import SessionLimitListener
+from suvec.common.listen_notify import SessionLimitListener
 
 
 class SessionManager(BadPasswordListener, SessionLimitListener):

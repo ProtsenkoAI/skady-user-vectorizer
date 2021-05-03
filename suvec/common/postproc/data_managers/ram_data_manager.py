@@ -1,7 +1,7 @@
 from typing import List, Any
 
 from .types import UsersData, UserData
-from common.top_level_types import User, Group
+from suvec.common.top_level_types import User, Group
 from .data_manager import DataManager
 
 

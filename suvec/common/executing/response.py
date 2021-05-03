@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from .parse_res import ParseRes, ErrorObj
 from .types import ResponseObj
-from common.top_level_types import User
+from suvec.common.top_level_types import User
 
 
 class Response(ABC):

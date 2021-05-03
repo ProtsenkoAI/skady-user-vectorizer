@@ -1,8 +1,8 @@
 from typing import Dict
 
-from common.top_level_types import User, Group
-from common.executing import Parser
-from common.executing import FriendsParseRes, GroupsParseRes, ResponseObj
+from suvec.common.top_level_types import User, Group
+from suvec.common.executing import Parser
+from suvec.common.executing import FriendsParseRes, GroupsParseRes, ResponseObj
 ApiResponseResult = Dict
 
 

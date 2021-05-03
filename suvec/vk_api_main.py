@@ -1,4 +1,4 @@
-from vk_api_impl.crawl_runner import VkApiCrawlRunner
+from suvec.vk_api_impl.crawl_runner import VkApiCrawlRunner
 
 
 def run():

@@ -1,5 +1,5 @@
 from typing import Dict, TypedDict, List, Optional
-from common.top_level_types import User, Group
+from suvec.common.top_level_types import User, Group
 
 
 class UserData(TypedDict):

@@ -1,5 +1,5 @@
-from common.executing import Response
-from common.top_level_types import User
+from suvec.common.executing import Response
+from suvec.common.top_level_types import User
 from vk_api.requests_pool import RequestResult
 
 

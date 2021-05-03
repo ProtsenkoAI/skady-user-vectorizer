@@ -1,10 +1,10 @@
 from vk_api import exceptions
 
-from common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED
-from common.executing import ParseRes, ErrorObj
-from common.listen_notify import BadPasswordNotifier
-from common.events_tracker import EventsTracker
-from common.external_errors_handling import ExternalErrorsHandler
+from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED
+from suvec.common.executing import ParseRes, ErrorObj
+from suvec.common.listen_notify import BadPasswordNotifier
+from suvec.common.events_tracker import EventsTracker
+from suvec.common.external_errors_handling import ExternalErrorsHandler
 
 
 class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier):

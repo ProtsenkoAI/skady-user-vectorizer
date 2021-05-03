@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from .records import Record
 from .records_storing import AuthRecordsStorage
-from common.events_tracker import EventsTracker
+from suvec.common.events_tracker import EventsTracker
 from .consts import AUTH_RECORD_RELOAD_TIME, RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
 
 

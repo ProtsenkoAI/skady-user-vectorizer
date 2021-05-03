@@ -1,5 +1,5 @@
 from .listener import AccessErrorListener
-from common.top_level_types import User
+from suvec.common.top_level_types import User
 
 
 class AccessErrorNotifier:

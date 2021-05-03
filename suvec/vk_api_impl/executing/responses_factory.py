@@ -1,6 +1,6 @@
 from vk_api.requests_pool import RequestResult
-from common.top_level_types import User
-from common.executing import ResponsesFactory
+from suvec.common.top_level_types import User
+from suvec.common.executing import ResponsesFactory
 from .parsers import FriendsParser, GroupsParser
 from .response import VkApiResponse
 

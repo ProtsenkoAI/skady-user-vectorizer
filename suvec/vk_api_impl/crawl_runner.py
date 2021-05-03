@@ -1,12 +1,12 @@
 import time
 
-from common.crawl_runner import CrawlRunner
-from common.postproc.data_managers.ram_data_manager_with_checkpoints import RAMDataManagerWithCheckpoints
+from suvec.common.crawl_runner import CrawlRunner
+from suvec.common.postproc.data_managers.ram_data_manager_with_checkpoints import RAMDataManagerWithCheckpoints
 from .session_switching_parsed_processor import SessionSwitchingParsedProcessor
-from common.top_level_types import User
-from common.listen_notify import ParsedEnoughListener
-from common.requesting.requester_impl import RequesterImpl
-from common.events_tracker import EventsTracker
+from suvec.common.top_level_types import User
+from suvec.common.listen_notify import ParsedEnoughListener
+from suvec.common.requesting.requester_impl import RequesterImpl
+from suvec.common.events_tracker import EventsTracker
 
 from .executing.pool_executor import VkApiPoolExecutor
 from .executing.responses_factory import VkApiResponsesFactory

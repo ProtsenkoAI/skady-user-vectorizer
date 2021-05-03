@@ -2,7 +2,7 @@ from typing import List
 import json
 
 from .ram_data_manager import RAMDataManager
-from common.top_level_types import User, Group
+from suvec.common.top_level_types import User, Group
 
 
 class RAMDataManagerWithCheckpoints(RAMDataManager):

@@ -1,8 +1,8 @@
 # TODO: union in one component with executor (and any other component that have vk_api dependencies)
 from vk_api.requests_pool import RequestResult
 
-from common.executing import Response
-from common.requesting import Request
+from suvec.common.executing import Response
+from suvec.common.requesting import Request
 
 
 class FriendsRequest(Request):

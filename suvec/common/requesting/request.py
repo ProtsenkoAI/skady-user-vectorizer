@@ -1,6 +1,6 @@
 from abc import ABC, abstractmethod
 
-from common.top_level_types import User
+from suvec.common.top_level_types import User
 from ..executing import Response
 
 

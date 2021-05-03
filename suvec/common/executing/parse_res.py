@@ -1,7 +1,7 @@
 from abc import ABC
 from typing import Optional, List
 
-from common.top_level_types import User, Group
+from suvec.common.top_level_types import User, Group
 from .types import ErrorObj
 
 
