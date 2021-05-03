@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod
 from .records import Record
 from .records_storing import AuthRecordsStorage
 from common.events_tracker import EventsTracker
-from .consts import AUTH_RECORD_RELOAD_TIME
+from .consts import AUTH_RECORD_RELOAD_TIME, RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
 
 
 class AuthRecordManager(ABC):
@@ -30,8 +30,9 @@ class AuthRecordManager(ABC):
             raise RuntimeError("Out of records")
 
     def _check_record_is_usable(self, record: Record):
-        return (record.status_ok or
-                record.status_worked_out and record.time_since_status_change >= AUTH_RECORD_RELOAD_TIME)
+        return (record.status == RESOURCE_OK_STATUS or
+                record.status == RESOURCE_WORKED_OUT_STATUS and
+                record.time_since_status_change >= AUTH_RECORD_RELOAD_TIME)
 
     def reset_requests_limit(self):
         if self.resource is not None:

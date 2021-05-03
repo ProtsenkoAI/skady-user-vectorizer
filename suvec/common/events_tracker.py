@@ -21,7 +21,7 @@ class EventsTracker(metaclass=Singleton):
         self.report_every_responses_nb = report_every_responses_nb
 
         logging.basicConfig(filename=log_pth, level="INFO")
-        self.logger = logging.getLogger("skady_user_vectorizer.vk_api_impl.EventsTrackerLogger")
+        self.logger = logging.getLogger("suvec.vk_api_impl.EventsTrackerLogger")
         self.logger.addHandler(logging.StreamHandler(sys.stdout))  # also print logs to stdout
 
         self.errors = []
@@ -62,10 +62,11 @@ class EventsTracker(metaclass=Singleton):
 
     def _maybe_state_report(self):
         if self.groups_responses_cnt % self.report_every_responses_nb == 0:
-            time_passed = int(time.time() - self.prev_report_time)
+            time_passed = time.time() - self.prev_report_time
+            self.prev_report_time = time.time()
             self._state_report(time_passed)
 
-    def _state_report(self, time_passed: int):
+    def _state_report(self, time_passed: float):
         # TODO: maybe save full list of skipped users and reasons somewhere
         # TODO: check that nb users parsed in logs is adequate
         msg_lines = (f"State Report",

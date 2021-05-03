@@ -1,11 +1,12 @@
 from .session_types import Proxy, Credentials
+from .consts import ResourceStatus
 
 
 class Record:
-    def __init__(self, obj_id: int, status_ok: bool, status_worked_out: bool, time_since_status_change: int):
+    # TODO: maybe we will need a validation that for some class are set only allowed statuses
+    def __init__(self, obj_id: int, status: ResourceStatus, time_since_status_change: int):
         self.obj_id = obj_id
-        self.status_ok = status_ok
-        self.status_worked_out = status_worked_out
+        self.status = status
         self.time_since_status_change = time_since_status_change
 
 
@@ -16,7 +17,6 @@ class ProxyRecord(Record):
 
 
 class CredsRecord(Record):
-    def __init__(self, *args, creds: Credentials, status_bad_password, **kwargs):
+    def __init__(self, *args, creds: Credentials, **kwargs):
         self.creds = creds
-        self.status_bad_password = status_bad_password
         super().__init__(*args, **kwargs)

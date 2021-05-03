@@ -1,3 +1,5 @@
+import time
+
 from common.crawl_runner import CrawlRunner
 from common.postproc.data_managers.ram_data_manager_with_checkpoints import RAMDataManagerWithCheckpoints
 from .session_switching_parsed_processor import SessionSwitchingParsedProcessor
@@ -15,16 +17,17 @@ from .session.records_managing.creds_manager import CredsManager
 from .session.records_managing.records_storing import AuthRecordsStorage, CredsStorage
 from .session.records_managing.records_storing.serializers import ProxyRecordsSerializer, CredsRecordsSerializer
 from .session import SessionManager
-import time
 
 
 class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
+    # NOTE: If performance will become a problem, will need to refactor from single-user methods to batch-of-users
+    #   methods and use multithreading
     def __init__(self, start_user_id: str, proxies_save_pth: str, creds_save_pth: str,
-                 logs_pth: str = "./logs.txt"):
-        events_tracker = EventsTracker(log_pth=logs_pth, report_every_responses_nb=100)
+                 logs_pth: str = "../logs.txt"):
+        events_tracker = EventsTracker(log_pth=logs_pth, report_every_responses_nb=500)
         responses_factory = VkApiResponsesFactory()
         requests_creator = VkApiRequestsCreator(responses_factory=responses_factory)
-        self.requester = RequesterImpl(requests_creator)
+        self.requester = RequesterImpl(requests_creator, max_requests_per_type_per_call=1000)
 
         errors_handler = VkApiErrorsHandler(events_tracker)
         proxy_storage = AuthRecordsStorage(proxies_save_pth, ProxyRecordsSerializer())
@@ -57,7 +60,9 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
             print("added users")
             requests = self.requester.get_requests()
             print("requests", len(requests))
+            start_execute = time.time()
             responses = self.executor.execute(requests)
+            print("time to get responses", time.time() - start_execute)
             print("responses", len(responses))
             parsed = [resp.parse() for resp in responses]
             print("parsed", len(parsed))
@@ -65,8 +70,6 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
                 self.parsed_processor.process(parsed_response)
 
             candidates = self.parsed_processor.get_new_parse_candidates()
-
-            time.sleep(5)  # TODO: turn off
 
     def parsed_enough(self):
         self.continue_crawling = False
