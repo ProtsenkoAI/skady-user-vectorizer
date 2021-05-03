@@ -1,6 +1,11 @@
 from setuptools import setup, find_packages
 import os
 
+import shutil
+
+for deleted_dir in ["./dist", "./build", "./.eggs", "./suvec.eggs-info"]:
+    shutil.rmtree(deleted_dir, ignore_errors=True)
+
 
 def read(file_name):
     return open(os.path.join(os.path.dirname(__file__), file_name)).read()
@@ -15,5 +20,6 @@ setup(name="suvec",
       packages=find_packages(),
       setup_requires=["wheel", "setuptools"],
       install_requires=["vk-api"],
-      python_requires='>3.8.0'
-)
+      python_requires='>3.8.0',
+
+      )

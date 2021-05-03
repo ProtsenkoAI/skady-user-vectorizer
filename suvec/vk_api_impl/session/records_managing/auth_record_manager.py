@@ -32,9 +32,10 @@ class AuthRecordManager(ABC):
             raise RuntimeError("Out of records")
 
     def _check_record_is_usable(self, record: Record):
+        seconds_in_hour = 60 ** 2
         return (record.status == RESOURCE_OK_STATUS or
                 record.status == RESOURCE_WORKED_OUT_STATUS and
-                record.time_since_status_change >= self.hours_for_reload)
+                record.time_since_status_change / seconds_in_hour >= self.hours_for_reload)
 
     def reset_requests_limit(self):
         if self.resource is not None:
