@@ -2,10 +2,10 @@ import time
 
 from suvec.common.crawling import CrawlRunner
 from suvec.common.postproc.data_managers.ram_data_manager_with_checkpoints import RAMDataManagerWithCheckpoints
-from suvec.common.postproc import SessionSwitchingParsedProcessor
+from suvec.common.postproc import SessionSwitchingParsedProcessorWrapper, SuccessNotifierProcessor
 from suvec.common.top_level_types import User
 from suvec.common.listen_notify import ParsedEnoughListener
-from suvec.common.requesting.requester_impl import RequesterImpl
+from suvec.common.requesting import EconomicRequester
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from .session.records_managing.terminal_out_of_records import TerminalOutOfProxy, TerminalOutOfCreds
 
@@ -27,7 +27,7 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
                  tracker=None, requester_max_requests_per_crawl_loop=1000,
                  tracker_response_freq=500, session_request_limit=30000,
                  save_every_n_users_parsed=1000, access_resource_reload_hours=24,
-                 max_users=10**7):
+                 max_users=10 ** 7):
 
         if tracker is None:
             tracker = TerminalEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
@@ -37,8 +37,8 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
 
         responses_factory = VkApiResponsesFactory()
         requests_creator = VkApiRequestsCreator(responses_factory=responses_factory)
-        self.requester = RequesterImpl(requests_creator,
-                                       max_requests_per_type_per_call=requester_max_requests_per_crawl_loop)
+        self.requester = EconomicRequester(requests_creator,
+                                           max_requests_per_type_per_call=requester_max_requests_per_crawl_loop)
 
         errors_handler = VkApiErrorsHandler(tracker)
 
@@ -55,12 +55,16 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
         self.data_manager = RAMDataManagerWithCheckpoints(save_pth=parse_res_save_pth,
                                                           save_every_n_users=save_every_n_users_parsed)
         # TODO: processor shouldn't count requests, move it to requester
-        self.parsed_processor = SessionSwitchingParsedProcessor(self.data_manager, tracker,
-                                                                errors_handler=errors_handler,
-                                                                requests_per_session_limit=session_request_limit,
-                                                                max_users=max_users)
+        processor_notifies_if_success = SuccessNotifierProcessor(self.data_manager, tracker,
+                                                                 errors_handler=errors_handler,
+                                                                 max_users=max_users)
 
+        processor_counts_requests = SessionSwitchingParsedProcessorWrapper(
+            processor_notifies_if_success, requests_per_session_limit=session_request_limit)
+
+        self.parsed_processor = processor_counts_requests
         self.parsed_processor.register_parsed_enough_listener(self)
+        self.parsed_processor.register_request_success_listener(self.requester)
         errors_handler.register_access_error_listener(self.executor)
         errors_handler.register_bad_password_listener(session_manager)
 

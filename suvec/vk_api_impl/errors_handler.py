@@ -12,8 +12,10 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
     """The class to process errors sent by service (API, website) we work with"""
     # TODO: instead of many if-else, maybe use small objects processing one type of error
     def __init__(self, events_tracker: TerminalEventsTracker):
+        BadPasswordNotifier.__init__(self)
+        AccessErrorNotifier.__init__(self)
+        
         self.tracker = events_tracker
-        super().__init__()
 
     def auth_error(self, error: exceptions.VkApiError, auth_data: dict):
         session = auth_data["session"]

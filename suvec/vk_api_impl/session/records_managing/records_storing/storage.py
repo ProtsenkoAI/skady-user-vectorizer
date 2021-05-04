@@ -1,7 +1,9 @@
 from typing import List
 import json
+import os
 
 from ..records import Record
+from .db_types import AuthResourceDict
 from .serializers import AuthRecordsSerializer
 from ..consts import RESOURCE_WORKED_OUT_STATUS
 
@@ -11,10 +13,17 @@ class AuthRecordsStorage:
     def __init__(self, save_pth: str, records_serializer: AuthRecordsSerializer):
         self.save_pth = save_pth
         self.serializer = records_serializer
-        with open(save_pth) as f:
-            records = json.load(f)
-
+        records = self._read_records(save_pth)
         self.records = self._parse_loaded_records(records)
+
+    def _read_records(self, save_pth: str) -> List[AuthResourceDict]:
+        if os.path.isfile(save_pth):
+            with open(save_pth) as f:
+                return json.load(f)
+        else:
+            with open(save_pth, "w") as f:
+                json.dump([], f)
+                return []
 
     def _parse_loaded_records(self, raw_records: List[dict]) -> List[Record]:
         return [self.serializer.to_record(raw_rec) for raw_rec in raw_records]
