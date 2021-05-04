@@ -1,15 +1,16 @@
 from vk_api import exceptions
 
-from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED
+from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_ERROR
 from suvec.common.executing import ParseRes, ErrorObj
 from suvec.common.listen_notify import BadPasswordNotifier
 from suvec.common.events_tracking import TerminalEventsTracker
 from suvec.common.external_errors_handling import ExternalErrorsHandler
+from suvec.common.listen_notify import AccessErrorNotifier
 
 
-class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier):
+class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessErrorNotifier):
     """The class to process errors sent by service (API, website) we work with"""
-    # TODO: separate each method to class with method handle()
+    # TODO: instead of many if-else, maybe use small objects processing one type of error
     def __init__(self, events_tracker: TerminalEventsTracker):
         self.tracker = events_tracker
         super().__init__()
@@ -48,6 +49,10 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier):
         self.tracker.message(msg=error_msg_to_log)
 
     def api_response_error(self, parsed_results: ParseRes):
+        if parsed_results.error.code == ACCESS_ERROR:
+            self.notify_access_error_listeners(user=parsed_results.user,
+                                               type_of_request=parsed_results.request_type)
+
         if parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED]:
             self.tracker.skip_user(user=parsed_results.user, msg=f"Profile is private")
         else:

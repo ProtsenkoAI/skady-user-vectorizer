@@ -1,5 +1,4 @@
 from abc import ABC, abstractmethod
-import time
 from typing import Dict
 
 from ..session_types import Proxy, Credentials
@@ -8,16 +7,13 @@ from .db_types import AuthResourceDict, CredsDict, ProxyDict, UserProxyDict, Use
 
 
 class AuthRecordsSerializer(ABC):
-    # TODO: time_since_status_change causes errors because it's fixed to time when record was created, need to
-    #   eliminate it
     RecordStatuses = Dict[str, bool]
 
     def __init__(self):
         self.next_obj_id = 0
 
     def to_record(self, raw_dict: AuthResourceDict) -> Record:
-        time_since_last_change = time.time() - raw_dict["status_change_time"]
-        kwargs_to_create_record = {"time_since_status_change": time_since_last_change,
+        kwargs_to_create_record = {"status_change_time": raw_dict['status_change_time'],
                                    "obj_id": self.next_obj_id, "status": raw_dict["status"]}
         self.next_obj_id += 1
 
@@ -28,9 +24,8 @@ class AuthRecordsSerializer(ABC):
         ...
 
     def from_record(self, record: Record) -> AuthResourceDict:
-        status_change_time = int(time.time() - record.time_since_status_change)
         kwargs_to_create_res_dict = dict(status=record.status,
-                                         status_change_time=status_change_time,)
+                                         status_change_time=record.status_change_time)
 
         return self.create_res_dict(record, **kwargs_to_create_res_dict)
 

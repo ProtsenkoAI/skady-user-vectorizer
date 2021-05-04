@@ -1,4 +1,4 @@
-from typing import List
+from typing import List, Callable
 
 from ..top_level_types import User
 from ..listen_notify import AccessErrorListener
@@ -22,23 +22,18 @@ class RequesterImpl(Requester, AccessErrorListener):
         return self._request_friends_and_groups()
 
     def _request_friends_and_groups(self):
-        # TODO: refactor
         requests = []
+        requests += self._create_requests(self.users_to_friends_request, self.request_creator.friends_request)
+        requests += self._create_requests(self.users_to_groups_request, self.request_creator.groups_request)
         nb_requests = 0
-        while self.users_to_friends_request:
-            user = self.users_to_friends_request.pop(0)
-            requests.append(self.request_creator.friends_request(user))
-            nb_requests += 1
-            if nb_requests >= self.max_requests_per_type_per_call:
-                break
 
-        self.requester = RequesterImpl(self.request_creator)
-        nb_requests = 0
-        while self.users_to_groups_request:
-            user = self.users_to_groups_request.pop(0)
-            requests.append(self.request_creator.groups_request(user))
-            nb_requests += 1
-            if nb_requests >= self.max_requests_per_type_per_call:
+        return requests
+
+    def _create_requests(self, users: List[User], request_creator_method: Callable):
+        requests = []
+        while users:
+            requests.append(request_creator_method(users.pop(0)))
+            if len(requests) >= self.max_requests_per_type_per_call:
                 break
         return requests
 

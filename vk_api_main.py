@@ -14,7 +14,7 @@ def run():
 
     runner = VkApiCrawlRunner(start_user_id="213167272",
                               parse_res_save_pth="/home/gldsn/Projects/skady-user-vectorizer/resources/checkpoint.json",
-                              events_tracker=events_tracker,
+                              tracker=events_tracker,
                               proxy_storage=proxy_storage,
                               creds_storage=creds_storage,
                               save_every_n_users_parsed=50

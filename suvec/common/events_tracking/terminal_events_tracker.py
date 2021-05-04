@@ -10,9 +10,6 @@ from .base_events_tracker import EventsTracker
 
 
 class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
-    # TODO: if will frequently add new methods for tracking will need to move state object with operations like
-    #   log, form request, etc to sep component and create many specific classes for each type of tracking
-
     # TODO: test that if imported in 2 different modules will have only one instance
     def __init__(self, log_pth: str, report_every_responses_nb: int = 1000):
         super().__init__(log_pth)

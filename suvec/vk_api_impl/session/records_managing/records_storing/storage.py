@@ -7,8 +7,7 @@ from ..consts import RESOURCE_WORKED_OUT_STATUS
 
 
 class AuthRecordsStorage:
-    # TODO: every time asked to get_records, need to load them from file
-    # TODO: maybe replace private _dump_records() with write() and call it from users objects
+    # TODO: maybe split to 2 objects: one will read, serialize, write. Second will delete, add, filter, get by idx etc.
     def __init__(self, save_pth: str, records_serializer: AuthRecordsSerializer):
         self.save_pth = save_pth
         self.serializer = records_serializer
@@ -24,7 +23,6 @@ class AuthRecordsStorage:
         return self.records
 
     def set_worked_out(self, worked_out_record: Record):
-        # TODO: move set_worked_out to manager, keep there only read/write operations
         record = self.get_record_by_id(worked_out_record.obj_id)
         record.status = RESOURCE_WORKED_OUT_STATUS
         self._dump_records()
@@ -47,6 +45,12 @@ class AuthRecordsStorage:
     def add_record(self, record: Record):
         self.records.append(record)
         self._dump_records()
+
+    def get_next_record_id(self) -> int:
+        max_id = 0
+        for record in self.records:
+            max_id = max(max_id, record.obj_id)
+        return max_id + 1
 
     def _dump_records(self):
         serialized = [self.serializer.from_record(rec) for rec in self.records]

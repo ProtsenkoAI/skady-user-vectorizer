@@ -6,9 +6,7 @@ from .data_manager import DataManager
 
 
 class RAMDataManager(DataManager):
-    # TODO: refactor
     def __init__(self):
-        self.users = []
         self.users_data: UsersData = {}
 
     def get_data(self) -> UsersData:
@@ -35,8 +33,8 @@ class RAMDataManager(DataManager):
         self.users_data[user.id][field_name] = value
 
     def filter_already_seen_users(self, users: List[User]) -> List[User]:
-        unseen_users = [user for user in users if user not in self.users]
+        unseen_users = [user for user in users if user not in self.users_data]
         return unseen_users
 
     def get_num_users(self):
-        return len(self.users)
+        return len(self.users_data)

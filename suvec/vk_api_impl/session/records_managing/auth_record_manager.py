@@ -2,16 +2,18 @@ from abc import ABC, abstractmethod
 
 from .records import Record
 from .records_storing import AuthRecordsStorage
+from .out_of_records_handler import OutOfRecordsHandler
 from suvec.common.events_tracking import TerminalEventsTracker
 from .consts import RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
 
 
 class AuthRecordManager(ABC):
     def __init__(self, storage: AuthRecordsStorage, events_tracker: TerminalEventsTracker,
-                 hours_for_resource_reload=24):
+                 out_of_records_handler: OutOfRecordsHandler, hours_for_resource_reload=24):
         self.storage = storage
         self.tracker = events_tracker
         self.hours_for_reload = hours_for_resource_reload
+        self.out_of_records_handler = out_of_records_handler
 
         self.resource = self._get_new_record()
 
@@ -29,7 +31,14 @@ class AuthRecordManager(ABC):
             if self._check_record_is_usable(record):
                 return record
         else:
-            raise RuntimeError("Out of records")
+            obtained_records = self.out_of_records_handler.run(first_record_id=self.storage.get_next_record_id())
+            if len(obtained_records):
+                for record in obtained_records:
+                    self.storage.add_record(record)
+                # recursion, so records handler should return empty records if can't obtain them
+                return self._get_new_record()
+            else:
+                raise RuntimeError("Out of records")
 
     def _check_record_is_usable(self, record: Record):
         seconds_in_hour = 60 ** 2

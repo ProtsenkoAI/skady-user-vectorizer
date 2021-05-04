@@ -6,7 +6,6 @@ from suvec.common.top_level_types import User
 
 
 class Response(ABC):
-    # TODO: depends on pool execution, if will return responses to user/client can become a problem
     def __init__(self, request_result, user: User, parser):
         self.request_result = request_result
         self.user = user

@@ -20,8 +20,6 @@ class TrackerState(TypedDict):
 
 
 class StatedEventsTracker(EventsTracker):
-    # TODO: move to suvec
-    # TODO: pass user to friends_added and groups_added
     # TODO: need to get working_proxies_cnt and working_creds_cnt at init stage from storages
     # TODO: separate creds session change and proxy session change
     def __init__(self, log_pth: str):

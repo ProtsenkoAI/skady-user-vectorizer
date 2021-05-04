@@ -9,8 +9,6 @@ from suvec.common.listen_notify import SessionLimitListener
 
 
 class SessionManager(BadPasswordListener, SessionLimitListener):
-    # TODO: add listener.py that enough requests made with this session and need to create new one
-    # TODO: maybe move whole session/ component to different product (Skady-Master-Key)
     def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager,
                  user_agent: str = 'Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0'):
         self.errors_handler = errors_handler
