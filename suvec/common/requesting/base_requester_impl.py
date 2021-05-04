@@ -1,5 +1,5 @@
 from typing import List, Callable
-from abc import ABC, abstractmethod
+from abc import abstractmethod
 
 from ..top_level_types import User
 from ..listen_notify import AbstractAccessErrorListener

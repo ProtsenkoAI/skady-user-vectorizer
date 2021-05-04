@@ -1,3 +1,3 @@
 from .parsed_processor_impl import ParsedProcessorImpl
-from .session_switching_parsed_processor_wrapper import SessionSwitchingParsedProcessorWrapper
-from .success_notifier_processor import SuccessNotifierProcessor
+from .parsed_processor import ParsedProcessor
+from .processor_with_hooks import ParsedProcessorWithHooks
