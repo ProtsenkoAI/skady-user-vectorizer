@@ -1,4 +1,5 @@
 from vk_api import exceptions
+from requests.exceptions import ProxyError
 
 from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_ERROR
 from suvec.common.executing import ParseRes, ErrorObj
@@ -10,11 +11,12 @@ from suvec.common.listen_notify import AccessErrorNotifier
 
 class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessErrorNotifier):
     """The class to process errors sent by service (API, website) we work with"""
+
     # TODO: instead of many if-else, maybe use small objects processing one type of error
     def __init__(self, events_tracker: TerminalEventsTracker):
         BadPasswordNotifier.__init__(self)
         AccessErrorNotifier.__init__(self)
-        
+
         self.tracker = events_tracker
 
     def auth_error(self, error: exceptions.VkApiError, auth_data: dict):
@@ -43,6 +45,10 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             self.tracker.message("Bad password error occurred")
             self.notify_bad_password()
 
+        elif isinstance(error, ProxyError):
+            self.tracker.error_occurred(error, "The proxy doesn't work. Try to send some request from it."
+                                               f"Auth data: {auth_data}")
+
         else:
             self.tracker.error_occurred(error=wrapped_error, msg=f"Unknown auth error")
             raise ValueError("Unknown auth error", error)
@@ -51,7 +57,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
         self.tracker.message(msg=error_msg_to_log)
 
     def api_response_error(self, parsed_results: ParseRes):
-        if parsed_results.error.code == ACCESS_ERROR:
+        if int(parsed_results.error.code) == ACCESS_ERROR:
             self.notify_access_error_listeners(user=parsed_results.user,
                                                type_of_request=parsed_results.request_type)
 

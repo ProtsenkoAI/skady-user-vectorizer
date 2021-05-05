@@ -42,6 +42,7 @@ class AuthRecordManager(ABC):
 
     def _check_record_is_usable(self, record: Record):
         seconds_in_hour = 60 ** 2
+        print("check record is usable", record, record.time_since_status_change)
         return (record.status == RESOURCE_OK_STATUS or
                 record.status == RESOURCE_WORKED_OUT_STATUS and
                 record.time_since_status_change / seconds_in_hour >= self.hours_for_reload)

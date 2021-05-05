@@ -1,12 +1,15 @@
 import time
+from typing import Optional
 
 from .session_types import Proxy, Credentials
-from .consts import ResourceStatus
+from .consts import ResourceStatus, RESOURCE_OK_STATUS
 
 
 class Record:
-    # TODO: maybe we will need a validation that for some class are set only allowed statuses
-    def __init__(self, obj_id: int, status: ResourceStatus, status_change_time: int):
+    def __init__(self, obj_id: int, status: ResourceStatus = RESOURCE_OK_STATUS,
+                 status_change_time: Optional[int] = None):
+        if status_change_time is None:
+            status_change_time = time.time()
         self.obj_id = obj_id
         self.status = status
         self.status_change_time = status_change_time

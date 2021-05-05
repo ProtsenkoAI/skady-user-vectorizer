@@ -9,3 +9,4 @@ class ProxyStorage(AuthRecordsStorage):
         new_proxy = Proxy(new_address, new_protocols)
         record_in_storage = self.get_record_by_id(record.obj_id)
         record_in_storage.proxy = new_proxy
+        self.dump_records()

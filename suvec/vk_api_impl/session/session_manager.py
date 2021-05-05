@@ -27,22 +27,6 @@ class SessionManager(BadPasswordListener, SessionLimitListener):
         self.proxy_manager.reset_requests_limit()
         self.session = self._get_creds_and_proxies_and_reset_session()
 
-    def _create_session(self, email, password, proxy_address, proxy_protocols) -> requests_pool.VkRequestsPool:
-        s = requests.Session()
-        s.headers.update({'User-agent': self.user_agent})
-        for proxy_protocol in proxy_protocols:
-            s.proxies.update({proxy_protocol: proxy_address})
-        vk_session = vk_api.VkApi(email, password, session=s)
-        try:
-            vk_session.auth()
-        except Exception as e:
-            auth_data = {"email": email, "password": password,
-                         "proxy protocols": proxy_protocols, "proxy address": proxy_address,
-                         "session": vk_session}
-            self.errors_handler.auth_error(e, auth_data=auth_data)
-
-        return requests_pool.VkRequestsPool(vk_session)
-
     def bad_password(self):
         self.creds_manager.reset_bad_password()
         self.session = self._get_creds_and_proxies_and_reset_session()
@@ -57,3 +41,19 @@ class SessionManager(BadPasswordListener, SessionLimitListener):
         proxy_address, proxy_protocols = self.proxy_manager.get()
 
         return self._create_session(email, password, proxy_address, proxy_protocols)
+
+    def _create_session(self, email, password, proxy_address, proxy_protocols) -> requests_pool.VkRequestsPool:
+        s = requests.Session()
+        s.headers.update({'User-agent': self.user_agent})
+        for proxy_protocol in proxy_protocols:
+            s.proxies.update({proxy_protocol: proxy_address})
+        vk_session = vk_api.VkApi(email, password, session=s)
+        try:
+            vk_session.auth()
+        except Exception as e:
+            print("error during auth", e)
+            auth_data = {"email": email, "password": password,
+                         "proxy protocols": proxy_protocols, "proxy address": proxy_address,
+                         "session": vk_session}
+            self.errors_handler.auth_error(e, auth_data=auth_data)
+        return requests_pool.VkRequestsPool(vk_session)

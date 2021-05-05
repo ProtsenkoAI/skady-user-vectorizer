@@ -5,7 +5,7 @@ from suvec.common.postproc.data_managers.ram_data_manager import RAMDataManager
 from suvec.common.postproc import ParsedProcessorWithHooks
 from suvec.common.postproc.processor_hooks import ProcessHookLimitSessionRequests, ProcessHookSuccessParseNotifier
 from suvec.common.top_level_types import User
-from suvec.common.listen_notify import ParsedEnoughListener
+from suvec.common.listen_notify import ParsedEnoughListener, AccessErrorListener
 from suvec.common.requesting import EconomicRequester
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from .session.records_managing.terminal_out_of_records import TerminalOutOfProxy, TerminalOutOfCreds
@@ -20,7 +20,7 @@ from .session.records_managing.creds_manager import CredsManager
 from .session import SessionManager
 
 
-class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
+class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener, AccessErrorListener):
     # TODO: If performance will become a problem, will need to refactor from single-user methods to batch-of-users
     #   methods and use multithreading
     def __init__(self, start_user_id: str, proxy_storage: ProxyStorage, creds_storage: CredsStorage,
@@ -70,10 +70,12 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
 
         self.parsed_processor.register_parsed_enough_listener(self)
         errors_handler.register_access_error_listener(self.executor)
+        errors_handler.register_access_error_listener(self)
 
         errors_handler.register_bad_password_listener(self.session_manager)
 
         self.continue_crawling = True
+        self.has_to_break_parsing = False
         self.candidates = [User(id=start_user_id)]
 
     def run(self):
@@ -92,6 +94,8 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
             print("parsed", len(parsed))
             for parsed_response in parsed:
                 self.parsed_processor.process(parsed_response)
+                if self.has_to_break_parsing:
+                    break
 
             self.candidates = self.parsed_processor.get_new_parse_candidates()
             self.end_loop()
@@ -101,9 +105,13 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener):
 
     def end_loop(self):
         self.events_tracker.loop_ended()
+        self.has_to_break_parsing = False
 
     def parsed_enough(self):
         self.continue_crawling = False
 
     def stop(self):
         self.continue_crawling = False
+
+    def access_error_occurred(self, user, type_of_request: str, *args, **kwargs):
+        self.has_to_break_parsing = True

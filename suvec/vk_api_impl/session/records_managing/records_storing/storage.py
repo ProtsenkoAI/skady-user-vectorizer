@@ -1,5 +1,6 @@
 from typing import List
 import json
+import time
 import os
 
 from ..records import Record
@@ -34,7 +35,8 @@ class AuthRecordsStorage:
     def set_worked_out(self, worked_out_record: Record):
         record = self.get_record_by_id(worked_out_record.obj_id)
         record.status = RESOURCE_WORKED_OUT_STATUS
-        self._dump_records()
+        record.status_change_time = time.time()
+        self.dump_records()
 
     def get_record_by_id(self, record_id) -> Record:
         rec_idx = self.get_record_idx_by_id(record_id)
@@ -44,7 +46,7 @@ class AuthRecordsStorage:
         record_idx = self.get_record_idx_by_id(record.obj_id)
         if record_idx is not None:
             self.records.pop(record_idx)
-        self._dump_records()
+        self.dump_records()
 
     def get_record_idx_by_id(self, obj_id: int) -> int:
         for idx, record in enumerate(self.records):
@@ -53,7 +55,7 @@ class AuthRecordsStorage:
 
     def add_record(self, record: Record):
         self.records.append(record)
-        self._dump_records()
+        self.dump_records()
 
     def get_next_record_id(self) -> int:
         max_id = 0
@@ -61,7 +63,7 @@ class AuthRecordsStorage:
             max_id = max(max_id, record.obj_id)
         return max_id + 1
 
-    def _dump_records(self):
+    def dump_records(self):
         serialized = [self.serializer.from_record(rec) for rec in self.records]
         with open(self.save_pth, "w") as f:
             json.dump(serialized, f)

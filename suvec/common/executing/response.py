@@ -23,4 +23,5 @@ class Response(ABC):
         ...
 
     def _get_error(self) -> ErrorObj:
+        # TODO: probably vk-specfic too, thus should make abstractmethod and move to inherited classes
         return ErrorObj(code=self.request_result.error["error_code"], error=self.request_result.error)
