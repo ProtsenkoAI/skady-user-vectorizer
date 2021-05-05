@@ -15,6 +15,14 @@ class DataManager(ABC):
         ...
 
     @abstractmethod
+    def take_fully_parsed_users(self) -> UsersData:
+        """Returns users that have all needed information"""
+        ...
+
+    def delete_user(self, user_id: str):
+        ...
+
+    @abstractmethod
     def save_user_groups(self, user: User, groups: List[Group]):
         ...
 

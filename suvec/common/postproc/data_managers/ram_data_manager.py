@@ -38,3 +38,13 @@ class RAMDataManager(DataManager):
 
     def get_num_users(self):
         return len(self.users_data)
+
+    def take_fully_parsed_users(self) -> UsersData:
+        res = {}
+        for user, user_data in self.users_data.items():
+            if user_data["friends"] is not None and user_data["groups"] is not None:
+                res[user] = user_data
+        return res
+
+    def delete_user(self, user_id: str):
+        del self.users_data[user_id]

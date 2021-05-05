@@ -1,5 +1,4 @@
 import time
-from random import randint
 from typing import TypedDict, List, Optional
 from .base_events_tracker import EventsTracker
 from ..top_level_types import User, Group
@@ -22,6 +21,7 @@ class TrackerState(TypedDict):
 class StatedEventsTracker(EventsTracker):
     # TODO: need to get working_proxies_cnt and working_creds_cnt at init stage from storages
     # TODO: separate creds session change and proxy session change
+    # TODO: maybe delete friends added and groups added methods
     def __init__(self, log_pth: str):
         super().__init__(log_pth)
         self._sessions_requests_cnt = []
@@ -45,9 +45,6 @@ class StatedEventsTracker(EventsTracker):
 
     def _request_processed(self):
         self.state["cur_session_requests"] += 1
-        self.state["total_groups"] += randint(1, 100)
-        if self.state["cur_session_requests"] % 2 == 1:
-            self.state["users_parsed"] += 1
         self.prev_request_time = time.time()
 
     def error_occurred(self, error: ErrorObj, msg: Optional[str] = None):
@@ -64,7 +61,6 @@ class StatedEventsTracker(EventsTracker):
     def groups_added(self, user: User, groups: List[Group]):
         self._request_processed()
         self.state["total_groups"] += len(groups)
-        self.state["users_parsed"] += 1
         self._count_user_if_all_requests_parsed(user)
 
     def _count_user_if_all_requests_parsed(self, user: User):
@@ -88,6 +84,10 @@ class StatedEventsTracker(EventsTracker):
 
     def loop_started(self):
         self.start_loop_time = time.time()
+
+    def report_long_term_data_stats(self, users_parsed: int, total_groups: int):
+        self.state["users_parsed"] = users_parsed
+        self.state["total_groups"] = total_groups
 
     def loop_ended(self):
         time_for_loop = time.time() - self.start_loop_time

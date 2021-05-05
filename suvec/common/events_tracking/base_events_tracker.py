@@ -48,3 +48,7 @@ class EventsTracker(ABC, metaclass=AbstractSingleton):
     @abstractmethod
     def loop_ended(self):
         ...
+
+    @abstractmethod
+    def report_long_term_data_stats(self, users_parsed: int, total_groups: int):
+        ...

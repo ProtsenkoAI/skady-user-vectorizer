@@ -10,7 +10,7 @@ from .base_events_tracker import EventsTracker
 
 
 class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
-    # TODO: test that if imported in 2 different modules will have only one instance
+    # TODO: test that if imported in 2 different modules will have only one instance (it's singleton)
     def __init__(self, log_pth: str, report_every_responses_nb: int = 1000):
         super().__init__(log_pth)
         self.report_every_responses_nb = report_every_responses_nb
@@ -91,3 +91,7 @@ class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
 
     def loop_ended(self):
         self.message("Ending parsing loop")
+
+    def report_long_term_data_stats(self, users_parsed: int, total_groups: int):
+        self.total_groups_nb = total_groups
+        self.groups_responses_cnt = users_parsed

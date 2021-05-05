@@ -18,13 +18,13 @@ def run():
     base_dir = "/home/gldsn/Projects/skady-user-vectorizer/"
     runner = VkCrawlRunnerWithCheckpoints(
         start_user_id="213167272",
-        parse_res_save_pth=os.path.join(base_dir, "resources/checkpoint.json"),
+        data_resume_checkpoint_save_pth=os.path.join(base_dir, "resources/checkpoints/data_checkpoint.json"),
         tracker=events_tracker,
         proxy_storage=proxy_storage,
         creds_storage=creds_storage,
         requester_checkpoints_path=os.path.join(base_dir, "resources/checkpoints/requester_checkpoint.json"),
-        requester_max_requests_per_crawl_loop=50
-
+        requester_max_requests_per_crawl_loop=50,
+        long_term_save_pth=os.path.join(base_dir, "resources/parsed_data.json")
     )
     runner.run()
 
