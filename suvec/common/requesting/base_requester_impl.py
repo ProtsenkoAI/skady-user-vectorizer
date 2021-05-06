@@ -37,6 +37,8 @@ class BaseRequesterImpl(Requester, AbstractAccessErrorListener):
         return requests
 
     def access_error_occurred(self, user, type_of_request: str, *args, **kwargs):
+        # TODO: at the moment if access error occurs, we break parsing, thus all users after first one will be dropped
+        #   and not moved to request queues again
         if type_of_request == "friends":
             self.users_to_friends_request.append(user)
         elif type_of_request == "groups":

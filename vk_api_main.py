@@ -21,21 +21,21 @@ def run():
     _import_proxy_and_creds_from_files(proxy_storage, creds_storage, base_dir)
 
     runner = VkCrawlRunnerWithCheckpoints(
-        start_user_id="213167272",
+        start_user_id="142478661",
         data_resume_checkpoint_save_pth=os.path.join(base_dir, "checkpoints/data_checkpoint.json"),
         tracker=events_tracker,
         proxy_storage=proxy_storage,
         creds_storage=creds_storage,
         requester_checkpoints_path=os.path.join(base_dir, "checkpoints/requester_checkpoint.json"),
-        requester_max_requests_per_crawl_loop=50,
-        long_term_save_pth=os.path.join(base_dir, "parsed_data.json")
+        requester_max_requests_per_crawl_loop=1000,
+        long_term_save_pth=os.path.join(base_dir, "parsed_data.jsonl")
     )
     runner.run()
 
 
 def _import_proxy_and_creds_from_files(proxy_storage, creds_storage, base_dir):
-    ...
     ### Turn on only once with new files, because can create duplicates
+    ...
     # proxy_importer = WebshareFileProxyImporter(
     #     path_to_resources=os.path.join(base_dir, "session/webshare_250_proxies.txt"),
     #     min_obj_id=proxy_storage.get_next_record_id()

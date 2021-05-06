@@ -7,6 +7,8 @@ from .data_manager import DataManager
 
 class RAMDataManager(DataManager):
     def __init__(self):
+        # TODO: at the moment, when dump users to file, miss info about them, so filter_already_seen_users doesn't
+        #   work properly
         self.users_data: UsersData = {}
 
     def get_data(self) -> UsersData:

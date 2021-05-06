@@ -26,8 +26,14 @@ class DataManagerCheckpointer:
         for user, _ in data.items():
             data_manager.delete_user(user)
 
+        if os.path.isfile(self.long_term_save_pth):
+            with open(self.long_term_save_pth, "r") as f:
+                cnt_saved_data = f.read().count("\n")
+        else:
+            cnt_saved_data = 0
+
         total_groups = self._cnt_groups(data)
-        self.tracker.report_long_term_data_stats(len(data), total_groups)
+        self.tracker.report_long_term_data_stats(len(data) + cnt_saved_data, total_groups)
 
         with open(self.long_term_save_pth, "a") as f:
             for user, user_data in data.items():
@@ -44,4 +50,4 @@ class DataManagerCheckpointer:
 
             data_manager.set_data(data)
         else:
-            RuntimeError("There's no checkpoint, can't load")
+            raise RuntimeError("There's no checkpoint, can't load")

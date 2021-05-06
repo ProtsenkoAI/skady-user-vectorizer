@@ -10,6 +10,9 @@ class EconomicRequester(BaseRequesterImpl, RequestSuccessListener):
     def add_users(self, users: List[User]):
         self.users_to_groups_request += users
 
+        self.users_to_groups_request = list(set(self.users_to_groups_request))
+        self.users_to_friends_request = list(set(self.users_to_friends_request))
+
     def request_succeed(self, user: User, req_type: str):
         if req_type == "groups":
             self.users_to_friends_request.append(user)

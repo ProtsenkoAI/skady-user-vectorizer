@@ -16,5 +16,6 @@ class VkCrawlRunnerWithCheckpoints(VkApiCrawlRunner):
 
     def end_loop(self):
         super().end_loop()
+
         self.requester_checkpointer.save_checkpoint(self.requester)
         self.data_checkpointer.save_checkpoint(self.data_manager)
