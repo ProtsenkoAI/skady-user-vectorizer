@@ -1,6 +1,7 @@
 # Suvec
-### Pretrained models are [here](https://drive.google.com/drive/folders/1L_cHapEISPOgUohZN7Tt84f3kj5OHl41?usp=sharing).
-### Example of training word2vec using crawled data is [here](https://github.com/ProtsenkoAI/skady-user-vectorizer/blob/master/notebooks/group2vec.ipynb)
+#### Pretrained models are [here](https://drive.google.com/drive/folders/1L_cHapEISPOgUohZN7Tt84f3kj5OHl41?usp=sharing).
+#### Example of training word2vec using crawled data is [here](https://github.com/ProtsenkoAI/skady-user-vectorizer/blob/master/notebooks/group2vec.ipynb)
+#### Crawled data dumps are [here](https://drive.google.com/drive/folders/1LjrENnP_RD0xAFq-lXc7GJ-s9JiTgeYo?usp=sharing)
 
 Suvec is a tool intended to create features of users using their social networks. At the moment it includes:
 1. Engine to crawl groups and friends of users to create group2vec embeddings (details below)
