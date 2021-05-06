@@ -3,7 +3,7 @@ import os
 
 import shutil
 
-for deleted_dir in ["./dist", "./build", "./.eggs", "./suvec.eggs-info"]:
+for deleted_dir in ["./dist", "./build", "./.eggs", "./suvec.egg    -info"]:
     shutil.rmtree(deleted_dir, ignore_errors=True)
 
 
@@ -19,7 +19,11 @@ setup(name="suvec",
       long_description=read("README.md"),
       packages=find_packages(),
       setup_requires=["wheel", "setuptools"],
-      install_requires=["vk-api"],
+      install_requires=["vk-api", "requests"],
       python_requires='>3.8.0',
-
+      extras_require={
+              'dev': [
+                  "jupyterlab"
+              ]
+          }
       )

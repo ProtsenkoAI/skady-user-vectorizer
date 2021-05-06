@@ -22,10 +22,11 @@ class StatedEventsTracker(EventsTracker):
     # TODO: need to get working_proxies_cnt and working_creds_cnt at init stage from storages
     # TODO: separate creds session change and proxy session change
     # TODO: maybe delete friends added and groups added methods
-    def __init__(self, log_pth: str):
+    def __init__(self, log_pth: str, num_parse_speed_points_stored: int = 200):
         super().__init__(log_pth)
         self._sessions_requests_cnt = []
         self._parsed_users: List[User] = []
+        self.num_parse_speed_points_stored = num_parse_speed_points_stored
         self.state = TrackerState(parse_speed=[],
                                   cur_session_requests=0,
                                   mean_session_lifetime=None,
@@ -39,12 +40,14 @@ class StatedEventsTracker(EventsTracker):
                                   )
         self.prev_request_time = time.time()
         self.start_loop_time = None
+        self.loop_requests = 0
 
     def get_state(self) -> TrackerState:
         return self.state
 
     def _request_processed(self):
         self.state["cur_session_requests"] += 1
+        self.loop_requests += 1
         self.prev_request_time = time.time()
 
     def error_occurred(self, error: ErrorObj, msg: Optional[str] = None):
@@ -66,6 +69,7 @@ class StatedEventsTracker(EventsTracker):
     def _count_user_if_all_requests_parsed(self, user: User):
         if user in self._parsed_users:
             self.state["users_parsed"] += 1
+            self._parsed_users.remove(user)
         else:
             self._parsed_users.append(user)
 
@@ -84,6 +88,7 @@ class StatedEventsTracker(EventsTracker):
 
     def loop_started(self):
         self.start_loop_time = time.time()
+        self.loop_requests = 0
 
     def report_long_term_data_stats(self, users_parsed: int, total_groups: int):
         self.state["users_parsed"] = users_parsed
@@ -91,8 +96,8 @@ class StatedEventsTracker(EventsTracker):
 
     def loop_ended(self):
         time_for_loop = time.time() - self.start_loop_time
-        self.state["parse_speed"].append(time_for_loop)
-        self.start_loop_time = time.time()
+        self.state["parse_speed"].append(self.loop_requests / time_for_loop)
+        self.state["parse_speed"] = self.state["parse_speed"][-self.num_parse_speed_points_stored:]
 
     def _mean(self, lst):
         if len(lst):

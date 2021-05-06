@@ -15,10 +15,7 @@ class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
         super().__init__(log_pth)
         self.report_every_responses_nb = report_every_responses_nb
 
-        self.errors = []
         self.errors_cnt = defaultdict(int)
-        self.skip_user_reasons: List[str] = []
-        self.skipped_users: List[User] = []
 
         self.groups_responses_cnt = 0
         self.requests_parsed_since_proxy_change = 0
@@ -26,14 +23,14 @@ class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
         self.total_groups_nb = 0
         self.prev_report_time = time.time()
 
+        self.skipped_users_cnt = 0
+
     def error_occurred(self, error: ErrorObj, msg: Optional[str] = None):
         super().error_occurred(error, msg)
         self.errors_cnt[error.code] += 1
-        self.errors.append(error)
 
     def skip_user(self, user: User, msg: Optional[str] = None):
-        self.skipped_users.append(user)
-        self.skip_user_reasons.append(msg)
+        self.skipped_users_cnt += 1
 
     def friends_added(self, user: User, friends: List[User]):
         self._request_parsed()
@@ -59,9 +56,9 @@ class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
         # TODO: check that nb users parsed in logs is adequate
         msg_lines = (f"State Report",
                      f"Nb users parsed: {self.groups_responses_cnt}",
-                     f"Total errors: {len(self.errors)}",
+                     f"Total errors: {self.errors_cnt}",
                      f"Errors counts by code: {self.errors_cnt}",
-                     f"Number of skipped users: {len(self.skipped_users)}",
+                     f"Number of skipped users: {self.skipped_users_cnt}",
                      f"Seconds since previous report: {time_passed}",
                      f"Total Groups: {self.total_groups_nb}")
         msg = "\n".join(msg_lines)

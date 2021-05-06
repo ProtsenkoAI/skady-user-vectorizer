@@ -44,8 +44,8 @@ class AuthRecordManager(ABC):
         seconds_in_hour = 60 ** 2
         print("check record is usable", record, record.time_since_status_change)
         return (record.status == RESOURCE_OK_STATUS or
-                record.status == RESOURCE_WORKED_OUT_STATUS and
-                record.time_since_status_change / seconds_in_hour >= self.hours_for_reload)
+                (record.status == RESOURCE_WORKED_OUT_STATUS and
+                 record.time_since_status_change / seconds_in_hour >= self.hours_for_reload))
 
     def reset_requests_limit(self):
         if self.resource is not None:

@@ -46,8 +46,10 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             self.notify_bad_password()
 
         elif isinstance(error, ProxyError):
-            self.tracker.error_occurred(error, "The proxy doesn't work. Try to send some request from it."
+            error_obj = ErrorObj(code=None, error=error)
+            self.tracker.error_occurred(error_obj, "The proxy doesn't work. Try to send some request from it."
                                                f"Auth data: {auth_data}")
+            # TODO: notify bad proxy, otherwise parsing will fail
 
         else:
             self.tracker.error_occurred(error=wrapped_error, msg=f"Unknown auth error")
@@ -61,7 +63,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             self.notify_access_error_listeners(user=parsed_results.user,
                                                type_of_request=parsed_results.request_type)
 
-        if parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED]:
+        elif parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED]:
             self.tracker.skip_user(user=parsed_results.user, msg=f"Profile is private")
         else:
             msg = (f"Unknown error occurred: {parsed_results.error.code} "

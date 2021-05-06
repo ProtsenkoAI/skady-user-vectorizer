@@ -7,9 +7,11 @@ name = "pypi"
 vk-api = "*"
 wheel = "*"
 setuptools = "*"
-dill = "*"
+gensim = "*"
+python-levenshtein = "*"
 
 [dev-packages]
+jupyterlab = "*"
 
 [requires]
 python_version = "3.8"

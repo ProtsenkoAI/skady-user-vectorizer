@@ -10,3 +10,5 @@ resources/
 *.eggs/
 **/*.egg/
 build/
+notebooks/data
+**/.ipynb_checkpoints/
