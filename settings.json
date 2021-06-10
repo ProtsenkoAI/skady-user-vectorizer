@@ -1,0 +1,17 @@
+{
+  "resources":  {
+    "res_path": "./resources",
+    "result_file": "parsed_data.jsonl",
+    "checkpoints": {
+      "data_checkpoint": "data_checkpoint.json",
+      "requester_checkpoint": "requester_checkpoint.json"
+    },
+    "access": {
+        "creds_file": "creds.json",
+        "proxy_file": "proxies.json"
+    }
+  },
+  "other_paths": {
+    "logs": "./resources/logs.txt"
+  }
+}

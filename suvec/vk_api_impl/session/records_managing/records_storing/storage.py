@@ -53,8 +53,9 @@ class AuthRecordsStorage:
             if record.obj_id == obj_id:
                 return idx
 
-    def add_record(self, record: Record):
-        self.records.append(record)
+    def add_record(self, record: Record, allow_duplicates=False):
+        if allow_duplicates or not record.is_in(self.records):
+            self.records.append(record)
         self.dump_records()
 
     def get_next_record_id(self) -> int:
