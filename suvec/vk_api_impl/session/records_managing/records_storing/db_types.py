@@ -1,4 +1,4 @@
-from typing import TypedDict, List
+from typing import TypedDict
 
 
 class UserCredsDict(TypedDict):
@@ -8,7 +8,6 @@ class UserCredsDict(TypedDict):
 
 class UserProxyDict(TypedDict):
     address: str
-    protocols: List[str]
 
 
 class AuthResourceDict(TypedDict):

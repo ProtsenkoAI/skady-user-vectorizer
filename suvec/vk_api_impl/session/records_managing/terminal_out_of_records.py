@@ -40,7 +40,5 @@ class TerminalOutOfCreds(TerminalOutOfRecords):
 class TerminalOutOfProxy(TerminalOutOfRecords):
     def receive_input_and_create_record(self, obj_id: int) -> Record:
         address = input("Proxy address:\n")
-        protocols_string = input("Protocols delimited by ' ' (example: 'http https ftp'):\n")
-        protocols = list(protocols_string.split())
 
-        return ProxyRecord(proxy=Proxy(address, protocols), obj_id=obj_id, status_change_time=time.time())
+        return ProxyRecord(proxy=Proxy(address), obj_id=obj_id, status_change_time=time.time())

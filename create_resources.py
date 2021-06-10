@@ -5,7 +5,7 @@ import json
 import utils
 
 
-def _create_resources_dir(settings_path="../settings.json", force_create: bool = False):
+def _create_resources_dir(settings_path="./settings.json", force_create: bool = False):
     # TODO: refactor
     """
     :param force_create: deletes existing directory and creates new if True
@@ -27,7 +27,6 @@ def _create_resources_dir(settings_path="../settings.json", force_create: bool =
     checkpoints_dir.mkdir()
     access_dir.mkdir()
     backups_dir.mkdir()
-
 
     result_file = res_dir / res_settings["result_file"]
     result_file.touch()

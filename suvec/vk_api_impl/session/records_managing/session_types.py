@@ -1,6 +1,3 @@
-from typing import List
-
-
 class Credentials:
     def __init__(self, email: str, password: str):
         self.email = email
@@ -15,14 +12,12 @@ class Credentials:
 
 
 class Proxy:
-    # TODO: remove protocols (or set defaults)
-    def __init__(self, address: str, protocols: List[str]):
+    def __init__(self, address: str):
         self.address = address
-        self.protocols = protocols
 
     @classmethod
     def create_empty(cls):
-        return cls(address="", protocols=["http", "https"])
+        return cls(address="")
 
     def __eq__(self, other):
-        return self.address == other.address and self.protocols == other.protocols
+        return self.address == other.address

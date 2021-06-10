@@ -1,5 +1,5 @@
 from typing import NamedTuple
 
 
-User = NamedTuple("User", [("id", str)])
-Group = NamedTuple("Group", [("id", str)])
+User = NamedTuple("User", [("id", int)])
+Group = NamedTuple("Group", [("id", int)])

@@ -1,4 +1,5 @@
 import vk_api
+import vk_api
 from vk_api import requests_pool
 import requests
 
@@ -38,14 +39,14 @@ class SessionManager(BadPasswordListener, SessionLimitListener):
 
     def _get_creds_and_proxies_and_reset_session(self):
         email, password = self.creds_manager.get()
-        proxy_address, proxy_protocols = self.proxy_manager.get()
+        proxy_address = self.proxy_manager.get()
 
-        return self._create_session(email, password, proxy_address, proxy_protocols)
+        return self._create_session(email, password, proxy_address)
 
-    def _create_session(self, email, password, proxy_address, proxy_protocols) -> requests_pool.VkRequestsPool:
+    def _create_session(self, email, password, proxy_address) -> requests_pool.VkRequestsPool:
         s = requests.Session()
         s.headers.update({'User-agent': self.user_agent})
-        for proxy_protocol in proxy_protocols:
+        for proxy_protocol in ["http", "https"]:
             s.proxies.update({proxy_protocol: proxy_address})
         vk_session = vk_api.VkApi(email, password, session=s)
         try:
@@ -53,7 +54,7 @@ class SessionManager(BadPasswordListener, SessionLimitListener):
         except Exception as e:
             print("error during auth", e)
             auth_data = {"email": email, "password": password,
-                         "proxy protocols": proxy_protocols, "proxy address": proxy_address,
+                         "proxy address": proxy_address,
                          "session": vk_session}
             self.errors_handler.auth_error(e, auth_data=auth_data)
         return requests_pool.VkRequestsPool(vk_session)

@@ -10,6 +10,7 @@ setuptools = "*"
 gensim = "*"
 python-levenshtein = "*"
 requests = "*"
+jupyterlab = "*"
 
 [dev-packages]
 jupyterlab = "*"

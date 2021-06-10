@@ -49,10 +49,10 @@ class CredsRecordsSerializer(AuthRecordsSerializer):
 
 class ProxyRecordsSerializer(AuthRecordsSerializer):
     def create_record(self, raw_dict: ProxyDict, *args, **kwargs) -> ProxyRecord:
-        proxy = Proxy(address=raw_dict["proxy"]["address"], protocols=raw_dict["proxy"]["protocols"])
+        proxy = Proxy(address=raw_dict["proxy"]["address"])
         return ProxyRecord(*args, proxy=proxy, **kwargs)
 
     def create_res_dict(self, record: ProxyRecord, *args, **kwargs) -> ProxyDict:
-        proxy = UserProxyDict(address=record.proxy.address, protocols=record.proxy.protocols)
+        proxy = UserProxyDict(address=record.proxy.address)
         record_dct = ProxyDict(*args, proxy=proxy, **kwargs)
         return record_dct

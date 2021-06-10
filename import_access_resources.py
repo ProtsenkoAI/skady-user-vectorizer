@@ -1,7 +1,5 @@
 """Takes .txt file with list of proxies from webshare.com and adds proxies to parser
 """
-from pathlib import Path
-import json
 
 import utils
 from suvec.vk_api_impl.session.records_managing.resources_import import WebshareFileProxyImporter, VkFileCredsImporter
@@ -27,7 +25,7 @@ def import_vk_accounts_txt(accounts_txt_pth: str, creds_storage: CredsStorage):
 
 
 if __name__ == "__main__":
-    settings_path = "./settings"
+    settings_path = "./settings.json"
     res_path = utils.get_resources_path(settings_path)
 
     proxy_file_pth = res_path / "other" / "webshare_proxy.txt"

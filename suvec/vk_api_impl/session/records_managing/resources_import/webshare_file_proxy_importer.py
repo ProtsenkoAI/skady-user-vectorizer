@@ -14,7 +14,7 @@ class WebshareFileProxyImporter(FileResourcesImporter):
         obj_id = start_obj_id
         for address in addresses:
             address = address.strip()
-            record = ProxyRecord(proxy=Proxy(address=address, protocols=["http", "https"]), obj_id=obj_id)
+            record = ProxyRecord(proxy=Proxy(address=address), obj_id=obj_id)
             records.append(record)
             obj_id += 1
         return records

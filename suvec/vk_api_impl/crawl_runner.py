@@ -23,9 +23,9 @@ from .session import SessionManager
 class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener, AccessErrorListener):
     # TODO: If performance will become a problem, will need to refactor from single-user methods to batch-of-users
     #   methods and use multithreading
-    def __init__(self, start_user_id: str, proxy_storage: ProxyStorage, creds_storage: CredsStorage,
+    def __init__(self, start_user_id: int, proxy_storage: ProxyStorage, creds_storage: CredsStorage,
                  logs_pth: str = "../logs.txt",
-                 tracker=None, requester_max_requests_per_crawl_loop=1000,
+                 tracker=None, requester_max_requests_per_crawl_loop=10000,
                  tracker_response_freq=500, session_request_limit=30000,
                  access_resource_reload_hours=24,
                  max_users=10 ** 7):
