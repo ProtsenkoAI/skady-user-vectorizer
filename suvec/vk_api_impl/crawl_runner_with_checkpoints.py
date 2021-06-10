@@ -4,10 +4,10 @@ from suvec.common.requesting.requester_checkpointer import RequesterCheckpointer
 
 
 class VkCrawlRunnerWithCheckpoints(VkApiCrawlRunner):
-    def __init__(self, *args, data_resume_checkpoint_save_pth: str, long_term_save_pth: str,
+    def __init__(self, *args, data_resume_checkpoint_save_pth: str, data_backup_path: str, long_term_save_pth: str,
                  requester_checkpoints_path: str, **kwargs):
         super().__init__(*args, **kwargs)
-        self.data_checkpointer = DataManagerCheckpointer(data_resume_checkpoint_save_pth,
+        self.data_checkpointer = DataManagerCheckpointer(data_resume_checkpoint_save_pth, data_backup_path,
                                                          long_term_save_pth, self.events_tracker)
         self.requester_checkpointer = RequesterCheckpointer(requester_checkpoints_path)
 

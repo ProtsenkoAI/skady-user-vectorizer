@@ -19,6 +19,10 @@ class RequesterCheckpointer:
             groups_requests_users = [User(id=user_id) for user_id in set(groups_requests_ids)]
             requester.users_to_friends_request += friends_requests_users
             requester.users_to_groups_request += groups_requests_users
+        else:
+            with open(self.checkpoint_pth, "w") as f:
+                default_val = ([], [])
+                json.dump(default_val, f)
 
     def save_checkpoint(self, requester: BaseRequesterImpl):
         friends_requests_ids = [user.id for user in set(requester.users_to_friends_request)]

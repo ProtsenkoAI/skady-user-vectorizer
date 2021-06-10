@@ -1,5 +1,4 @@
-import os
-
+import utils
 from suvec.vk_api_impl.crawl_runner_with_checkpoints import VkCrawlRunnerWithCheckpoints
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
@@ -10,22 +9,25 @@ from suvec.vk_api_impl.session.records_managing.records_storing.serializers impo
 def run():
     events_tracker = TerminalEventsTracker(log_pth="../logs.txt", report_every_responses_nb=300)
 
-    base_dir = "./resources/"
-    proxies_save_pth = os.path.join(base_dir, "proxies.json")
-    creds_save_pth = os.path.join(base_dir, "creds.json")
+    settings_path = "./settings.json"
+    proxies_save_pth, creds_save_pth = utils.get_proxy_and_creds_paths(settings_path)
+    checkp_data, checkp_requester = utils.get_data_requester_checkpoint_paths(settings_path)
+    result_file = utils.get_result_path(settings_path)
+    backups_path = utils.get_backups_path(settings_path)
 
     proxy_storage = ProxyStorage(proxies_save_pth, ProxyRecordsSerializer())
     creds_storage = CredsStorage(creds_save_pth, CredsRecordsSerializer())
 
     runner = VkCrawlRunnerWithCheckpoints(
         start_user_id="142478661",
-        data_resume_checkpoint_save_pth=os.path.join(base_dir, "checkpoints/data_checkpoint.json"),
+        data_resume_checkpoint_save_pth=checkp_data,
         tracker=events_tracker,
         proxy_storage=proxy_storage,
         creds_storage=creds_storage,
-        requester_checkpoints_path=os.path.join(base_dir, "checkpoints/requester_checkpoint.json"),
+        requester_checkpoints_path=checkp_requester,
         requester_max_requests_per_crawl_loop=1000,
-        long_term_save_pth=os.path.join(base_dir, "parsed_data.jsonl")
+        long_term_save_pth=result_file,
+        data_backup_path = backups_path / "parsed_backup.jsonl"
     )
     runner.run()
 

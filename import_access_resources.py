@@ -3,6 +3,7 @@
 from pathlib import Path
 import json
 
+import utils
 from suvec.vk_api_impl.session.records_managing.resources_import import WebshareFileProxyImporter, VkFileCredsImporter
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
 from suvec.vk_api_impl.session.records_managing.records_storing.serializers import ProxyRecordsSerializer, \
@@ -26,17 +27,16 @@ def import_vk_accounts_txt(accounts_txt_pth: str, creds_storage: CredsStorage):
 
 
 if __name__ == "__main__":
-    settings_path = Path("../settings.json")
-    res_path = settings_path.parent / json.load(settings_path.open())["resources"]["res_path"]
+    settings_path = "./settings"
+    res_path = utils.get_resources_path(settings_path)
 
     proxy_file_pth = res_path / "other" / "webshare_proxy.txt"
     accounts_file_pth = res_path / "other" / "vk_accounts.txt"
 
-    proxies_save_pth = res_path / "access" / "proxies.json"
-    creds_save_pth = res_path / "access" / "creds.json"
+    proxies_save_pth, creds_save_pth = utils.get_proxy_and_creds_paths(settings_path)
 
-    proxy_storage = ProxyStorage(proxies_save_pth, ProxyRecordsSerializer())
-    creds_storage = CredsStorage(creds_save_pth, CredsRecordsSerializer())
+    proxy_storage = ProxyStorage(str(proxies_save_pth), ProxyRecordsSerializer())
+    creds_storage = CredsStorage(str(creds_save_pth), CredsRecordsSerializer())
 
-    import_webshare_proxy(proxy_file_pth, proxy_storage)
-    import_vk_accounts_txt(accounts_file_pth, creds_storage)
+    import_webshare_proxy(str(proxy_file_pth), proxy_storage)
+    import_vk_accounts_txt(str(accounts_file_pth), creds_storage)
