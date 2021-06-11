@@ -38,7 +38,9 @@ class BaseRequesterImpl(Requester, AbstractAccessErrorListener):
 
     def access_error_occurred(self, user, type_of_request: str, *args, **kwargs):
         # TODO: at the moment if access error occurs, we break parsing, thus all users after first one will be dropped
-        #   and not moved to request queues again
+        #   and not moved to request queues again. Solution will be tol listen success parse notification and remove
+        #   from list of users needed parsing, but it'll bring overheads. Thus, we don't do it because now there are
+        #   too many users to process them all and we don't have problem with absence of users to parse.
         if type_of_request == "friends":
             self.users_to_friends_request.append(user)
         elif type_of_request == "groups":

@@ -17,9 +17,6 @@ class EconomicRequester(BaseRequesterImpl, RequestSuccessListener):
         self.users_to_groups_request += unseen_users
         self.already_added.update(unseen_users)
 
-        self.users_to_groups_request = self.users_to_groups_request
-        self.users_to_friends_request = self.users_to_friends_request
-
     def request_succeed(self, user: User, req_type: str):
         if req_type == "groups":
             self.users_to_friends_request.append(user)

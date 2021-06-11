@@ -26,10 +26,8 @@ class ParsedProcessorImpl(ParsedProcessor, ParsedEnoughNotifier):
 
     def process_success(self, res: ParseRes):
         if res.request_type == "friends":
-            parsed_results: FriendsParseRes
             self._proc_friends(res)
         elif res.request_type == "groups":
-            parsed_results: GroupsParseRes
             self._proc_groups(res)
         else:
             raise ValueError(f"Unknown request_type: {res.request_type}")

@@ -7,7 +7,7 @@ from suvec.vk_api_impl.session.records_managing.records_storing.serializers impo
 
 
 def run():
-    events_tracker = TerminalEventsTracker(log_pth="../logs.txt", report_every_responses_nb=2000)
+    events_tracker = TerminalEventsTracker(log_pth="../logs.txt", report_every_responses_nb=1000)
 
     settings_path = "./settings.json"
     proxies_save_pth, creds_save_pth = utils.get_proxy_and_creds_paths(settings_path)
@@ -25,7 +25,7 @@ def run():
         proxy_storage=proxy_storage,
         creds_storage=creds_storage,
         requester_checkpoints_path=checkp_requester,
-        requester_max_requests_per_crawl_loop=5000,
+        requester_max_requests_per_crawl_loop=1000,
         long_term_save_pth=result_file,
         data_backup_path=str(backups_path / "parsed_backup.jsonl"),
         loops_per_checkpoint=3

@@ -1,4 +1,4 @@
-import vk_api
+from typing import Optional
 import vk_api
 from vk_api import requests_pool
 import requests
@@ -17,6 +17,7 @@ class SessionManager(BadPasswordListener, SessionLimitListener):
         self.creds_manager = creds_manager
         self.user_agent = user_agent
         self.session = None
+        self.proxy_address: Optional[str] = None
 
     def get_session(self) -> vk_api.VkRequestsPool:
         if self.session is None:
@@ -40,7 +41,7 @@ class SessionManager(BadPasswordListener, SessionLimitListener):
     def _get_creds_and_proxies_and_reset_session(self):
         email, password = self.creds_manager.get()
         proxy_address = self.proxy_manager.get()
-
+        self.proxy_address = proxy_address
         return self._create_session(email, password, proxy_address)
 
     def _create_session(self, email, password, proxy_address) -> requests_pool.VkRequestsPool:

@@ -1,7 +1,7 @@
 from vk_api import exceptions
 from requests.exceptions import ProxyError
 
-from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_ERROR
+from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_ERROR, ACCESS_DENIED
 from suvec.common.executing import ParseRes, ErrorObj
 from suvec.common.events_tracking import TerminalEventsTracker
 from suvec.common.external_errors_handling import ExternalErrorsHandler
@@ -62,7 +62,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             self.notify_access_error_listeners(user=parsed_results.user,
                                                type_of_request=parsed_results.request_type)
 
-        elif parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED]:
+        elif parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_DENIED]:
             self.tracker.skip_user(user=parsed_results.user, msg=f"Bad user (private, blocked, etc)")
         else:
             msg = (f"Unknown error occurred: {parsed_results.error.code} "

@@ -46,7 +46,7 @@ class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
         self._maybe_state_report()
 
     def _maybe_state_report(self):
-        if self.groups_responses_cnt % self.report_every_responses_nb == 0:
+        if self.groups_responses_cnt % self.report_every_responses_nb == 0 and self.groups_responses_cnt != 0:
             time_passed = time.time() - self.prev_report_time
             self.prev_report_time = time.time()
             self._state_report(time_passed)

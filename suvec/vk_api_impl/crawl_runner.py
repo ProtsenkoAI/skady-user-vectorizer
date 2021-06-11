@@ -11,6 +11,8 @@ from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsT
 from .session.records_managing.terminal_out_of_records import TerminalOutOfProxy, TerminalOutOfCreds
 
 from .executing.pool_executor import VkApiPoolExecutor
+from .executing.async_exec import AsyncVkApiPoolExecutor
+from .executing.async_exec.async_responses_factory import VkAsyncResponsesFactory
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
 from .executing.responses_factory import VkApiResponsesFactory
 from .requesting import VkApiRequestsCreator
@@ -28,7 +30,7 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener, AccessErrorListener):
                  tracker=None, requester_max_requests_per_crawl_loop=10000,
                  tracker_response_freq=500, session_request_limit=30000,
                  access_resource_reload_hours=24,
-                 max_users=10 ** 7):
+                 max_users=10 ** 7, use_async=True):
 
         if tracker is None:
             tracker = TerminalEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
@@ -36,7 +38,11 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener, AccessErrorListener):
         self.events_tracker = tracker
         CrawlRunner.__init__(self, tracker=tracker)
 
-        responses_factory = VkApiResponsesFactory()
+        if use_async:
+            responses_factory = VkAsyncResponsesFactory()
+        else:
+            responses_factory = VkApiResponsesFactory()
+
         requests_creator = VkApiRequestsCreator(responses_factory=responses_factory)
         self.requester = EconomicRequester(requests_creator,
                                            max_requests_per_type_per_call=requester_max_requests_per_crawl_loop)
@@ -51,7 +57,10 @@ class VkApiCrawlRunner(CrawlRunner, ParsedEnoughListener, AccessErrorListener):
                                      hours_for_resource_reload=access_resource_reload_hours)
 
         self.session_manager = SessionManager(errors_handler, proxy_manager, creds_manager)
-        self.executor = VkApiPoolExecutor(session_manager=self.session_manager)
+        if use_async:
+            self.executor = AsyncVkApiPoolExecutor(session_manager=self.session_manager)
+        else:
+            self.executor = VkApiPoolExecutor(session_manager=self.session_manager)
 
         self.data_manager = RAMDataManager()
         # TODO: processor shouldn't count requests, move it to requester

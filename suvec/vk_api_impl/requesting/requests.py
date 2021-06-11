@@ -9,6 +9,7 @@ class FriendsRequest(Request):
         return "friends.get"
 
     def create_response(self, resp_raw: vk_api.requests_pool.RequestResult) -> Response:
+        # TODO: too much architecture layers, refactor
         return self.responses_factory.create_friends_response(resp_raw, user=self.user)
 
 
@@ -17,4 +18,5 @@ class GroupsRequest(Request):
         return "groups.get"
 
     def create_response(self, resp_raw: vk_api.requests_pool.RequestResult) -> Response:
+        # TODO: too much architecture layers, refactor
         return self.responses_factory.create_groups_response(resp_raw, user=self.user)
