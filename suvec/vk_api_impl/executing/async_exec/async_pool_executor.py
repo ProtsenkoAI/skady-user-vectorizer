@@ -11,7 +11,6 @@ from ..pool_executor import VkApiPoolExecutor
 
 
 class _TokenSessionWithProxy:
-    # TODO: refactor
     """wrapper for AsyncVkExecuteRequestPool from aiovk because it doesn't support passing
     Driver to session"""
 
@@ -25,6 +24,7 @@ class _TokenSessionWithProxy:
 
 class AsyncVkApiPoolExecutor(VkApiPoolExecutor):
     # TODO: try to tackle creating a lot of sessions/pools/proxy objects overheads
+    # TODO: refactor
     def execute(self, requests: List[Request]) -> List[Response]:
         vk_api_pool = self.session_manager.get_session()
 
@@ -34,10 +34,11 @@ class AsyncVkApiPoolExecutor(VkApiPoolExecutor):
         token_session = _TokenSessionWithProxy(proxy_ip, proxy_port)
         access_token = vk_api_pool.vk_session.token["access_token"]
 
-        responses = asyncio.run(self._execute_async(requests, access_token, token_session))
+        responses = asyncio.run(self.execute_async(requests, access_token, token_session))
         return responses
 
-    async def _execute_async(self, requests: List[Request], access_token: str, token_session: _TokenSessionWithProxy) -> List[Response]:
+    async def execute_async(self, requests: List[Request], access_token: str, token_session: _TokenSessionWithProxy
+                            ) -> List[Response]:
         pool_executes = []
         req_and_response_async = []
 
@@ -64,12 +65,9 @@ class AsyncVkApiPoolExecutor(VkApiPoolExecutor):
                     else:
                         raise e
 
-            # await pool.execute()
-
         if pool_executes:
             # awaiting left pools
             await asyncio.gather(*pool_executes)
-
         # TODO: uncomment
         # await asyncio.gather(*pool_executes)
         responses = [req.create_response(raw_resp_async) for req, raw_resp_async in req_and_response_async]
