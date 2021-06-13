@@ -15,6 +15,3 @@ class CrawlRunner(ABC):
     @abstractmethod
     def stop(self):
         ...
-
-    def get_tracker(self):
-        return self._tracker

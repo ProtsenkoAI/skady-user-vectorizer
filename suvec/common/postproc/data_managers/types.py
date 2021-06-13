@@ -7,4 +7,4 @@ class UserData(TypedDict):
     groups: Optional[List[Group]]
 
 
-UsersData = Dict[str, UserData]
+UsersData = Dict[int, UserData]

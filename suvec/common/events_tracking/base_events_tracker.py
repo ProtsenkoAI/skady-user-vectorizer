@@ -1,54 +1,36 @@
 from abc import ABC, abstractmethod
-from typing import Optional, List
+from typing import Optional
 import logging
 import sys
 
-from ..executing import ErrorObj
-from ..top_level_types import User, Group
+from ..top_level_types import User
 from ..utils import AbstractSingleton
 
 
 class EventsTracker(ABC, metaclass=AbstractSingleton):
+    # TODO: need tracker checkpoints if robust stats are needed
+
     def __init__(self, log_pth: str):
         logging.basicConfig(filename=log_pth, level="INFO")
         self.logger = logging.getLogger("suvec.vk_api_impl.EventsTrackerLogger")
         self.logger.addHandler(logging.StreamHandler(sys.stdout))  # also print logs to stdout
 
     @abstractmethod
-    def error_occurred(self, error: ErrorObj, msg: Optional[str] = None):
+    def error_occurred(self, description: str):
         ...
 
     @abstractmethod
     def skip_user(self, user: User, msg: Optional[str] = None):
         ...
 
-    def message(self, msg: str):
-        self.logger.info(msg)
-
     @abstractmethod
-    def friends_added(self, user: User, friends: List[User]):
+    def user_parsed(self):
         ...
 
     @abstractmethod
-    def groups_added(self, user: User, groups: List[Group]):
+    def creds_changed(self):
         ...
 
     @abstractmethod
-    def creds_report(self, creds_left, creds_can_be_used, changed):
-        ...
-
-    @abstractmethod
-    def proxy_report(self, proxy_left: int, proxy_left_with_ok_state: int, changed):
-        ...
-
-    @abstractmethod
-    def loop_started(self):
-        ...
-
-    @abstractmethod
-    def loop_ended(self):
-        ...
-
-    @abstractmethod
-    def report_long_term_data_stats(self, users_parsed: int, total_groups: int):
+    def proxy_changed(self):
         ...

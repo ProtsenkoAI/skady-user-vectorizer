@@ -1,13 +1,13 @@
-from vk_api.requests_pool import RequestResult
-from suvec.common.top_level_types import User
-from suvec.common.executing import ResponsesFactory
-from .parsers import FriendsParser, GroupsParser
-from .response import VkApiResponse
+from suvec.common.executing import ResponsesFactoryImpl
+from .parsers import VkApiFriendsParser, VkApiGroupsParser
+from .data_retrieving import VkApiRequestDataRetriever, AioVkRequestDataRetriever
 
 
-class VkApiResponsesFactory(ResponsesFactory):
-    def create_friends_response(self, request_res: RequestResult, user: User):
-        return VkApiResponse(request_result=request_res, user=user, parser=FriendsParser())
+class VkApiResponsesFactory(ResponsesFactoryImpl):
+    def __init__(self):
+        super().__init__(VkApiFriendsParser(), VkApiGroupsParser(), VkApiRequestDataRetriever())
 
-    def create_groups_response(self, request_res: RequestResult, user: User):
-        return VkApiResponse(request_result=request_res, user=user, parser=GroupsParser())
+
+class AioVkResponsesFactory(ResponsesFactoryImpl):
+    def __init__(self):
+        super().__init__(VkApiFriendsParser(), VkApiGroupsParser(), AioVkRequestDataRetriever())

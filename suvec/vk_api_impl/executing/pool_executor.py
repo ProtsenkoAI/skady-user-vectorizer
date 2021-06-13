@@ -3,27 +3,29 @@ from vk_api import VkRequestsPool
 
 from ..session.session_manager import SessionManager
 from suvec.common.requesting import Request
-from suvec.common.executing import Response
-from suvec.common.listen_notify import AccessErrorListener
+from suvec.common.executing import ParseRes
+from suvec.common.executing import ResponsesFactory
 
 
-class VkApiPoolExecutor(AccessErrorListener):
+class VkApiPoolExecutor:
     # TODO: later, if vk will raise speed limit errors, need to throttle requests / manage delays
-    def __init__(self, session_manager: SessionManager, max_pool_size=25):
+    def __init__(self, session_manager: SessionManager, responses_factory: ResponsesFactory, max_pool_size=25):
         self.max_pool_size = max_pool_size
+        self.responses_factory = responses_factory
         self.session_manager = session_manager
 
-    def execute(self, requests: List[Request]) -> List[Response]:
+    def execute(self, requests: List[Request]) -> List[ParseRes]:
         # TODO: need fast check for access error and other errors when should break executing.
         #   Otherwise have large overheads
-        session = self.session_manager.get_session()
-        responses = []
+        session, session_id = self.session_manager.get_next_session()
+        not_executed_requests = []
         for idx, req in enumerate(requests):
             resp_raw = session.method(req.get_method(), values=req.get_request_kwargs())
-            responses.append(req.create_response(resp_raw))
+            not_executed_requests.append((req, resp_raw))
             self._execute_pool_if_needed(session, idx)
 
         self._execute(session)
+        responses = [self.responses_factory.create(req_res, request, session_id) for request, req_res in not_executed_requests]
         return responses
 
     def _execute_pool_if_needed(self, session: VkRequestsPool, idx: int):
@@ -35,5 +37,3 @@ class VkApiPoolExecutor(AccessErrorListener):
         # TODO: handle JSONDecodeError: Expecting value: line 1 column 247645 (char 247644)
         session.execute()
 
-    def access_error_occurred(self, *args, **kwargs):
-        self.session_manager.reset_session_access_error()

@@ -5,8 +5,8 @@ from ..consts import CREDS_BAD_PASSWORD_STATUS
 
 
 class CredsStorage(AuthRecordsStorage):
-    def set_bad_password(self, bad_password_creds: CredsRecord):
-        record = self.get_record_by_id(bad_password_creds.obj_id)
+    def set_bad_password(self, record_id):
+        record = self.get_record_by_id(record_id)
         record.status = CREDS_BAD_PASSWORD_STATUS
         self.dump_records()
 

@@ -48,5 +48,5 @@ class RAMDataManager(DataManager):
                 res[user] = user_data
         return res
 
-    def delete_user(self, user_id: str):
+    def delete_user(self, user_id: int):
         del self.users_data[user_id]

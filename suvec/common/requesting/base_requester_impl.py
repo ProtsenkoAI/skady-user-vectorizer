@@ -9,30 +9,34 @@ from .requester import Requester
 
 
 class BaseRequesterImpl(Requester, AbstractAccessErrorListener):
-    def __init__(self, request_creator: RequestsCreator, max_requests_per_type_per_call: int = 100):
+    def __init__(self, request_creator: RequestsCreator, max_requests_per_call: int = 100):
         self.users_to_friends_request = []
         self.users_to_groups_request = []
         self.request_creator = request_creator
-        self.max_requests_per_type_per_call = max_requests_per_type_per_call
+        self.max_requests_per_call = max_requests_per_call
 
     def get_requests(self) -> List[Request]:
-        return self._request_friends_and_groups()
+        return self.request_friends_and_groups()
 
-    def _request_friends_and_groups(self):
+    def request_friends_and_groups(self):
         requests = []
-        requests += self.create_requests(self.users_to_friends_request, self.request_creator.friends_request)
-        requests += self.create_requests(self.users_to_groups_request, self.request_creator.groups_request)
+        requests += self.create_requests(self.users_to_friends_request, self.request_creator.friends_request,
+                                         self.max_requests_per_call)
+        # Friends requests is first priority, then go groups requests
+        requests_left = self.max_requests_per_call - len(requests)
+        requests += self.create_requests(self.users_to_groups_request, self.request_creator.groups_request,
+                                         requests_left)
         return requests
 
     @abstractmethod
     def add_users(self, users: List[User]):
         ...
 
-    def create_requests(self, users: List[User], request_creator_method: Callable):
+    def create_requests(self, users: List[User], request_creator_method: Callable, max_requests: int):
         requests = []
         while users:
             requests.append(request_creator_method(users.pop(0)))
-            if len(requests) >= self.max_requests_per_type_per_call:
+            if len(requests) >= max_requests:
                 break
         return requests
 
