@@ -29,14 +29,14 @@ class AuthRecordManager(ABC):
 
             # TODO: refactor
             seconds_in_hour = 60 ** 2
-            if record_tester is not None and record.time_since_status_change >= seconds_in_hour * self.min_hours_to_try_resource_again:
-                test_succeed = record_tester((prepared_record, rec_id))
-                record.status_change_time = time.time()
-            else:
-                test_succeed = False
 
-            if self._check_record_is_usable(record) or test_succeed:
+            if self._check_record_is_usable(record):
                 yield prepared_record, rec_id
+
+            elif record_tester is not None and record.time_since_status_change >= seconds_in_hour * self.min_hours_to_try_resource_again:
+                record.status_change_time = time.time()
+                if record_tester((prepared_record, rec_id)):
+                    yield prepared_record, rec_id
         else:
             obtained_records = self.out_of_records_handler.run(first_record_id=self.storage.get_next_record_id())
             if len(obtained_records):

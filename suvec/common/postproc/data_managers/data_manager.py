@@ -1,29 +1,26 @@
 from abc import ABC, abstractmethod
-from typing import List
+from typing import List, Dict
 
-from .types import UsersData
 from suvec.common.top_level_types import User, Group
 
 
 class DataManager(ABC):
+    UserData = dict
+    UsersData = Dict[int, UserData]
+
     @abstractmethod
     def save_user_friends(self, user: User, friends: List[User]):
+        ...
+
+    @abstractmethod
+    def save_user_groups(self, user: User, groups: List[Group]):
         ...
 
     @abstractmethod
     def get_data(self) -> UsersData:
         ...
 
-    @abstractmethod
-    def take_fully_parsed_users(self) -> UsersData:
-        """Returns users that have all needed information"""
-        ...
-
     def delete_user(self, user_id: str):
-        ...
-
-    @abstractmethod
-    def save_user_groups(self, user: User, groups: List[Group]):
         ...
 
     @abstractmethod

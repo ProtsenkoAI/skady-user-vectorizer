@@ -32,8 +32,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             try:
                 error.try_again(captcha_answer)
             except exceptions.VkApiError as exception:
-                error_obj = ErrorObj(code=None, error=exception)
-                self.tracker.error_occurred(error_obj, msg="can't handle auth error")
+                self.tracker.error_occurred("can't handle auth error")
             if session is None:
                 raise ValueError("Captcha error occurred, but you have not passed session object, thus can't auth")
             else:
@@ -47,12 +46,11 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
 
         elif isinstance(error, ProxyError):
             error_obj = ErrorObj(code=None, error=error)
-            self.tracker.error_occurred(error_obj, "The proxy doesn't work. Try to send some request from it."
-                                               f"Auth data: {auth_data}")
-            # TODO: notify bad proxy, otherwise parsing will fail
+            self.tracker.error_occurred("The proxy doesn't work. Try to send some request from it. "
+                                        f"Auth data: {auth_data}")
 
         else:
-            self.tracker.error_occurred(error=wrapped_error, msg=f"Unknown auth error")
+            self.tracker.error_occurred(f"Unknown auth error, error: {wrapped_error.code, wrapped_error.error}")
             raise ValueError("Unknown auth error", error)
 
         error_msg_to_log = f"Auth error: auth_data = {auth_data}"

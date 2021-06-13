@@ -5,11 +5,14 @@ from suvec.common.postproc.data_managers.ram_data_manager import RAMDataManager
 from suvec.common.postproc import ParsedProcessorWithHooks
 from suvec.common.postproc.processor_hooks import HookSuccessParseNotifier
 from suvec.common.top_level_types import User
-from suvec.common.listen_notify import AccessErrorListener
 from suvec.common.requesting import EconomicRequester
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
+from suvec.common.postproc.data_managers.data_long_term_saver import DataLongTermSaver
 from .session.records_managing.terminal_out_of_records import TerminalOutOfProxy, TerminalOutOfCreds
 
+
+from suvec.common.requesting.requested_users_storage import RequestedUsersFileStorage
+from suvec.common.requesting.users_filter import DuplicateUsersFilter
 from .executing.pool_executor import VkApiPoolExecutor
 from .executing.async_pool_executor import AsyncVkApiPoolExecutor, MultiSessionAsyncVkApiPoolExecutor
 from .executing.responses_factory import AioVkResponsesFactory
@@ -22,28 +25,34 @@ from .session.records_managing.creds_manager import CredsManager
 from .session import SessionManager
 
 
-class VkApiCrawlRunner(CrawlRunner, AccessErrorListener):
+class VkApiCrawlRunner(CrawlRunner):
     # TODO: If performance will become a problem, will need to refactor from single-user methods to batch-of-users
     #   methods and use multithreading
     def __init__(self, start_user_id: int, proxy_storage: ProxyStorage, creds_storage: CredsStorage,
+                 long_term_save_pth: str, data_backup_path: str,
                  logs_pth: str = "../logs.txt",
                  tracker=None, requester_max_requests_per_loop=10000,
-                 tracker_response_freq=500, session_request_limit=30000,
+                 tracker_response_freq=500,
                  access_resource_reload_hours=24, use_async=True, nb_sessions=1):
 
         if tracker is None:
             tracker = TerminalEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
-            self.tracker = tracker
+        self.tracker = tracker
 
         self.events_tracker = tracker
         CrawlRunner.__init__(self, tracker=tracker)
 
         requests_creator = VkApiRequestsCreator()
-        self.requester = EconomicRequester(
-            requests_creator, max_requests_per_call=requester_max_requests_per_loop,
-            unused_friends_file_pth="./resources/checkpoints/dumped_friends_requests.txt",
-            unused_groups_file_pth="./resources/checkpoints/dumped_groups_requests.txt"
 
+        friends_req_storage = RequestedUsersFileStorage("./resources/checkpoints/dumped_friends_requests.txt")
+        groups_req_storage = RequestedUsersFileStorage("./resources/checkpoints/dumped_groups_requests.txt")
+        users_filter = DuplicateUsersFilter()
+        self.requester = EconomicRequester(
+            requests_creator,
+            friends_req_storage=friends_req_storage,
+            groups_req_storage=groups_req_storage,
+            users_filter=users_filter,
+            max_requests_per_call=requester_max_requests_per_loop
         )
 
         errors_handler = VkApiErrorsHandler(tracker)
@@ -66,7 +75,8 @@ class VkApiCrawlRunner(CrawlRunner, AccessErrorListener):
             responses_factory = VkApiResponsesFactory()
             self.executor = VkApiPoolExecutor(self.session_manager, responses_factory)
 
-        self.data_manager = RAMDataManager()
+        long_term_saver = DataLongTermSaver(long_term_save_pth, data_backup_path)
+        self.data_manager = RAMDataManager(long_term_saver)
         # TODO: processor shouldn't count requests, move it to requester
         self.parsed_processor = ParsedProcessorWithHooks(self.data_manager, tracker,
                                                          errors_handler=errors_handler)
@@ -74,14 +84,9 @@ class VkApiCrawlRunner(CrawlRunner, AccessErrorListener):
         success_request_notifier_hook = HookSuccessParseNotifier()
         success_request_notifier_hook.register_request_success_listener(self.requester)
 
-        # limit_session_requests_hook = ProcessHookLimitSessionRequests(req_limit=session_request_limit)
-        # limit_session_requests_hook.register_session_limit_listener(self.session_manager)
-
-        # self.parsed_processor.add_process_hook(limit_session_requests_hook)
         self.parsed_processor.add_process_success_hook(success_request_notifier_hook)
 
         errors_handler.register_access_error_listener(self.session_manager)
-        errors_handler.register_access_error_listener(self)
 
         errors_handler.register_bad_password_listener(self.session_manager)
 
@@ -99,10 +104,13 @@ class VkApiCrawlRunner(CrawlRunner, AccessErrorListener):
             parsed = self.executor.execute(requests)
             print("time to get responses", time.time() - start_execute)
             print("responses", len(parsed))
+
+            process_start_time = time.time()
             for parsed_response in parsed:
                 self.parsed_processor.process(parsed_response)
-                if self.has_to_break_parsing:
-                    break
+            process_time = time.time() - process_start_time
+            # TODO: deleted terminatin of processing in case of access error, so need to check performance drop
+            print("time to process", process_time)
 
             self.candidates = self.parsed_processor.get_new_parse_candidates()
             self.tracker.state_report()
@@ -110,5 +118,3 @@ class VkApiCrawlRunner(CrawlRunner, AccessErrorListener):
     def stop(self):
         self.continue_crawling = False
 
-    def access_error_occurred(self, parse_res):
-        self.has_to_break_parsing = True
