@@ -10,6 +10,6 @@ class AccessErrorNotifier:
     def register_access_error_listener(self, listener: AccessErrorListener):
         self.access_error_listeners.append(listener)
 
-    def notify_access_error_listeners(self, parse_res):
+    def notify_access_error_listeners(self, request):
         for listener in self.access_error_listeners:
-            listener.access_error_occurred(parse_res)
+            listener.access_error_occurred(request)

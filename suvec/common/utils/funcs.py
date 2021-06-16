@@ -1,4 +1,4 @@
-from typing import Callable, List, Generator
+from typing import Callable, List, Generator, Optional
 import signal
 
 
@@ -25,9 +25,17 @@ def shield_from_termination(func: Callable):
     return wrapped
 
 
-def split(lst: List, batch_size: int) -> Generator[List, None, None]:
+def split(lst: List, step: Optional[int] = None, parts: Optional[int] = None) -> Generator[List, None, None]:
+    both_none = step is None and parts is None
+    both_not_none = step is not None and parts is not None
+    if both_none or both_not_none:
+        raise ValueError("Choose step OR parts parameter")
+
+    if parts is not None:
+        step = len(lst) // parts
+
     start_idx = 0
     while start_idx < len(lst):
-        yield lst[start_idx: start_idx + batch_size]
-        start_idx += batch_size
+        yield lst[start_idx: start_idx + step]
+        start_idx += step
 

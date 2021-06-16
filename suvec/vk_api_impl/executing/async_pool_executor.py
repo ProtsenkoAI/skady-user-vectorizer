@@ -12,15 +12,15 @@ from suvec.common.executing import ResponsesFactory
 
 
 class AsyncVkApiPoolExecutor(Executor):
-    # TODO: refactor
     def __init__(self, session_manager: SessionManagerImpl, responses_factory: ResponsesFactory, max_pool_size=25):
         self.max_pool_size = max_pool_size
         self.responses_factory = responses_factory
         self.sessions_container = AioVkSessionsContainer(errors_handler=session_manager.get_errors_handler())
         # TODO: Refactor this place (pass allocated sessions, not session_manager)
-        self.create_sessions_container(session_manager, self.sessions_container)
+        self.fill_sessions_container(session_manager, self.sessions_container)
+        self.requests_per_second_limit = 3
 
-    def create_sessions_container(self, session_manager, container):
+    def fill_sessions_container(self, session_manager, container):
         session_manager.allocate_sessions(1, container)
 
     def execute(self, requests: List[Request]) -> List[ParseRes]:
@@ -43,24 +43,31 @@ class AsyncVkApiPoolExecutor(Executor):
 
             execute_res_awaitable = pool.execute()
             pool_executes.append(execute_res_awaitable)
-            if idx % 3 == 2:
-                # waiting till last 3 requests end and sleep to fit into requests limit
-                try:
-                    await asyncio.gather(*pool_executes)
-                    responses.extend(self._create_responses(awaited_requests_and_raw_responses, session_id))
-                    # TODO: can increase speed if will reduce sleep time, catch speed limits and re-send failed requests
-                    await asyncio.sleep(1)
-                except asyncio.TimeoutError:
-                    print("TimeoutError!")
-                    pass
-                finally:
-                    awaited_requests_and_raw_responses = []
-                    pool_executes = []
+            if idx % self.requests_per_second_limit == 0 and idx != 0:
+                responses.extend(await self._gather_responses(awaited_requests_and_raw_responses,
+                                                              pool_executes,
+                                                              session_id))
+                await asyncio.sleep(1)
 
-        if pool_executes:
-            await asyncio.gather(*pool_executes)  # awaiting left pools
-            responses.extend(self._create_responses(awaited_requests_and_raw_responses, session_id))
+        if awaited_requests_and_raw_responses:
+            # last iteration
+            responses.extend(await self._gather_responses(awaited_requests_and_raw_responses,
+                                                          pool_executes,
+                                                          session_id))
         return responses
 
-    def _create_responses(self, awaited_reqs_and_resps, session_id):
-        return [self.responses_factory.create(resp, req, session_id) for req, resp in awaited_reqs_and_resps]
+    async def _gather_responses(self, reqs_and_raw_resps, executes, session_id):
+        """Clears reqs and resps, executes and returns responses"""
+        # executes are awaitable objects. When they'll be awaited, responses objects will be filled with data
+        responses = []
+        try:
+            await asyncio.gather(*[executes.pop(0) for _ in range(len(executes))])
+            while reqs_and_raw_resps:
+                req, resp = reqs_and_raw_resps.pop(0)
+                responses.append(self.responses_factory.create(resp, req, session_id))
+
+        except asyncio.TimeoutError:
+            print("TimeoutError!")
+            pass
+
+        return responses

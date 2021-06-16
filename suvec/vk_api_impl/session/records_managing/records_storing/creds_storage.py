@@ -7,9 +7,11 @@ from ..consts import CREDS_BAD_PASSWORD_STATUS
 
 
 class CredsStorage(AuthRecordsStorage):
+    def prepare_record(self, record):
+        return record.creds
+
     def set_bad_password(self, record):
         record.status = CREDS_BAD_PASSWORD_STATUS
-        record.status_change_time = time.time()
         self.dump_records()
 
     def replace_creds(self, record: CredsRecord, new_email, new_password):

@@ -25,7 +25,7 @@ def run():
         proxy_storage=proxy_storage,
         creds_storage=creds_storage,
         requester_checkpoints_path=checkp_requester,
-        requester_max_requests_per_loop=600,
+        requester_max_requests_per_loop=2000,
         long_term_save_pth=result_file,
         data_backup_path=str(backups_path / "parsed_backup.jsonl"),
         loops_per_checkpoint=3,

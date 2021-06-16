@@ -3,6 +3,7 @@ import asyncio
 
 from suvec.common.requesting import Request
 from suvec.common.executing import ParseRes
+from suvec.common import utils
 
 from .async_pool_executor import AsyncVkApiPoolExecutor
 
@@ -15,8 +16,7 @@ class MultiSessionAsyncVkApiPoolExecutor(AsyncVkApiPoolExecutor):
         self.nb_sessions = nb_sessions
         super().__init__(*args, **kwargs)
 
-    def create_sessions_container(self, session_manager, container):
-        # TODO: refactor relations with parent class
+    def fill_sessions_container(self, session_manager, container):
         session_manager.allocate_sessions(self.nb_sessions, container)
 
     def execute(self, requests: List[Request]) -> List[ParseRes]:
@@ -24,7 +24,7 @@ class MultiSessionAsyncVkApiPoolExecutor(AsyncVkApiPoolExecutor):
 
     async def _multi_session_execute(self, requests: List[Request]) -> List[ParseRes]:
         sessions = self.sessions_container.get()
-        requests_parts = self._split(requests, len(sessions))
+        requests_parts = utils.split(requests, parts=len(sessions))
         execute_results = []
 
         for part, (session_id, session) in zip(requests_parts, sessions):
@@ -37,13 +37,3 @@ class MultiSessionAsyncVkApiPoolExecutor(AsyncVkApiPoolExecutor):
         for part in awaited_execute_results:
             responses.extend(part)
         return responses
-
-    @staticmethod
-    def _split(lst, nb_splits):
-        if len(lst) < nb_splits:
-            return [lst]
-        step_size = len(lst) // nb_splits
-        parts = []
-        for start_idx in range(0, len(lst), step_size):
-            parts.append(lst[start_idx: start_idx + step_size])
-        return parts

@@ -12,8 +12,17 @@ class Record(ABC):
         if status_change_time is None:
             status_change_time = time.time()
         self.obj_id = obj_id
-        self.status = status
+        self._status = status
         self.status_change_time = status_change_time
+
+    @property
+    def status(self):
+        return self._status
+
+    @status.setter
+    def status(self, status):
+        self.status_change_time = time.time()
+        self._status = status
 
     @property
     def time_since_status_change(self):

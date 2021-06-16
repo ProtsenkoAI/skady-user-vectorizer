@@ -22,11 +22,13 @@ def _create_resources_dir(settings_path="./settings.json", force_create: bool = 
     checkpoints_dir = res_dir / "checkpoints"
     access_dir = res_dir / "access"
     backups_dir = res_dir / "backups"
+    test_files_dir = res_dir / "testing"
 
     res_dir.mkdir()
     checkpoints_dir.mkdir()
     access_dir.mkdir()
     backups_dir.mkdir()
+    test_files_dir.mkdir()
 
     result_file = res_dir / res_settings["result_file"]
     result_file.touch()

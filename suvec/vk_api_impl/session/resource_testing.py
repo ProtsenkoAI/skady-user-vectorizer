@@ -1,6 +1,7 @@
 from vk_api import exceptions
 
 from .auth import auth_vk_api
+from .types import SessionData
 
 
 class ResourceTester:
@@ -9,17 +10,17 @@ class ResourceTester:
     # TODO: at the moment do not process situation when test resources got AccessError, but it can be.
     #   need to test them too before testing current creds and proxy
 
-    def __init__(self, sessions_container):
-        # TODO: refactor this infinity-loop connection
+    def __init__(self, sessions_container, errors_handler):
         self.sessions_container = sessions_container
+        self.errors_handler = errors_handler
 
-    def test_cred(self, cred_with_id):
+    def test_cred(self, cred):
         working_cred, working_proxy = self._get_session_data()
-        return self._test_resources(cred_with_id, working_proxy)
+        return self._test_resources(cred, working_proxy)
 
-    def test_proxy(self, proxy_with_id):
+    def test_proxy(self, proxy):
         working_cred, working_proxy = self._get_session_data()
-        return self._test_resources(working_cred, proxy_with_id)
+        return self._test_resources(working_cred, proxy)
 
     def _get_session_data(self):
         _, session_data = self.sessions_container.get()[0]
@@ -27,11 +28,11 @@ class ResourceTester:
         return creds, proxy
 
     def _test_resources(self, creds, proxy):
-        session, session_id = auth_vk_api(creds, proxy)
+        session = auth_vk_api(SessionData(creds=creds, proxy=proxy), self.errors_handler, session_id=-999)
         if session is None:
             return False
         try:
-            res = session.vk_session.method("groups.get", values={"user_ids": 1})
+            res = session.method("groups.get", values={"user_ids": 1})
             return True
         except exceptions.ApiError:
             print("Test failed")

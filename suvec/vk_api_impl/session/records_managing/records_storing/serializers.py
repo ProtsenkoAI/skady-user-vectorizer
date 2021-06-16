@@ -3,6 +3,7 @@ from typing import Dict
 
 from ..session_types import Proxy, Credentials
 from ..records import Record, CredsRecord, ProxyRecord
+from ..consts import RESOURCE_ALREADY_USED, RESOURCE_OK_STATUS
 from .db_types import AuthResourceDict, CredsDict, ProxyDict, UserProxyDict, UserCredsDict
 
 
@@ -24,7 +25,12 @@ class AuthRecordsSerializer(ABC):
         ...
 
     def from_record(self, record: Record) -> AuthResourceDict:
-        kwargs_to_create_res_dict = dict(status=record.status,
+        # don't dump that record is used in this session, just mark this session is ok
+        if record.status != RESOURCE_ALREADY_USED:
+            status = record.status
+        else:
+            status = RESOURCE_OK_STATUS
+        kwargs_to_create_res_dict = dict(status=status,
                                          status_change_time=record.status_change_time)
 
         return self.create_res_dict(record, **kwargs_to_create_res_dict)

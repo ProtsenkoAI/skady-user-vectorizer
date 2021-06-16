@@ -1,4 +1,4 @@
-from typing import Optional
+from typing import Optional, Any
 from abc import ABC, abstractmethod
 import time
 
@@ -26,6 +26,7 @@ class AuthRecordManager(ABC):
             if self._check_record_is_usable(record):
                 self.storage.set_is_used(record)
                 yield self.prepare_record(record)
+
         else:
             obtained_records = self.out_of_records_handler.run(first_record_id=self.storage.get_next_record_id())
             if len(obtained_records):
@@ -43,6 +44,11 @@ class AuthRecordManager(ABC):
         self.storage.set_worked_out(record)
 
     @abstractmethod
+    def prepare_record(self, record) -> Any:
+        """prepare Record object before returning to storage user"""
+        ...
+
+    @abstractmethod
     def test_with_record_tester(self, record_tester, record):
         ...
 
@@ -51,14 +57,14 @@ class AuthRecordManager(ABC):
         ok_status = record.status == RESOURCE_OK_STATUS
         reloaded = (record.status == RESOURCE_WORKED_OUT_STATUS and
                     record.time_since_status_change / seconds_in_hour >= self.hours_for_reload)
+        test_res = False
         if reloaded:
             record.status = RESOURCE_OK_STATUS
         if record.status == RESOURCE_WORKED_OUT_STATUS:
             time_to_check_working = record.time_since_status_change >= seconds_in_hour * self.hours_to_try_again
             if self.record_tester is not None and time_to_check_working:
-                record.status_change_time = time.time()
                 test_res = self.test_with_record_tester(self.record_tester, record)
-        else:
-            test_res = False
+        if test_res:
+            record.status = RESOURCE_OK_STATUS
 
         return ok_status or reloaded or test_res

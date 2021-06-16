@@ -58,7 +58,7 @@ class AioVkSessionsContainer(SessionsContainer):
 
     def add(self, session_data: SessionData):
         super().add(session_data)
-        self.aiovk_sessions[self.last_session_id] = self._create_aio_session(session_data)
+        self.aiovk_sessions[self.last_session_id] = self._create_aio_session(session_data, self.last_session_id)
 
     def get(self):
         return list(self.aiovk_sessions.items())
@@ -67,8 +67,8 @@ class AioVkSessionsContainer(SessionsContainer):
         super().remove(session_id)
         del self.aiovk_sessions[session_id]
 
-    def _create_aio_session(self, session_data: SessionData) -> AioSession:
-        vk_session = auth_vk_api(session_data, self.errors_handler)
+    def _create_aio_session(self, session_data: SessionData, session_id) -> AioSession:
+        vk_session = auth_vk_api(session_data, self.errors_handler, session_id)
         proxy_ip, proxy_port = self._extract_proxy(vk_session)
         token_session = TokenSessionWithProxyMaker(proxy_ip, proxy_port)
         access_token = vk_session.token["access_token"]

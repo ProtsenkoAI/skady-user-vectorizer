@@ -19,7 +19,7 @@ class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListene
         tester_container = SessionsContainer()
         self.sessions_containers: List[SessionsContainer] = []
         self.allocate_sessions(1, tester_container)
-        self.resource_tester = ResourceTester(tester_container)
+        self.resource_tester = ResourceTester(tester_container, self.errors_handler)
 
     def allocate_sessions(self, n: int, container: SessionsContainer):
         for proxy, cred, _ in zip(self.proxy_manager.get_working(), self.creds_manager.get_working(), range(n)):
@@ -31,27 +31,29 @@ class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListene
 
     def access_error_occurred(self, parse_res):
         session_data = self._get_session_data_by_id(parse_res.session_id)
-        creds, proxy = session_data.creds, session_data.proxy
+        if session_data is not None:  # will be None if already deleted this session
+            creds, proxy = session_data.creds, session_data.proxy
 
-        creds_test_succ = self.resource_tester.test_cred(creds)
-        proxy_test_succ = self.resource_tester.test_proxy(proxy)
+            creds_test_succ = self.resource_tester.test_cred(creds)
+            proxy_test_succ = self.resource_tester.test_proxy(proxy)
 
-        if creds_test_succ:
-            self.creds_manager.mark_free(creds)
-        else:
-            self.creds_manager.mark_worked_out(creds)
-        if proxy_test_succ:
-            self.proxy_manager.mark_free(proxy)
-        else:
-            self.proxy_manager.mark_worked_out(proxy)
-        self._replace_session(parse_res.session_data)
+            if creds_test_succ:
+                self.creds_manager.mark_free(creds)
+            else:
+                self.creds_manager.mark_worked_out(creds)
+            if proxy_test_succ:
+                self.proxy_manager.mark_free(proxy)
+            else:
+                self.proxy_manager.mark_worked_out(proxy)
+            self._replace_session(parse_res.session_id)
 
     def bad_password(self, session_id):
         session_data = self._get_session_data_by_id(session_id)
-        creds, proxy = session_data.creds, session_data.proxy
-        self.creds_manager.mark_bad_password(creds)
-        self.proxy_manager.mark_free(proxy)
-        self._replace_session(session_id)
+        if session_data is not None:
+            creds, proxy = session_data.creds, session_data.proxy
+            self.creds_manager.mark_bad_password(creds)
+            self.proxy_manager.mark_free(proxy)
+            self._replace_session(session_id)
 
     def _get_session_data_by_id(self, session_id: int):
         for container in self.sessions_containers:
@@ -62,10 +64,12 @@ class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListene
         for container in self.sessions_containers:
             if container.check_in(session_id):
                 container.remove(session_id)
-
-                creds, proxies = next(self.creds_manager.get_working()), next(self.proxy_manager.get_working())
-                container.add(self._create_session(creds, proxies))
-                break
+                try:
+                    creds, proxies = next(self.creds_manager.get_working()), next(self.proxy_manager.get_working())
+                    container.add(self._create_session(creds=creds, proxy=proxies))
+                    break
+                except StopIteration:
+                    print("have no creds/proxies, don't add new session")
 
     def get_errors_handler(self):
         return self.errors_handler

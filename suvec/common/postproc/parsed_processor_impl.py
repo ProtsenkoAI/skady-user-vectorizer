@@ -42,8 +42,7 @@ class ParsedProcessorImpl(ParsedProcessor):
     def _proc_friends(self, results: FriendsParseRes):
         friends = results.friends
         self.data_manager.save_user_friends(results.request.user, friends)
-        unparsed_friends = self.data_manager.filter_already_seen_users(friends)
-        self.parse_candidates += unparsed_friends
+        self.parse_candidates += friends
         self.tracker.user_parsed()
 
     def _proc_groups(self, results: GroupsParseRes):

@@ -14,18 +14,21 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
     """The class to process errors sent by service (API, website) we work with"""
     # TODO: refactor logging/working with tracker
 
-    # TODO: instead of many if-else, maybe use small objects processing one type of error
+    # TODO: add method for errors not specific to any instrument or operation (JSONDecodeError, RemoteDisconnected, etc)
+
     # TODO: issue with listener-notifier pattern: if we'll make request not from executor (for example, creds tester),
     #   and then process access_error, executor will get notification, despite it has no connection with the request
+
+    # TODO: if 600 responses have access error, the notify_access_error() will be called 600 times, which
+    #  is not a good thing. Can change interfaces to process by batches
     def __init__(self, events_tracker: TerminalEventsTracker):
         BadPasswordNotifier.__init__(self)
         AccessErrorNotifier.__init__(self)
 
         self.tracker = events_tracker
 
-    def auth_error(self, error: exceptions.VkApiError, auth_data: dict):
+    def auth_error(self, error: exceptions.VkApiError, auth_data: dict, session_id: int):
         session = auth_data["session"]
-        session_data = auth_data["session_data"]
         del auth_data["session"]
 
         error_code = getattr(error, "code", None)
@@ -47,7 +50,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             # Funny fact: vk_api can return Bad password even if it's not the problem.
             # One time it returned bad password when we didn't pass User agent in requests session
             # SO if there'll be bugs, consider find REAL root of the problem
-            self.notify_bad_password(session.session_data)
+            self.notify_bad_password(session_id)
 
         elif isinstance(error, ProxyError):
             self.tracker.error_occurred("The proxy doesn't work. Try to send some request from it. "
@@ -62,7 +65,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
 
     def response_error(self, parsed_results: ParseRes):
         if int(parsed_results.error.code) == ACCESS_ERROR:
-            self.notify_access_error_listeners(parsed_results)
+            self.notify_access_error_listeners(parsed_results.request)
 
         elif parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_DENIED]:
             self.tracker.skip_user(user=parsed_results.request.user, msg=f"Bad user (private, blocked, etc)")

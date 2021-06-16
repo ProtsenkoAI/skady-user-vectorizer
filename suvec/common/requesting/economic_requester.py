@@ -27,29 +27,29 @@ class EconomicRequester(BaseRequester, RequestSuccessListener, AccessErrorListen
             self.friends_req_storage.add_user(user)
 
     def get_requests(self) -> List[Request]:
-        users_to_friends_request = self.friends_req_storage.get_users(self.max_requests_per_call)
-        friends_requests = self.create_friends_requests(users_to_friends_request)
+        users_to_friends_request = self.groups_req_storage.get_users(self.max_requests_per_call)
+        groups_requests = self.create_groups_requests(users_to_friends_request)
 
-        users_needed = self.max_requests_per_call - len(friends_requests)
+        users_needed = self.max_requests_per_call - len(groups_requests)
         if users_needed > 0:
-            users_to_groups_request = self.groups_req_storage.get_users(users_needed)
-            groups_requests = self.create_groups_requests(users_to_groups_request)
+            users_to_friends_request = self.friends_req_storage.get_users(users_needed)
+            friends_requests = self.create_friends_requests(users_to_friends_request)
         else:
-            groups_requests = []
+            friends_requests = []
 
-        return friends_requests + groups_requests
+        return groups_requests + friends_requests
 
     def request_succeed(self, user: User, req_type: str):
-        if req_type == "groups":
+        if req_type == "friends":
             self.groups_req_storage.add_user(user)
 
-    def access_error_occurred(self, parse_res):
-        if parse_res.request_type == "friends":
-            self.friends_req_storage.add_user(parse_res.request.user)
-        elif parse_res.request_type == "groups":
-            self.groups_req_storage.add_user(parse_res.request.user)
+    def access_error_occurred(self, request: Request):
+        if request.req_type == "friends":
+            self.friends_req_storage.add_user(request.user)
+        elif request.req_type == "groups":
+            self.groups_req_storage.add_user(request.user)
         else:
-            raise ValueError(f"Unknown type_of_request: {parse_res.request_type}")
+            raise ValueError(f"Unknown type_of_request: {request.req_type}")
 
     def get_checkpoint(self):
         groups_req_data = self.groups_req_storage.get_checkpoint()

@@ -1,4 +1,4 @@
-from typing import List, Tuple
+from typing import List
 import json
 import time
 import os
@@ -37,18 +37,15 @@ class AuthRecordsStorage:
 
     def set_worked_out(self, record: Record):
         record.status = RESOURCE_WORKED_OUT_STATUS
-        record.status_change_time = time.time()
+        self.dump_records()
 
     def set_is_used(self, record: Record):
         record.status = RESOURCE_ALREADY_USED
-        record.status_change_time = time.time()
+        self.dump_records()
 
     def set_is_free(self, record: Record):
         record.state = RESOURCE_OK_STATUS
-        record.status_change_time = time.time()
-
-    def delete_record(self, record: Record):
-        self.records.remove(record)
+        self.dump_records()
 
     def get_record_idx_by_id(self, rec_id: int) -> int:
         for idx, (record, record_id) in enumerate(self.records):
@@ -57,11 +54,11 @@ class AuthRecordsStorage:
 
     def add_record(self, record: Record, allow_duplicates=False):
         if allow_duplicates or not record.is_in(self.records):
-            self.records.append((record, self.get_next_record_id()))
+            self.records.append(record)
         self.dump_records()
 
     def dump_records(self):
-        serialized = [self.serializer.from_record(rec) for (rec, rec_id) in self.records]
+        serialized = [self.serializer.from_record(rec) for rec in self.records]
         with open(self.save_pth, "w") as f:
             json.dump(serialized, f)
 

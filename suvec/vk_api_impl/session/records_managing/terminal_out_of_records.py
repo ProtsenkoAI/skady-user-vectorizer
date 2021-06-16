@@ -11,13 +11,13 @@ from .out_of_records_handler import OutOfRecordsHandler
 
 class TerminalOutOfRecords(OutOfRecordsHandler, ABC):
     def run(self, first_record_id: int) -> List[Record]:
-        print("Oops! Have no working proxies left")
-        print("Please, enter new credentials, or parsing will be terminated")
+        print("Oops! Have no working resources left")
+        print("Please, enter new resources, or parsing will be terminated")
 
         resources = []
         rec_id = first_record_id
         while True:
-            terminate = input("Starting enter new creds, if want to terminate, enter 'T', otherwise N\n")
+            terminate = input("Start enter new resources, if want to terminate, enter 'Y', otherwise N\n")
             if terminate == "Y":
                 return resources
             resources.append(self.receive_input_and_create_record(rec_id))

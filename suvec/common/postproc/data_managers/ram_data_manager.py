@@ -11,8 +11,6 @@ UsersData = Dict[int, UserData]
 
 class RAMDataManager(DataManager):
     def __init__(self, long_term_saver: DataLongTermSaver, dmp_long_term_every: int = 2000):
-        # TODO: at the moment, when dump users to file, miss info about them, so filter_already_seen_users doesn't
-        #   work properly
         self.users_data: UsersData = {}
         self.standard_user_val = lambda: {"friends": None, "groups": None}
         self.cnt_fully_parsed = 0
@@ -53,10 +51,6 @@ class RAMDataManager(DataManager):
     def _check_fully_parsed(self, user_id: int):
         user_data = self.users_data[user_id]
         return user_data["friends"] is not None and user_data["groups"] is not None
-
-    def filter_already_seen_users(self, users: List[User]) -> List[User]:
-        unseen_users = [user for user in users if user.id not in self.users_data]
-        return unseen_users
 
     def get_num_users(self):
         return len(self.users_data)

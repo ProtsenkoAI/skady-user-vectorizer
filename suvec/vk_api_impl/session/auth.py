@@ -7,6 +7,7 @@ from suvec.common.external_errors_handling import ExternalErrorsHandler
 
 def auth_vk_api(session_data: SessionData,
                 errors_handler: ExternalErrorsHandler,
+                session_id,
                 user_agent: str = 'Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0'
                 ) -> Optional[vk_api.VkApi]:
     s = requests.Session()
@@ -21,5 +22,5 @@ def auth_vk_api(session_data: SessionData,
         print("error during auth", e)
         auth_data = {"session_data": session_data,
                      "session": vk_session}
-        errors_handler.auth_error(e, auth_data=auth_data)
+        errors_handler.auth_error(e, auth_data=auth_data, session_id=session_id)
         return None
