@@ -4,7 +4,7 @@ from .auth_record_manager import AuthRecordManager
 
 class ProxyManager(AuthRecordManager):
     def prepare_record(self, record: ProxyRecord):
-        return record.proxy.address
+        return record.proxy
 
-    def send_tracker_reset_message(self, resources_total_cnt: int, usable_resources_left_cnt: int):
-        self.tracker.proxy_report(resources_total_cnt, usable_resources_left_cnt, changed=True)
+    def test_with_record_tester(self, record_tester, proxy):
+        return record_tester.test_proxy(proxy)

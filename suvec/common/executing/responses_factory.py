@@ -5,11 +5,11 @@ from . import ParseRes
 
 
 class ResponsesFactory(ABC):
-    def create(self, req_res: RequestResult, req: Request, session_id) -> ParseRes:
+    def create(self, req_res: RequestResult, req: Request, session_data) -> ParseRes:
         if req.req_type == "friends":
-            return self.create_friends_response(req_res, req, session_id=session_id)
+            return self.create_friends_response(req_res, req, session_id=session_data)
         elif req.req_type == "groups":
-            return self.create_groups_response(req_res, req, session_id=session_id)
+            return self.create_groups_response(req_res, req, session_id=session_data)
         else:
             raise ValueError(f"Invalid req_type: {req.req_type}")
 

@@ -11,6 +11,7 @@ from .request import Request
 class EconomicRequester(BaseRequester, RequestSuccessListener, AccessErrorListener):
     """When user is added, first schedules one type of request and if it succeeds sends all other.
     Also checks that users are unique"""
+
     def __init__(self, *args, friends_req_storage: RequestedUsersFileStorage,
                  groups_req_storage: RequestedUsersFileStorage,
                  users_filter: DuplicateUsersFilter,

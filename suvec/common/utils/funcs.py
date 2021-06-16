@@ -1,4 +1,4 @@
-from typing import Callable
+from typing import Callable, List, Generator
 import signal
 
 
@@ -23,3 +23,11 @@ def shield_from_termination(func: Callable):
         _need_to_stop = True
 
     return wrapped
+
+
+def split(lst: List, batch_size: int) -> Generator[List, None, None]:
+    start_idx = 0
+    while start_idx < len(lst):
+        yield lst[start_idx: start_idx + batch_size]
+        start_idx += batch_size
+

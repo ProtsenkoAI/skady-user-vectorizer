@@ -8,11 +8,11 @@ class CredsManager(AuthRecordManager):
         super().__init__(storage, *args, **kwargs)
 
     def prepare_record(self, record: CredsRecord):
-        return record.creds.email, record.creds.password
+        return record.creds
 
     def mark_bad_password(self, creds_id):
         self.storage: CredsStorage
         self.storage.set_bad_password(creds_id)
 
-    def send_tracker_reset_message(self, resources_total_cnt: int, usable_resources_left_cnt: int):
-        self.tracker.creds_report(resources_total_cnt, usable_resources_left_cnt, changed=True)
+    def test_with_record_tester(self, record_tester, creds):
+        return record_tester.test_creds(creds)

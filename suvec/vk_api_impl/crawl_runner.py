@@ -14,7 +14,8 @@ from .session.records_managing.terminal_out_of_records import TerminalOutOfProxy
 from suvec.common.requesting.requested_users_storage import RequestedUsersFileStorage
 from suvec.common.requesting.users_filter import DuplicateUsersFilter
 from .executing.pool_executor import VkApiPoolExecutor
-from .executing.async_pool_executor import AsyncVkApiPoolExecutor, MultiSessionAsyncVkApiPoolExecutor
+from .executing.async_pool_executor import AsyncVkApiPoolExecutor
+from .executing.mutli_session_async_pool_executor import MultiSessionAsyncVkApiPoolExecutor
 from .executing.responses_factory import AioVkResponsesFactory
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
 from .executing.responses_factory import VkApiResponsesFactory
@@ -22,7 +23,7 @@ from .requesting import VkApiRequestsCreator
 from .errors_handler import VkApiErrorsHandler
 from .session.records_managing.proxy_manager import ProxyManager
 from .session.records_managing.creds_manager import CredsManager
-from .session import SessionManager
+from .session import SessionManagerImpl
 
 
 class VkApiCrawlRunner(CrawlRunner):
@@ -64,12 +65,13 @@ class VkApiCrawlRunner(CrawlRunner):
         creds_manager = CredsManager(creds_storage, tracker, out_of_creds_handler,
                                      hours_for_resource_reload=access_resource_reload_hours)
 
-        self.session_manager = SessionManager(errors_handler, proxy_manager, creds_manager)
+        self.session_manager = SessionManagerImpl(errors_handler, proxy_manager, creds_manager)
         if use_async:
             responses_factory = AioVkResponsesFactory()
             if nb_sessions == 1:
                 self.executor = AsyncVkApiPoolExecutor(self.session_manager, responses_factory)
             else:
+
                 self.executor = MultiSessionAsyncVkApiPoolExecutor(self.session_manager, responses_factory)
         else:
             responses_factory = VkApiResponsesFactory()

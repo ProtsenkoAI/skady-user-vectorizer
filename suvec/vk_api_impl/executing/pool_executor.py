@@ -1,23 +1,26 @@
 from typing import List
 from vk_api import VkRequestsPool
 
-from ..session.session_manager import SessionManager
+from ..session.session_manager_impl import SessionManagerImpl
+from ..session.sessions_containers import VkApiSessionsContainer
+from suvec.common.executing import ResponsesFactory
 from suvec.common.requesting import Request
 from suvec.common.executing import ParseRes
-from suvec.common.executing import ResponsesFactory
+from suvec.common.executing.executor import Executor
 
 
-class VkApiPoolExecutor:
-    # TODO: later, if vk will raise speed limit errors, need to throttle requests / manage delays
-    def __init__(self, session_manager: SessionManager, responses_factory: ResponsesFactory, max_pool_size=25):
+class VkApiPoolExecutor(Executor):
+    # TODO: this component isn't being used now, but it has no unittests, thus it starts to rot.
+    def __init__(self, session_manager: SessionManagerImpl, responses_factory: ResponsesFactory, max_pool_size=25):
         self.max_pool_size = max_pool_size
         self.responses_factory = responses_factory
-        self.session_manager = session_manager
+        self.sessions_container = VkApiSessionsContainer(errors_handler=session_manager.get_errors_handler())
+        session_manager.allocate_sessions(1, self.sessions_container)
 
     def execute(self, requests: List[Request]) -> List[ParseRes]:
         # TODO: need fast check for access error and other errors when should break executing.
         #   Otherwise have large overheads
-        session, session_id = self.session_manager.get_next_session()
+        session_id, session = self.sessions_container.get()[0]
         not_executed_requests = []
         for idx, req in enumerate(requests):
             resp_raw = session.method(req.get_method(), values=req.get_request_kwargs())
@@ -25,7 +28,8 @@ class VkApiPoolExecutor:
             self._execute_pool_if_needed(session, idx)
 
         self._execute(session)
-        responses = [self.responses_factory.create(req_res, request, session_id) for request, req_res in not_executed_requests]
+        responses = [self.responses_factory.create(req_res, request, session_id)
+                     for request, req_res in not_executed_requests]
         return responses
 
     def _execute_pool_if_needed(self, session: VkRequestsPool, idx: int):

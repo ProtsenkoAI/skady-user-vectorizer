@@ -48,7 +48,7 @@ class RequestedUsersFileStorage(RequestedUsersStorage):
             loaded = self._try_to_load_users(self.save_pth, need_to_load)
             self.req_users.extend(loaded)
 
-        res = self.req_users
+        res = self.req_users[:max_nb]
         self.req_users = self.req_users[max_nb:]  # remove returned users
         return res
 
@@ -69,8 +69,10 @@ class RequestedUsersFileStorage(RequestedUsersStorage):
 
     def load_checkpoint(self, checkp_data):
         req_users, unused_users = checkp_data
-        self.req_users.extend(self._create_users(req_users))
         self.unused_users.extend(self._create_users(unused_users))
+        req_users = self._create_users(req_users)
+        for user in req_users:
+            self.add_user(user)
 
     def _get_ids(self, users: List[User]):
         return [user.id for user in users]

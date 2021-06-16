@@ -13,7 +13,6 @@ class UserProxyDict(TypedDict):
 class AuthResourceDict(TypedDict):
     status: str
     status_change_time: int
-    obj_id: int
 
 
 class CredsDict(AuthResourceDict):

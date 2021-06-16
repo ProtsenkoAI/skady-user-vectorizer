@@ -1,3 +1,5 @@
+import logging
+
 from vk_api import exceptions
 from requests.exceptions import ProxyError
 
@@ -10,16 +12,20 @@ from suvec.common.listen_notify import AccessErrorNotifier, BadPasswordNotifier
 
 class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessErrorNotifier):
     """The class to process errors sent by service (API, website) we work with"""
+    # TODO: refactor logging/working with tracker
 
     # TODO: instead of many if-else, maybe use small objects processing one type of error
+    # TODO: issue with listener-notifier pattern: if we'll make request not from executor (for example, creds tester),
+    #   and then process access_error, executor will get notification, despite it has no connection with the request
     def __init__(self, events_tracker: TerminalEventsTracker):
         BadPasswordNotifier.__init__(self)
         AccessErrorNotifier.__init__(self)
 
         self.tracker = events_tracker
 
-    def auth_error(self, error: exceptions.VkApiError, auth_data: dict, session_id):
+    def auth_error(self, error: exceptions.VkApiError, auth_data: dict):
         session = auth_data["session"]
+        session_data = auth_data["session_data"]
         del auth_data["session"]
 
         error_code = getattr(error, "code", None)
@@ -41,11 +47,9 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             # Funny fact: vk_api can return Bad password even if it's not the problem.
             # One time it returned bad password when we didn't pass User agent in requests session
             # SO if there'll be bugs, consider find REAL root of the problem
-            self.tracker.message("Bad password error occurred")
-            self.notify_bad_password(session_id)
+            self.notify_bad_password(session.session_data)
 
         elif isinstance(error, ProxyError):
-            error_obj = ErrorObj(code=None, error=error)
             self.tracker.error_occurred("The proxy doesn't work. Try to send some request from it. "
                                         f"Auth data: {auth_data}")
 
@@ -54,7 +58,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
             raise ValueError("Unknown auth error", error)
 
         error_msg_to_log = f"Auth error: auth_data = {auth_data}"
-        self.tracker.message(msg=error_msg_to_log)
+        logging.error(error_msg_to_log)
 
     def response_error(self, parsed_results: ParseRes):
         if int(parsed_results.error.code) == ACCESS_ERROR:
@@ -65,5 +69,5 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
         else:
             msg = (f"Unknown error occurred: {parsed_results.error.code} "
                    f"User: {parsed_results.request.user}")
-            self.tracker.error_occurred(error=parsed_results.error, msg=msg)
+            self.tracker.error_occurred(msg)
             raise ValueError(msg)
