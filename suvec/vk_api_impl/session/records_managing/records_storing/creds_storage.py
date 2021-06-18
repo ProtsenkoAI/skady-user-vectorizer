@@ -4,9 +4,13 @@ from .storage import AuthRecordsStorage
 from ..records import CredsRecord
 from ..session_types import Credentials
 from ..consts import CREDS_BAD_PASSWORD_STATUS
+from .serializers import CredsRecordsSerializer
 
 
 class CredsStorage(AuthRecordsStorage):
+    def __init__(self, save_pth: str):
+        super().__init__(save_pth, CredsRecordsSerializer())
+
     def prepare_record(self, record):
         return record.creds
 

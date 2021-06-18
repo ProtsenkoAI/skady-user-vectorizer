@@ -1,42 +1,48 @@
 from typing import List
 
 from suvec.common.listen_notify import BadPasswordListener, AccessErrorListener
+from suvec.common.executing import ParseRes
 from .records_managing import ProxyManager, CredsManager
 from .session_manager import SessionManager
-from .records_managing.records import Proxy, Credentials
+from .records_managing.records import CredsRecord, ProxyRecord
 from .resource_testing import ResourceTester
 from .types import SessionData
 from .sessions_containers import SessionsContainer
 
 
 class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListener):
-    # TODO: unittests
-
-    def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager):
+    def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager,
+                 tester: ResourceTester):
+        self._last_session_id = -1
         self.errors_handler = errors_handler
         self.proxy_manager = proxy_manager
         self.creds_manager = creds_manager
-        tester_container = SessionsContainer()
         self.sessions_containers: List[SessionsContainer] = []
-        self.allocate_sessions(1, tester_container)
-        self.resource_tester = ResourceTester(tester_container, self.errors_handler)
+        self.allocate_sessions(1, tester.get_container())
+        self.resource_tester = tester
 
     def allocate_sessions(self, n: int, container: SessionsContainer):
-        for proxy, cred, _ in zip(self.proxy_manager.get_working(), self.creds_manager.get_working(), range(n)):
-            container.add(self._create_session(proxy, cred))
+        # TODO: it's inconvenient to create container every time, but we need to support different container subclass,
+        #   maybe we can find better solution
+        for idx, (proxy, cred) in enumerate(zip(self.proxy_manager.get_working(), self.creds_manager.get_working())):
+            self._last_session_id += 1
+            container.add(self._create_session(proxy, cred), self._last_session_id)
+
+            if idx == n - 1:
+                break
+
         self.sessions_containers.append(container)
 
-    def _create_session(self, proxy: Proxy, creds: Credentials):
+    def _create_session(self, proxy: ProxyRecord, creds: CredsRecord):
         return SessionData(creds, proxy)
 
-    def access_error_occurred(self, parse_res):
+    def access_error_occurred(self, parse_res: ParseRes):
         session_data = self._get_session_data_by_id(parse_res.session_id)
         if session_data is not None:  # will be None if already deleted this session
             creds, proxy = session_data.creds, session_data.proxy
 
-            creds_test_succ = self.resource_tester.test_cred(creds)
-            proxy_test_succ = self.resource_tester.test_proxy(proxy)
-
+            creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
+            proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
             if creds_test_succ:
                 self.creds_manager.mark_free(creds)
             else:
@@ -66,10 +72,12 @@ class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListene
                 container.remove(session_id)
                 try:
                     creds, proxies = next(self.creds_manager.get_working()), next(self.proxy_manager.get_working())
-                    container.add(self._create_session(creds=creds, proxy=proxies))
-                    break
+                    self._last_session_id += 1
+                    container.add(self._create_session(creds=creds, proxy=proxies), self._last_session_id)
                 except StopIteration:
                     print("have no creds/proxies, don't add new session")
+                finally:
+                    break
 
     def get_errors_handler(self):
         return self.errors_handler

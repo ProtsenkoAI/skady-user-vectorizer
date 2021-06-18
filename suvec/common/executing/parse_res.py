@@ -2,7 +2,7 @@ from abc import ABC
 from typing import Optional, List
 
 from suvec.common.top_level_types import User, Group
-from suvec.common.requesting import Request
+from suvec.common.requesting.request import Request
 from .types import ErrorObj
 
 

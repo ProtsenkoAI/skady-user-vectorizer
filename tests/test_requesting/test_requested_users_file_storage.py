@@ -1,14 +1,14 @@
 import unittest
 import os
 import guppy
-import sys
-
 from suvec.common.requesting import RequestedUsersFileStorage
 from suvec.common.top_level_types import User
 from utils import get_resources_path
 
 
 class TestRequestedUsersFileStorage(unittest.TestCase):
+    # TODO: maybe test that doesn't create duplicate users
+
     def setUp(self):
         """Delete existing storage"""
         storage_pth = self._get_storage_pth()
@@ -28,6 +28,7 @@ class TestRequestedUsersFileStorage(unittest.TestCase):
                 memory_bytes_usage = memory_checker.heap().size
                 # memory usage should be enough to store 10 ** 3 ram users and 10 ** 3 users scheduled for dump
                 nb_users_storing = 2 * 10 ** 3
+                # very much memory because of python object overheads, can be more productive if will use np.array
                 bytes_per_user = 36
                 self.assertLess(memory_bytes_usage - memory_usage_before, nb_users_storing * bytes_per_user + 1000)
 

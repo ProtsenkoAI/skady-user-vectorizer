@@ -11,6 +11,10 @@ class UsersFilter(ABC):
 
 
 class DuplicateUsersFilter(UsersFilter):
+
+    # TODO: at the moment costs too much memory per user because of python objects and set memory usage.
+    #   should use numpy arrays/ reduce cost of py objects
+
     def __init__(self):
         self.already_added = set()
 
@@ -27,9 +31,3 @@ class DuplicateUsersFilter(UsersFilter):
 
     def load_checkpoint(self, checkp_data):
         self.already_added.update(checkp_data)
-
-
-if __name__ == "__main__":
-    users_filter = DuplicateUsersFilter()
-    print(users_filter([User(123), User(456)]))
-    print(users_filter([User(789), User(123)]))

@@ -33,8 +33,8 @@ if __name__ == "__main__":
 
     proxies_save_pth, creds_save_pth = utils.get_proxy_and_creds_paths(settings_path)
 
-    proxy_storage = ProxyStorage(str(proxies_save_pth), ProxyRecordsSerializer())
-    creds_storage = CredsStorage(str(creds_save_pth), CredsRecordsSerializer())
+    proxy_storage = ProxyStorage(str(proxies_save_pth))
+    creds_storage = CredsStorage(str(creds_save_pth))
 
     import_webshare_proxy(str(proxy_file_pth), proxy_storage)
     import_vk_accounts_txt(str(accounts_file_pth), creds_storage)

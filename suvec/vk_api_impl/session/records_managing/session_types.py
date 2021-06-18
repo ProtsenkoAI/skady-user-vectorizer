@@ -10,6 +10,9 @@ class Credentials:
     def __eq__(self, other):
         return self.email == other.email and self.password == other.password
 
+    def __repr__(self):
+        return f"creds: {self.email}, {self.password}"
+
 
 class Proxy:
     def __init__(self, address: str):
@@ -21,3 +24,6 @@ class Proxy:
 
     def __eq__(self, other):
         return self.address == other.address
+
+    def __repr__(self):
+        return f"proxy: {self.address}"

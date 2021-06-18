@@ -4,6 +4,10 @@ from typing import List, Dict
 from suvec.common.top_level_types import User, Group
 
 
+UserData = dict
+UsersData = Dict[int, UserData]
+
+
 class DataManager(ABC):
     UserData = dict
     UsersData = Dict[int, UserData]
@@ -21,8 +25,4 @@ class DataManager(ABC):
         ...
 
     def delete_user(self, user_id: str):
-        ...
-
-    @abstractmethod
-    def get_num_users(self):
         ...

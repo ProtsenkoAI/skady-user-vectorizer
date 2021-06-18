@@ -21,9 +21,10 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
 
     # TODO: if 600 responses have access error, the notify_access_error() will be called 600 times, which
     #  is not a good thing. Can change interfaces to process by batches
-    def __init__(self, events_tracker: TerminalEventsTracker):
+    def __init__(self, events_tracker: TerminalEventsTracker, process_captcha=False):
         BadPasswordNotifier.__init__(self)
         AccessErrorNotifier.__init__(self)
+        self.process_captcha = process_captcha
 
         self.tracker = events_tracker
 
@@ -33,8 +34,7 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
 
         error_code = getattr(error, "code", None)
         wrapped_error = ErrorObj(error_code, error)
-        if isinstance(error, exceptions.Captcha):
-            # TODO: at the moment have a lot of crushes because of captcha, maybe need just skip
+        if isinstance(error, exceptions.Captcha) and self.process_captcha:
             print("captcha needed")
             print(f"Captcha url: {error.get_url()}")
             captcha_answer = input("Please enter captcha text: \n")

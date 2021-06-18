@@ -13,7 +13,6 @@ class SessionsContainer:
     """Container with session objects. Sessions can be inserted from session manager"""
     def __init__(self):
         self.sessions_data: Dict[int, SessionData] = {}
-        self.last_session_id = -1
 
     def check_in(self, session_id: int):
         return session_id in self.sessions_data
@@ -21,9 +20,8 @@ class SessionsContainer:
     def remove(self, session_id: int):
         del self.sessions_data[session_id]
 
-    def add(self, session_data: SessionData):
-        self.last_session_id += 1
-        self.sessions_data[self.last_session_id] = session_data
+    def add(self, session_data: SessionData, session_id):
+        self.sessions_data[session_id] = session_data
 
     def get_data(self, session_id):
         """Internal method for errors processing"""
@@ -52,13 +50,13 @@ AioSession = NamedTuple("AioSession", [("session", TokenSessionWithProxyMaker),
 
 class AioVkSessionsContainer(SessionsContainer):
     def __init__(self, *args, errors_handler, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
         self.errors_handler = errors_handler
         self.aiovk_sessions: Dict[int, AioSession] = {}
 
-    def add(self, session_data: SessionData):
-        super().add(session_data)
-        self.aiovk_sessions[self.last_session_id] = self._create_aio_session(session_data, self.last_session_id)
+    def add(self, session_data: SessionData, session_id):
+        super().add(session_data, session_id)
+        self.aiovk_sessions[session_id] = self._create_aio_session(session_data, session_id)
 
     def get(self):
         return list(self.aiovk_sessions.items())
@@ -82,13 +80,13 @@ class AioVkSessionsContainer(SessionsContainer):
 
 class VkApiSessionsContainer(SessionsContainer):
     def __init__(self, *args, errors_handler, **kwargs):
-        super().__init__(*args, **kwargs)
+        super().__init__()
         self.errors_handler = errors_handler
         self.vk_api_sessions: Dict[int, VkRequestsPool] = {}
 
-    def add(self, session_data: SessionData):
-        super().add(session_data)
-        self.vk_api_sessions[self.last_session_id] = self._create_vk_api_pool(session_data)
+    def add(self, session_data: SessionData, session_id):
+        super().add(session_data, session_id)
+        self.vk_api_sessions[session_id] = self._create_vk_api_pool(session_data)
 
     def get(self) -> List[Tuple[int, VkRequestsPool]]:
         return list(self.vk_api_sessions.items())

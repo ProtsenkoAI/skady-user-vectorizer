@@ -2,8 +2,6 @@ import utils
 from suvec.vk_api_impl.crawl_runner_with_checkpoints import VkCrawlRunnerWithCheckpoints
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
-from suvec.vk_api_impl.session.records_managing.records_storing.serializers import ProxyRecordsSerializer, \
-    CredsRecordsSerializer
 
 
 def run():
@@ -15,8 +13,8 @@ def run():
     result_file = utils.get_result_path(settings_path)
     backups_path = utils.get_backups_path(settings_path)
 
-    proxy_storage = ProxyStorage(proxies_save_pth, ProxyRecordsSerializer())
-    creds_storage = CredsStorage(creds_save_pth, CredsRecordsSerializer())
+    proxy_storage = ProxyStorage(proxies_save_pth)
+    creds_storage = CredsStorage(creds_save_pth)
 
     runner = VkCrawlRunnerWithCheckpoints(
         start_user_id="142478661",

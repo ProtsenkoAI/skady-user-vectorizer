@@ -44,7 +44,7 @@ class AuthRecordsStorage:
         self.dump_records()
 
     def set_is_free(self, record: Record):
-        record.state = RESOURCE_OK_STATUS
+        record.status = RESOURCE_OK_STATUS
         self.dump_records()
 
     def get_record_idx_by_id(self, rec_id: int) -> int:

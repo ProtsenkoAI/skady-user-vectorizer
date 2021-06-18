@@ -35,6 +35,9 @@ class Record(ABC):
 
         return False
 
+    def __repr__(self):
+        return f"record_id: {self.obj_id}, status: {self.status}"
+
     @abstractmethod
     def check_same(self, record):
         """Check that both records represent same resource (for example, same proxy address)"""
@@ -49,6 +52,9 @@ class ProxyRecord(Record):
     def check_same(self, record):
         return self.proxy == record.proxy
 
+    def __repr__(self):
+        return f"{self.proxy}, {super().__repr__()}"
+
 
 class CredsRecord(Record):
     def __init__(self, *args, creds: Credentials, **kwargs):
@@ -57,3 +63,6 @@ class CredsRecord(Record):
 
     def check_same(self, record):
         return self.creds == record.creds
+
+    def __repr__(self):
+        return f"{self.creds}, {super().__repr__()}"

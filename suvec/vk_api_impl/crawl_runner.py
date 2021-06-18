@@ -18,6 +18,7 @@ from .executing.async_pool_executor import AsyncVkApiPoolExecutor
 from .executing.mutli_session_async_pool_executor import MultiSessionAsyncVkApiPoolExecutor
 from .executing.responses_factory import AioVkResponsesFactory
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
+from suvec.vk_api_impl.session.resource_testing import ResourceTester
 from .executing.responses_factory import VkApiResponsesFactory
 from .requesting import VkApiRequestsCreator
 from .errors_handler import VkApiErrorsHandler
@@ -29,6 +30,12 @@ from .session import SessionManagerImpl
 class VkApiCrawlRunner(CrawlRunner):
     # TODO: If performance will become a problem, will need to refactor from single-user methods to batch-of-users
     #   methods and use multithreading
+
+    # TODO: separate creating of complex objects and runner to 2 components. First will get all settings and will have
+    #   build methods, second will call objects, register listeners, run crawling
+
+    # TODO: need integration tests with crawl runner and mock components to test that all listen/notify connections
+    #   are set up and work properly
     def __init__(self, start_user_id: int, proxy_storage: ProxyStorage, creds_storage: CredsStorage,
                  long_term_save_pth: str, data_backup_path: str,
                  logs_pth: str = "../logs.txt",
@@ -65,7 +72,8 @@ class VkApiCrawlRunner(CrawlRunner):
         creds_manager = CredsManager(creds_storage, tracker, out_of_creds_handler,
                                      hours_for_resource_reload=access_resource_reload_hours)
 
-        self.session_manager = SessionManagerImpl(errors_handler, proxy_manager, creds_manager)
+        tester = ResourceTester(errors_handler)
+        self.session_manager = SessionManagerImpl(errors_handler, proxy_manager, creds_manager, tester)
         if use_async:
             responses_factory = AioVkResponsesFactory()
             if nb_sessions == 1:
@@ -79,7 +87,7 @@ class VkApiCrawlRunner(CrawlRunner):
 
         long_term_saver = DataLongTermSaver(long_term_save_pth, data_backup_path)
         self.data_manager = RAMDataManager(long_term_saver)
-        # TODO: processor shouldn't count requests, move it to requester
+
         self.parsed_processor = ParsedProcessorWithHooks(self.data_manager, tracker,
                                                          errors_handler=errors_handler)
 
@@ -89,6 +97,7 @@ class VkApiCrawlRunner(CrawlRunner):
         self.parsed_processor.add_process_success_hook(success_request_notifier_hook)
 
         errors_handler.register_access_error_listener(self.session_manager)
+        errors_handler.register_access_error_listener(self.requester, only_request=True)
 
         errors_handler.register_bad_password_listener(self.session_manager)
 

@@ -1,15 +1,15 @@
-from typing import List, Dict
+from typing import List
 import logging
 
 from .data_long_term_saver import DataLongTermSaver
 from suvec.common.top_level_types import User, Group
-from .data_manager import DataManager
-
-UserData = dict
-UsersData = Dict[int, UserData]
+from .data_manager import DataManager, UsersData
 
 
 class RAMDataManager(DataManager):
+    # TODO: dict for every user's data cost a lot of memory, should use NamedTuple
+    # TODO: users_data costs a lot of memory for hashtable
+
     def __init__(self, long_term_saver: DataLongTermSaver, dmp_long_term_every: int = 2000):
         self.users_data: UsersData = {}
         self.standard_user_val = lambda: {"friends": None, "groups": None}
@@ -52,15 +52,17 @@ class RAMDataManager(DataManager):
         user_data = self.users_data[user_id]
         return user_data["friends"] is not None and user_data["groups"] is not None
 
-    def get_num_users(self):
-        return len(self.users_data)
-
     def dump_long_term(self):
-        long_term_data = []
+        # using new dict to free memory
+        long_term_data = {}
+        new_users_data = {}
         for user, data in self.users_data.items():
             if self._check_fully_parsed(user):
-                long_term_data.append((user, data))
-                del self.users_data[user]
+                long_term_data[user] = data
+            else:
+                new_users_data[user] = data
+
+        self.users_data = new_users_data
 
         self.long_term_saver.save(long_term_data)
 

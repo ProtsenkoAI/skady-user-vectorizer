@@ -3,7 +3,7 @@ from abc import ABC, abstractmethod, ABCMeta
 
 class AccessErrorListener(ABC):
     @abstractmethod
-    def access_error_occurred(self, request):
+    def access_error_occurred(self, parse_res):
         ...
 
 

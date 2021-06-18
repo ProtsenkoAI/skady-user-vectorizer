@@ -1,6 +1,7 @@
 from vk_api import exceptions
 
 from .auth import auth_vk_api
+from .sessions_containers import SessionsContainer
 from .types import SessionData
 
 
@@ -10,11 +11,14 @@ class ResourceTester:
     # TODO: at the moment do not process situation when test resources got AccessError, but it can be.
     #   need to test them too before testing current creds and proxy
 
-    def __init__(self, sessions_container, errors_handler):
-        self.sessions_container = sessions_container
+    def __init__(self, errors_handler):
+        self.sessions_container = SessionsContainer()
         self.errors_handler = errors_handler
 
-    def test_cred(self, cred):
+    def get_container(self):
+        return self.sessions_container
+
+    def test_creds(self, cred):
         working_cred, working_proxy = self._get_session_data()
         return self._test_resources(cred, working_proxy)
 

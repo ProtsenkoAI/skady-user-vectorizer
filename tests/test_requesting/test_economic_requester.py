@@ -1,9 +1,13 @@
 import unittest
+import shutil
+import os
 from suvec.common.requesting import EconomicRequester, DuplicateUsersFilter, RequestedUsersFileStorage
 from suvec.common.top_level_types import User
 from suvec.vk_api_impl.requesting import VkApiRequestsCreator
 from suvec.vk_api_impl.requesting.requests import FriendsRequest, GroupsRequest
 from utils import get_resources_path
+
+test_res_pth = get_resources_path("./settings.json") / "testing"
 
 
 class TestEcoRequester(unittest.TestCase):
@@ -34,8 +38,37 @@ class TestEcoRequester(unittest.TestCase):
         self.assertIn(2, groups_request_users)
         self.assertIn(3, friends_request_users)
 
+    def test_low_number_of_not_fully_parsed_users(self):
+        """Makes a lot of loops and checks that requester doesn't generate number of non-fully parsed users larger,
+        than max_requests_per_call param value.
+        Non-fully-parsed users are users with only one requested made - only groups or only friends"""
+        users_groups_req_made, users_friends_req_made = set(), set()
+        users_to_request = [User(usr_id) for usr_id in range(10 ** 5)]
+        add_users_step = 10 ** 4
+
+        max_requests = 500
+        requester = self._create(max_requests)
+
+        while users_to_request:
+            chosen_users = users_to_request[:add_users_step]
+            users_to_request = users_to_request[add_users_step:]
+            requester.add_users(chosen_users)
+            requests = requester.get_requests()
+
+            for request in requests:
+                requester.request_succeed(request.user, request.req_type)
+                if request.req_type == "friends":
+                    users_friends_req_made.add(request.user)
+                else:
+                    users_groups_req_made.add(request.user)
+
+            # users only in one set
+            unpaired_users_nb = len(users_groups_req_made.symmetric_difference(users_friends_req_made))
+
+            self.assertLessEqual(unpaired_users_nb, max_requests)
+
     def test_functional_adding_and_getting_users(self):
-        """Makes few cycles of add_users, get_requests, request_succeeded to imitate real operations"""
+        """Makes few loops of add_users, get_requests, request_succeeded to imitate real operations"""
         requester = self._create()
         some_users = [User(1), User(2), User(3)]
 
@@ -63,14 +96,16 @@ class TestEcoRequester(unittest.TestCase):
             self.assertIsInstance(request, FriendsRequest)
             self.assertIn(request.user, new_users)
 
-    def _create(self):
-        test_res_pth = get_resources_path("./settings.json") / "testing"
+    def _create(self, max_requests_nb: int = 100):
         users_to_friends_req = RequestedUsersFileStorage(test_res_pth / "users_to_friends_request.txt")
         users_to_groups_req = RequestedUsersFileStorage(test_res_pth / "users_to_groups_request.txt")
         requester = EconomicRequester(VkApiRequestsCreator(),
                                       friends_req_storage=users_to_friends_req,
                                       groups_req_storage=users_to_groups_req,
                                       users_filter=DuplicateUsersFilter(),
-                                      max_requests_per_call=100)
+                                      max_requests_per_call=max_requests_nb)
         return requester
 
+    def tearDown(self):
+        shutil.rmtree(test_res_pth)
+        os.mkdir(test_res_pth)

@@ -1,12 +1,12 @@
-from typing import List, Tuple, Dict, Any
+from typing import Dict, Any
 import json
 import shutil
 
+from .data_manager import UsersData
 from suvec.common.utils import shield_from_termination
 
 UserId = int
 UserData = Dict[str, Any]
-UsersData = List[Tuple[UserId, UserData]]
 
 
 class DataLongTermSaver:
@@ -28,7 +28,7 @@ class DataLongTermSaver:
     @shield_from_termination
     def _write_long_term(self, data: UsersData):
         with open(self.save_pth, "a") as f:
-            for user, user_data in data:
+            for user, user_data in data.items():
                 saved_line = json.dumps({"user_id": user, "data": user_data})
                 f.write(saved_line + "\n")
                 self.cnt_saved_data += 1
