@@ -28,7 +28,8 @@ def run():
         data_backup_path=str(backups_path / "parsed_backup.jsonl"),
         loops_per_checkpoint=3,
         use_async=True,
-        nb_sessions=2
+        nb_sessions=2,
+        dmp_long_term_steps=200
     )
     runner.run()
 

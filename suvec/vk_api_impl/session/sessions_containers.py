@@ -73,6 +73,7 @@ class AioVkSessionsContainer(SessionsContainer):
         return AioSession(token_session, access_token, session_data)
 
     def _extract_proxy(self, vk_api_session: vk_api.VkApi) -> Tuple[str, str]:
+        # TODO: process case when auth_vk_api returns None
         requests_session = vk_api_session.http
         proxy = requests_session.proxies["http"]
         return proxy.split(":")

@@ -1,6 +1,7 @@
 import unittest
 import guppy
 import random
+import json
 from typing import Callable, Optional
 
 from suvec.common.postproc.data_managers.ram_data_manager import RAMDataManager, UsersData
@@ -110,6 +111,19 @@ class TestRAMDataManager(unittest.TestCase):
     def test_doesnt_save_user_long_term_twice(self):
         # TODO
         ...
+
+    def test_checkpointing(self):
+        """Gets checkpoint and passes it back to data manager"""
+        data_manager = RAMDataManager(MockLongTermSaver(), dmp_long_term_every=10 ** 8)
+        the_user = User(id=1)
+        data_manager.save_user_groups(the_user, groups=[])
+
+        checkp = data_manager.get_checkpoint()
+        loaded_checkp = json.loads(json.dumps(checkp))
+        data_manager.load_checkpoint(loaded_checkp)
+
+        data_manager.save_user_friends(the_user, friends=[])
+        self.assertEqual(data_manager.cnt_fully_parsed, 1)
 
 
 class MockLongTermSaver:

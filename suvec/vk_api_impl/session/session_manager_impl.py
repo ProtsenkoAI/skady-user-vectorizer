@@ -36,8 +36,8 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
     def _create_session(self, proxy: ProxyRecord, creds: CredsRecord):
         return SessionData(creds, proxy)
 
-    def session_error_occurred(self, parse_res: ParseRes):
-        session_data = self._get_session_data_by_id(parse_res.session_id)
+    def session_error_occurred(self, session_id: int):
+        session_data = self._get_session_data_by_id(session_id)
         if session_data is not None:  # will be None if already deleted this session
             creds, proxy = session_data.creds, session_data.proxy
             creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
@@ -50,7 +50,7 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
                 self.proxy_manager.mark_free(proxy)
             else:
                 self.proxy_manager.mark_worked_out(proxy)
-            self._replace_session(parse_res.session_id)
+            self._replace_session(session_id)
 
     def bad_password(self, session_id):
         session_data = self._get_session_data_by_id(session_id)

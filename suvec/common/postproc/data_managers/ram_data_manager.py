@@ -13,18 +13,13 @@ ArrayUsersData = Dict[int, ArrayUserData]
 
 class RAMDataManager(DataManager):
     # TODO: users_data costs a lot of memory for hashtable, can push fully parsed users to list
+    # TODO: refactor from/to array conversion
 
     def __init__(self, long_term_saver: DataLongTermSaver, dmp_long_term_every: int = 2000):
         self.users_data: ArrayUsersData = {}
         self.cnt_fully_parsed = 0
         self.long_term_saver = long_term_saver
         self.dmp_long_term_every = dmp_long_term_every
-
-    def get_data(self) -> UsersData:
-        return self.users_data
-
-    def set_data(self, data: UsersData):
-        self.users_data = data
 
     def save_user_friends(self, user: User, friends: List[User]):
         if user.id not in self.users_data:
@@ -69,15 +64,32 @@ class RAMDataManager(DataManager):
 
         self.long_term_saver.save(long_term_data)
 
-    def get_checkpoint(self):
+    def get_checkpoint(self) -> UsersData:
         logging.info(f"Number of unpaired users in data_manager checkpoint: {len(self.users_data)}")
-        return self.users_data
+        checkp = []
+        for user, data in self.users_data.items():
+            checkp.append((user, self._from_arr(data)))
+        return dict(checkp)
 
-    def load_checkpoint(self, checkp_data: dict):
-        self.users_data.update(**checkp_data)
+    def load_checkpoint(self, checkp_data: UsersData):
+        for user, user_data in checkp_data.items():
+            friends, groups = user_data["friends"], user_data["groups"]
+            if friends is not None:
+                friends = self._to_arr(friends)
+            if groups is not None:
+                groups = self._to_arr(groups)
+            self.users_data[user] = ArrayUserData(friends, groups)
 
     def _to_arr(self, ids):
         return np.array(ids, dtype=np.int32)
 
     def _from_arr(self, user_data: ArrayUserData) -> UserData:
-        return {"friends": list(user_data.friends), "groups": list(user_data.groups)}
+        friends = user_data.friends
+        groups = user_data.groups
+        if friends is not None:
+            friends = friends.tolist()
+        if groups is not None:
+            groups = groups.tolist()
+
+        res = {"friends": friends, "groups": groups}
+        return res

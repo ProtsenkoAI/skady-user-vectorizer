@@ -18,9 +18,5 @@ class DataManager(ABC):
     def save_user_groups(self, user: User, groups: List[Group]):
         ...
 
-    @abstractmethod
-    def get_data(self) -> UsersData:
-        ...
-
     def delete_user(self, user_id: str):
         ...

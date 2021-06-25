@@ -40,7 +40,8 @@ class VkApiCrawlRunner(CrawlRunner):
                  logs_pth: str = "../logs.txt",
                  tracker=None, requester_max_requests_per_loop=10000,
                  tracker_response_freq=500,
-                 access_resource_reload_hours=1, use_async=True, nb_sessions=1):
+                 access_resource_reload_hours=1, use_async=True, nb_sessions=1,
+                 dmp_long_term_steps=2000):
 
         if tracker is None:
             tracker = TerminalEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
@@ -84,7 +85,7 @@ class VkApiCrawlRunner(CrawlRunner):
             self.executor = VkApiPoolExecutor(self.session_manager, responses_factory)
 
         long_term_saver = DataLongTermSaver(long_term_save_pth, data_backup_path)
-        self.data_manager = RAMDataManager(long_term_saver)
+        self.data_manager = RAMDataManager(long_term_saver, dmp_long_term_every=dmp_long_term_steps)
 
         self.parsed_processor = ParsedProcessorWithHooks(self.data_manager, tracker,
                                                          errors_handler=errors_handler)
