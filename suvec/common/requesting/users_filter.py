@@ -54,7 +54,7 @@ class DuplicateUsersFilter(UsersFilter):
         return np.empty(size, dtype=np.int32)
 
     def get_checkpoint(self):
-        return list(self.already_added)
+        return self.already_added.tolist()
 
     def load_checkpoint(self, checkp_data):
         # Caution: buggy place

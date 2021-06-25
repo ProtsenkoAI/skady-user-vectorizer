@@ -3,6 +3,7 @@ from suvec.common.checkpointing.simple_objects_checkpointer import SimpleObjects
 
 
 class VkCrawlRunnerWithCheckpoints(VkApiCrawlRunner):
+    # TODO: test that creates checkpoints
     def __init__(self, *args, data_resume_checkpoint_save_pth: str,
                  requester_checkpoints_path: str, loops_per_checkpoint: int, **kwargs):
         super().__init__(*args, **kwargs)

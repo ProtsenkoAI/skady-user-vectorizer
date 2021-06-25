@@ -122,6 +122,10 @@ class VkApiCrawlRunner(CrawlRunner):
 
             self.candidates = self.parsed_processor.get_new_parse_candidates()
             self.tracker.state_report()
+            self.end_loop()
+
+    def end_loop(self):
+        pass
 
     def stop(self):
         self.continue_crawling = False
