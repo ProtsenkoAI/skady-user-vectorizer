@@ -21,15 +21,16 @@ class TestRequestedUsersFileStorage(unittest.TestCase):
         memory_usage_before = memory_checker.heap().size
         users_storage = self._create_storage()
 
+        # memory usage should be enough to store 10 ** 3 ram users and 10 ** 3 users scheduled for dump
+        nb_users_storing = 2 * 10 ** 3
+        # very much memory because of python object overheads, can be more productive if will use np.array
+        bytes_per_user = 36
+
         for idx in range(10 ** 6):
             user = User(idx)
             users_storage.add_user(user)
             if idx % 10 ** 5 + 5 == 0:
                 memory_bytes_usage = memory_checker.heap().size
-                # memory usage should be enough to store 10 ** 3 ram users and 10 ** 3 users scheduled for dump
-                nb_users_storing = 2 * 10 ** 3
-                # very much memory because of python object overheads, can be more productive if will use np.array
-                bytes_per_user = 36
                 self.assertLess(memory_bytes_usage - memory_usage_before, nb_users_storing * bytes_per_user + 1000)
 
     def test_get_all_added_users(self):

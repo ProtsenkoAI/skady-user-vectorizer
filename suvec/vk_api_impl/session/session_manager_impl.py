@@ -1,6 +1,6 @@
 from typing import List
 
-from suvec.common.listen_notify import BadPasswordListener, AccessErrorListener
+from suvec.common.listen_notify import SessionErrorListener
 from suvec.common.executing import ParseRes
 from .records_managing import ProxyManager, CredsManager
 from .session_manager import SessionManager
@@ -10,7 +10,7 @@ from .types import SessionData
 from .sessions_containers import SessionsContainer
 
 
-class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListener):
+class SessionManagerImpl(SessionManager, SessionErrorListener):
     def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager,
                  tester: ResourceTester):
         self._last_session_id = -1
@@ -36,11 +36,10 @@ class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListene
     def _create_session(self, proxy: ProxyRecord, creds: CredsRecord):
         return SessionData(creds, proxy)
 
-    def access_error_occurred(self, parse_res: ParseRes):
+    def session_error_occurred(self, parse_res: ParseRes):
         session_data = self._get_session_data_by_id(parse_res.session_id)
         if session_data is not None:  # will be None if already deleted this session
             creds, proxy = session_data.creds, session_data.proxy
-
             creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
             proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
             if creds_test_succ:
@@ -59,6 +58,14 @@ class SessionManagerImpl(SessionManager, BadPasswordListener, AccessErrorListene
             creds, proxy = session_data.creds, session_data.proxy
             self.creds_manager.mark_bad_password(creds)
             self.proxy_manager.mark_free(proxy)
+            self._replace_session(session_id)
+
+    def proxy_error_occurred(self, session_id: int):
+        session_data = self._get_session_data_by_id(session_id)
+        if session_data is not None:
+            creds, proxy = session_data.creds, session_data.proxy
+            self.creds_manager.mark_free(creds)
+            self.proxy_manager.mark_worked_out(proxy)
             self._replace_session(session_id)
 
     def _get_session_data_by_id(self, session_id: int):

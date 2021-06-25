@@ -11,7 +11,7 @@ test_res_pth = get_resources_path("./settings.json") / "testing"
 
 
 class TestEcoRequester(unittest.TestCase):
-    def test_access_error(self):
+    def test_error_processing(self):
         """Test that if access error occurred on user in will be requested again later"""
         requester = self._create()
         some_users = [User(1), User(2), User(3)]
@@ -22,7 +22,7 @@ class TestEcoRequester(unittest.TestCase):
             if request.user.id in [1, 2]:
                 requester.request_succeed(request.user, request.req_type)
             else:
-                requester.access_error_occurred(request)
+                requester.user_unrelated_error(request)
 
         new_requests = requester.get_requests()
         groups_request_users = []

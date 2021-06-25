@@ -32,7 +32,7 @@ def split(lst: List, step: Optional[int] = None, parts: Optional[int] = None) ->
         raise ValueError("Choose step OR parts parameter")
 
     if parts is not None:
-        step = len(lst) // parts
+        step = max(len(lst) // parts, 1)
 
     start_idx = 0
     while start_idx < len(lst):

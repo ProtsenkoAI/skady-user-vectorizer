@@ -26,13 +26,11 @@ class MultiSessionAsyncVkApiPoolExecutor(AsyncVkApiPoolExecutor):
         sessions = self.sessions_container.get()
         requests_parts = utils.split(requests, parts=len(sessions))
         execute_results = []
-
         for part, (session_id, session) in zip(requests_parts, sessions):
             responses = self.execute_async(part, session.access_token, session.session, session_id)
             execute_results.append(responses)
 
         awaited_execute_results = await asyncio.gather(*execute_results)
-
         responses = []
         for part in awaited_execute_results:
             responses.extend(part)

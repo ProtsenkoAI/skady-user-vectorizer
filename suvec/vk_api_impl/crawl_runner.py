@@ -8,7 +8,6 @@ from suvec.common.top_level_types import User
 from suvec.common.requesting import EconomicRequester
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from suvec.common.postproc.data_managers.data_long_term_saver import DataLongTermSaver
-from .session.records_managing.terminal_out_of_records import TerminalOutOfProxy, TerminalOutOfCreds
 
 
 from suvec.common.requesting.requested_users_storage import RequestedUsersFileStorage
@@ -41,7 +40,7 @@ class VkApiCrawlRunner(CrawlRunner):
                  logs_pth: str = "../logs.txt",
                  tracker=None, requester_max_requests_per_loop=10000,
                  tracker_response_freq=500,
-                 access_resource_reload_hours=24, use_async=True, nb_sessions=1):
+                 access_resource_reload_hours=1, use_async=True, nb_sessions=1):
 
         if tracker is None:
             tracker = TerminalEventsTracker(log_pth=logs_pth, report_every_responses_nb=tracker_response_freq)
@@ -65,11 +64,9 @@ class VkApiCrawlRunner(CrawlRunner):
 
         errors_handler = VkApiErrorsHandler(tracker)
 
-        out_of_proxy_handler = TerminalOutOfProxy()
-        out_of_creds_handler = TerminalOutOfCreds()
-        proxy_manager = ProxyManager(proxy_storage, tracker, out_of_proxy_handler,
+        proxy_manager = ProxyManager(proxy_storage, tracker,
                                      hours_for_resource_reload=access_resource_reload_hours)
-        creds_manager = CredsManager(creds_storage, tracker, out_of_creds_handler,
+        creds_manager = CredsManager(creds_storage, tracker,
                                      hours_for_resource_reload=access_resource_reload_hours)
 
         tester = ResourceTester(errors_handler)
@@ -77,10 +74,11 @@ class VkApiCrawlRunner(CrawlRunner):
         if use_async:
             responses_factory = AioVkResponsesFactory()
             if nb_sessions == 1:
-                self.executor = AsyncVkApiPoolExecutor(self.session_manager, responses_factory)
+                self.executor = AsyncVkApiPoolExecutor(self.session_manager, responses_factory, errors_handler)
             else:
 
-                self.executor = MultiSessionAsyncVkApiPoolExecutor(self.session_manager, responses_factory)
+                self.executor = MultiSessionAsyncVkApiPoolExecutor(self.session_manager, responses_factory,
+                                                                   errors_handler)
         else:
             responses_factory = VkApiResponsesFactory()
             self.executor = VkApiPoolExecutor(self.session_manager, responses_factory)
@@ -96,10 +94,8 @@ class VkApiCrawlRunner(CrawlRunner):
 
         self.parsed_processor.add_process_success_hook(success_request_notifier_hook)
 
-        errors_handler.register_access_error_listener(self.session_manager)
-        errors_handler.register_access_error_listener(self.requester, only_request=True)
-
-        errors_handler.register_bad_password_listener(self.session_manager)
+        errors_handler.register_session_error_listener(self.session_manager)
+        errors_handler.register_user_unrelated_listener(self.requester)
 
         self.continue_crawling = True
         self.has_to_break_parsing = False
@@ -120,7 +116,7 @@ class VkApiCrawlRunner(CrawlRunner):
             for parsed_response in parsed:
                 self.parsed_processor.process(parsed_response)
             process_time = time.time() - process_start_time
-            # TODO: deleted terminatin of processing in case of access error, so need to check performance drop
+            # TODO: deleted termination of processing in case of access error, so need to check performance drop
             print("time to process", process_time)
 
             self.candidates = self.parsed_processor.get_new_parse_candidates()
@@ -128,4 +124,3 @@ class VkApiCrawlRunner(CrawlRunner):
 
     def stop(self):
         self.continue_crawling = False
-

@@ -1,6 +1,6 @@
 from typing import List
 
-from ..listen_notify import RequestSuccessListener, AccessErrorListener
+from ..listen_notify import RequestSuccessListener, UserUnrelatedErrorListener
 from .base_requester import BaseRequester
 from ..top_level_types import User
 from .requested_users_storage import RequestedUsersFileStorage
@@ -8,7 +8,7 @@ from .users_filter import DuplicateUsersFilter
 from .request import Request
 
 
-class EconomicRequester(BaseRequester, RequestSuccessListener, AccessErrorListener):
+class EconomicRequester(BaseRequester, RequestSuccessListener, UserUnrelatedErrorListener):
     """When user is added, first schedules one type of request and if it succeeds sends all other.
     Also checks that users are unique"""
 
@@ -43,7 +43,7 @@ class EconomicRequester(BaseRequester, RequestSuccessListener, AccessErrorListen
         if req_type == "friends":
             self.groups_req_storage.add_user(user)
 
-    def access_error_occurred(self, request: Request):
+    def user_unrelated_error(self, request: Request):
         if request.req_type == "friends":
             self.friends_req_storage.add_user(request.user)
         elif request.req_type == "groups":

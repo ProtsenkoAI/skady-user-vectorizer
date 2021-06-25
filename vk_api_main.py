@@ -17,13 +17,13 @@ def run():
     creds_storage = CredsStorage(creds_save_pth)
 
     runner = VkCrawlRunnerWithCheckpoints(
-        start_user_id="142478661",
+        start_user_id=142478661,
         data_resume_checkpoint_save_pth=checkp_data,
         tracker=events_tracker,
         proxy_storage=proxy_storage,
         creds_storage=creds_storage,
         requester_checkpoints_path=checkp_requester,
-        requester_max_requests_per_loop=2000,
+        requester_max_requests_per_loop=200,
         long_term_save_pth=result_file,
         data_backup_path=str(backups_path / "parsed_backup.jsonl"),
         loops_per_checkpoint=3,

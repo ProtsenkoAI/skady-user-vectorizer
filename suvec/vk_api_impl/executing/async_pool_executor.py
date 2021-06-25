@@ -1,6 +1,7 @@
 from typing import List
 import asyncio
 from aiovk.pools import AsyncVkExecuteRequestPool
+from python_socks import ProxyConnectionError
 
 from suvec.common.requesting import Request
 from suvec.common.utils import split
@@ -8,14 +9,17 @@ from suvec.common.executing import ParseRes
 from suvec.common.executing.executor import Executor
 from ..session.session_manager_impl import SessionManagerImpl
 from ..session.sessions_containers import AioVkSessionsContainer, TokenSessionWithProxyMaker
+from ..errors_handler import VkApiErrorsHandler
 from suvec.common.executing import ResponsesFactory
 
 
 class AsyncVkApiPoolExecutor(Executor):
-    def __init__(self, session_manager: SessionManagerImpl, responses_factory: ResponsesFactory, max_pool_size=25):
+    def __init__(self, session_manager: SessionManagerImpl, responses_factory: ResponsesFactory,
+                 errors_handler: VkApiErrorsHandler, max_pool_size=25):
         self.max_pool_size = max_pool_size
         self.responses_factory = responses_factory
         self.sessions_container = AioVkSessionsContainer(errors_handler=session_manager.get_errors_handler())
+        self.errors_handler = errors_handler
         # TODO: Refactor this place (pass allocated sessions, not session_manager)
         self.fill_sessions_container(session_manager, self.sessions_container)
         self.requests_per_second_limit = 3
@@ -33,6 +37,7 @@ class AsyncVkApiPoolExecutor(Executor):
         pool_executes = []
         responses = []
         awaited_requests_and_raw_responses = []
+
         for idx, requests_batch in enumerate(split(requests, self.max_pool_size)):
             # creating new pool every time because it cleans list of executed pools only after response,
             #   thus if we use old pool the pool can be accidentally awaited second time
@@ -44,9 +49,21 @@ class AsyncVkApiPoolExecutor(Executor):
             execute_res_awaitable = pool.execute()
             pool_executes.append(execute_res_awaitable)
             if idx % self.requests_per_second_limit == 0 and idx != 0:
-                responses.extend(await self._gather_responses(awaited_requests_and_raw_responses,
+                try:
+                    # TODO: refactor this try/except
+                    responses.extend(await self._gather_responses(awaited_requests_and_raw_responses,
                                                               pool_executes,
                                                               session_id))
+                except ProxyConnectionError:
+                    # TODO: maybe should call only with unsuccessful requests, if error can occur
+                    #  in the middle of execution
+                    self.errors_handler.proxy_error(requests, session_id)
+                if awaited_requests_and_raw_responses:
+                    # if there are still requests without responses, should add them to requests again
+                    # TODO: refactor
+                    requests.extend([req for req, resp in awaited_requests_and_raw_responses])
+                    awaited_requests_and_raw_responses = []
+
                 await asyncio.sleep(1)
 
         if awaited_requests_and_raw_responses:

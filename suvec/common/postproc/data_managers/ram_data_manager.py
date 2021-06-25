@@ -1,18 +1,21 @@
-from typing import List
+from typing import List, Optional, Dict
+from recordclass import recordclass
 import logging
+import numpy as np
 
 from .data_long_term_saver import DataLongTermSaver
 from suvec.common.top_level_types import User, Group
-from .data_manager import DataManager, UsersData
+from .data_manager import DataManager, UsersData, UserData
+
+ArrayUserData = recordclass("ArrayUserData", [("friends", Optional[np.array]), ("groups", Optional[np.array])])
+ArrayUsersData = Dict[int, ArrayUserData]
 
 
 class RAMDataManager(DataManager):
-    # TODO: dict for every user's data cost a lot of memory, should use NamedTuple
-    # TODO: users_data costs a lot of memory for hashtable
+    # TODO: users_data costs a lot of memory for hashtable, can push fully parsed users to list
 
     def __init__(self, long_term_saver: DataLongTermSaver, dmp_long_term_every: int = 2000):
-        self.users_data: UsersData = {}
-        self.standard_user_val = lambda: {"friends": None, "groups": None}
+        self.users_data: ArrayUsersData = {}
         self.cnt_fully_parsed = 0
         self.long_term_saver = long_term_saver
         self.dmp_long_term_every = dmp_long_term_every
@@ -25,17 +28,17 @@ class RAMDataManager(DataManager):
 
     def save_user_friends(self, user: User, friends: List[User]):
         if user.id not in self.users_data:
-            self.users_data[user.id] = self.standard_user_val()
+            self.users_data[user.id] = ArrayUserData(None, None)
         friends_ids = [friend.id for friend in friends]
-        self.users_data[user.id]["friends"] = friends_ids
+        self.users_data[user.id].friends = self._to_arr(friends_ids)
 
         self._user_parsed(user)
 
     def save_user_groups(self, user: User, groups: List[Group]):
         if user.id not in self.users_data:
-            self.users_data[user.id] = self.standard_user_val()
+            self.users_data[user.id] = ArrayUserData(None, None)
         groups_ids = [group.id for group in groups]
-        self.users_data[user.id]["groups"] = groups_ids
+        self.users_data[user.id].groups = self._to_arr(groups_ids)
 
         self._user_parsed(user)
 
@@ -50,15 +53,15 @@ class RAMDataManager(DataManager):
 
     def _check_fully_parsed(self, user_id: int):
         user_data = self.users_data[user_id]
-        return user_data["friends"] is not None and user_data["groups"] is not None
+        return user_data.friends is not None and user_data.groups is not None
 
     def dump_long_term(self):
-        # using new dict to free memory
+        # using new dict to free memory, otherwise some python internal gc-feature keeps objects in ram
         long_term_data = {}
         new_users_data = {}
         for user, data in self.users_data.items():
             if self._check_fully_parsed(user):
-                long_term_data[user] = data
+                long_term_data[user] = self._from_arr(data)
             else:
                 new_users_data[user] = data
 
@@ -72,3 +75,9 @@ class RAMDataManager(DataManager):
 
     def load_checkpoint(self, checkp_data: dict):
         self.users_data.update(**checkp_data)
+
+    def _to_arr(self, ids):
+        return np.array(ids, dtype=np.int32)
+
+    def _from_arr(self, user_data: ArrayUserData) -> UserData:
+        return {"friends": list(user_data.friends), "groups": list(user_data.groups)}

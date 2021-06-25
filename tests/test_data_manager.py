@@ -1,12 +1,10 @@
 import unittest
 import guppy
-from typing import Callable
+import random
+from typing import Callable, Optional
 
 from suvec.common.postproc.data_managers.ram_data_manager import RAMDataManager, UsersData
 from suvec.common.top_level_types import User, Group
-
-friends_to_save = [User(1), User(2)]
-groups_to_save = [Group(1), Group(2)]
 
 
 class TestRAMDataManager(unittest.TestCase):
@@ -15,6 +13,8 @@ class TestRAMDataManager(unittest.TestCase):
         """
         inspect_was_called = False
         nb_users_saved = 100
+        friends_to_save = self._create_friends()
+        groups_to_save = self._create_groups()
 
         def _inspect_save(save: UsersData):
             nonlocal inspect_was_called
@@ -29,6 +29,7 @@ class TestRAMDataManager(unittest.TestCase):
         data_manager = RAMDataManager(long_term_saver=mock_long_saver, dmp_long_term_every=nb_users_saved)
         for user_id in range(nb_users_saved):
             user = User(user_id)
+
             data_manager.save_user_friends(user, friends_to_save)
             data_manager.save_user_groups(user, groups_to_save)
 
@@ -39,6 +40,8 @@ class TestRAMDataManager(unittest.TestCase):
         data_manager = RAMDataManager(None, dmp_long_term_every=100)
 
         user1, user2, user3, user4 = [User(usr_id) for usr_id in range(4)]
+        friends_to_save = self._create_friends()
+        groups_to_save = self._create_groups()
 
         data_manager.save_user_friends(user1, friends_to_save)
         data_manager.save_user_friends(user2, friends_to_save)
@@ -52,16 +55,12 @@ class TestRAMDataManager(unittest.TestCase):
         data_manager.save_user_groups(user2, groups_to_save)
         self.assertEqual(data_manager.cnt_fully_parsed, 2)
 
-    def test_memory_usage(self):
-        """Adds a lot of users, both fully and non-fully parsed and checks memory usage"""
-        # TODO: split this test
+    def test_deletes_fully_parsed_from_mem(self):
         max_parsed_users_in_ram = 100
-        bytes_per_user = 38
+        groups_to_save = self._create_groups()
+        friends_to_save = self._create_friends()
 
-        def _do_nothing(*args, **kwargs):
-            pass
-
-        data_manager = RAMDataManager(MockLongTermSaver(_do_nothing), dmp_long_term_every=max_parsed_users_in_ram)
+        data_manager = RAMDataManager(MockLongTermSaver(), dmp_long_term_every=max_parsed_users_in_ram)
 
         memory_checker = guppy.hpy()
         memory_usage_before = memory_checker.heap().size
@@ -76,25 +75,51 @@ class TestRAMDataManager(unittest.TestCase):
                 # 1000 bytes is some basic cost without any data
                 self.assertLessEqual(memory_used, 1000)
 
-        start_idx = max_parsed_users_in_ram * 100
-        for not_fully_parsed_idx in range(start_idx, start_idx + 10 ** 3):
-            user = User(not_fully_parsed_idx + start_idx)
+    def test_memory_usage(self):
+        """Adds a lot of users, both fully and non-fully parsed and checks memory usage"""
+        data_manager = RAMDataManager(MockLongTermSaver(), dmp_long_term_every=10 ** 8)
+        memory_checker = guppy.hpy()
+        memory_usage_before = memory_checker.heap().size
+        bytes_per_user = 20
+        nb_friends = 10
+        nb_groups = 10
+        bytes_for_friends = nb_friends * 4
+        bytes_for_groups = nb_groups * 4
+
+        nb_unpaired_users = 10 ** 3
+        for not_fully_parsed_idx in range(nb_unpaired_users):
+            user = User(not_fully_parsed_idx)
 
             if not_fully_parsed_idx % 2:
-                data_manager.save_user_groups(user, groups_to_save)
+                data_manager.save_user_groups(user, self._create_groups(nb_groups))
             else:
-                data_manager.save_user_friends(user, friends_to_save)
+                data_manager.save_user_friends(user, self._create_friends(nb_friends))
 
         memory_used = memory_checker.heap().size - memory_usage_before
 
-        basic_dict_cost = 240
-        hashtable_cost_coef = 1.6
-        self.assertLessEqual(memory_used, hashtable_cost_coef * 10 ** 3 * (bytes_per_user + basic_dict_cost))
+        self.assertLessEqual(memory_used, nb_unpaired_users * (bytes_per_user + bytes_for_friends + bytes_for_groups))
+
+    def _create_friends(self, nb=2):
+        start_idx = random.randint(10 ** 6, 10 ** 7)
+        return [User(usr_id) for usr_id in range(start_idx, start_idx + nb)]
+
+    def _create_groups(self, nb=2):
+        start_idx = random.randint(10 ** 6, 10 ** 7)
+        return [Group(group_id) for group_id in range(start_idx, start_idx + nb)]
+
+    def test_doesnt_save_user_long_term_twice(self):
+        # TODO
+        ...
 
 
 class MockLongTermSaver:
-    def __init__(self, save_callback: Callable):
+    def __init__(self, save_callback: Optional[Callable] = None):
+        if save_callback is None:
+            save_callback = self._do_nothing
         self.callback = save_callback
+
+    def _do_nothing(self, *args, **kwargs):
+        pass
 
     def save(self, data: UsersData):
         self.callback(data)

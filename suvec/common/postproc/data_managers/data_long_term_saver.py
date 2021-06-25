@@ -6,7 +6,7 @@ from .data_manager import UsersData
 from suvec.common.utils import shield_from_termination
 
 UserId = int
-UserData = Dict[str, Any]
+UserData = Dict[UserId, Any]
 
 
 class DataLongTermSaver:

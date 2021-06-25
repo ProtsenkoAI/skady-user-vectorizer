@@ -7,23 +7,24 @@ from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BL
 from suvec.common.executing import ParseRes, ErrorObj
 from suvec.common.events_tracking import TerminalEventsTracker
 from suvec.common.external_errors_handling import ExternalErrorsHandler
-from suvec.common.listen_notify import AccessErrorNotifier, BadPasswordNotifier
+from suvec.common.listen_notify import SessionErrorNotifier, UserUnrelatedErrorNotifier
 
 
-class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessErrorNotifier):
+class VkApiErrorsHandler(ExternalErrorsHandler, SessionErrorNotifier, UserUnrelatedErrorNotifier):
     """The class to process errors sent by service (API, website) we work with"""
     # TODO: refactor logging/working with tracker
 
     # TODO: add method for errors not specific to any instrument or operation (JSONDecodeError, RemoteDisconnected, etc)
 
     # TODO: issue with listener-notifier pattern: if we'll make request not from executor (for example, creds tester),
-    #   and then process access_error, executor will get notification, despite it has no connection with the request
+    #   and then process session_error, executor will get notification, despite it has no connection with the request
 
     # TODO: if 600 responses have access error, the notify_access_error() will be called 600 times, which
     #  is not a good thing. Can change interfaces to process by batches
+
     def __init__(self, events_tracker: TerminalEventsTracker, process_captcha=False):
-        BadPasswordNotifier.__init__(self)
-        AccessErrorNotifier.__init__(self)
+        SessionErrorNotifier.__init__(self)
+        UserUnrelatedErrorNotifier.__init__(self)
         self.process_captcha = process_captcha
 
         self.tracker = events_tracker
@@ -63,9 +64,15 @@ class VkApiErrorsHandler(ExternalErrorsHandler, BadPasswordNotifier, AccessError
         error_msg_to_log = f"Auth error: auth_data = {auth_data}"
         logging.error(error_msg_to_log)
 
+    def proxy_error(self, requests, session_id):
+        self.notify_proxy_error(session_id)
+        for request in requests:
+            self.notify_user_unrelated_error(request)
+
     def response_error(self, parsed_results: ParseRes):
         if int(parsed_results.error.code) == ACCESS_ERROR:
-            self.notify_access_error_listeners(parsed_results.request)
+            self.notify_session_error(parsed_results.session_id)
+            self.notify_user_unrelated_error(parsed_results.request)
 
         elif parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_DENIED]:
             self.tracker.skip_user(user=parsed_results.request.user, msg=f"Bad user (private, blocked, etc)")

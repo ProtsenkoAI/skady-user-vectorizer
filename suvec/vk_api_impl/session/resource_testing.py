@@ -32,11 +32,13 @@ class ResourceTester:
         return creds, proxy
 
     def _test_resources(self, creds, proxy):
+        print("_test_resources", creds, proxy)
         session = auth_vk_api(SessionData(creds=creds, proxy=proxy), self.errors_handler, session_id=-999)
         if session is None:
             return False
         try:
-            res = session.method("groups.get", values={"user_ids": 1})
+            res = session.method("groups.get", values={"user_id": 1})
+            res = session.method("friends.get", values={"user_id": 1})
             return True
         except exceptions.ApiError:
             print("Test failed")

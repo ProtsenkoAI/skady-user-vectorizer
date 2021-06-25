@@ -2,7 +2,7 @@ from typing import List, Callable
 from abc import abstractmethod
 
 from ..top_level_types import User
-from ..listen_notify import AbstractAccessErrorListener
+from ..listen_notify import AbstractSessionErrorListener
 from .request import Request
 from .requests_creator import RequestsCreator
 from .requester import Requester

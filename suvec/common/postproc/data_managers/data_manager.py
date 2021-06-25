@@ -9,8 +9,6 @@ UsersData = Dict[int, UserData]
 
 
 class DataManager(ABC):
-    UserData = dict
-    UsersData = Dict[int, UserData]
 
     @abstractmethod
     def save_user_friends(self, user: User, friends: List[User]):
