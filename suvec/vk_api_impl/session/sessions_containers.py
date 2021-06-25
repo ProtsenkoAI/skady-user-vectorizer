@@ -48,7 +48,12 @@ AioSession = NamedTuple("AioSession", [("session", TokenSessionWithProxyMaker),
                                        ("data", SessionData)])
 
 
+class BadSession(ValueError):
+    """Can't use provided session for some reason"""
+
+
 class AioVkSessionsContainer(SessionsContainer):
+    # TODO: sometimes not-working sessions are added to container, need tests for this situations
     def __init__(self, *args, errors_handler, **kwargs):
         super().__init__()
         self.errors_handler = errors_handler
@@ -59,6 +64,10 @@ class AioVkSessionsContainer(SessionsContainer):
         self.aiovk_sessions[session_id] = self._create_aio_session(session_data, session_id)
 
     def get(self):
+        if len(self.aiovk_sessions.items()) == 0:
+            # TODO: handle it with out of resources components
+            raise RuntimeError("Have no working sessions left")
+
         return list(self.aiovk_sessions.items())
 
     def remove(self, session_id: int):
@@ -67,6 +76,8 @@ class AioVkSessionsContainer(SessionsContainer):
 
     def _create_aio_session(self, session_data: SessionData, session_id) -> AioSession:
         vk_session = auth_vk_api(session_data, self.errors_handler, session_id)
+        if vk_session is None:
+            raise BadSession()
         proxy_ip, proxy_port = self._extract_proxy(vk_session)
         token_session = TokenSessionWithProxyMaker(proxy_ip, proxy_port)
         access_token = vk_session.token["access_token"]

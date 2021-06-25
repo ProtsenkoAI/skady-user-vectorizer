@@ -7,7 +7,7 @@ from .session_manager import SessionManager
 from .records_managing.records import CredsRecord, ProxyRecord
 from .resource_testing import ResourceTester
 from .types import SessionData
-from .sessions_containers import SessionsContainer
+from .sessions_containers import SessionsContainer, BadSession
 
 
 class SessionManagerImpl(SessionManager, SessionErrorListener):
@@ -24,12 +24,16 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
     def allocate_sessions(self, n: int, container: SessionsContainer):
         # TODO: it's inconvenient to create container every time, but we need to support different container subclass,
         #   maybe we can find better solution
-        for idx, (proxy, cred) in enumerate(zip(self.proxy_manager.get_working(), self.creds_manager.get_working())):
+        session_idx = 0
+        for proxy, creds in zip(self.proxy_manager.get_working(), self.creds_manager.get_working()):
             self._last_session_id += 1
-            container.add(self._create_session(proxy, cred), self._last_session_id)
-
-            if idx == n - 1:
-                break
+            try:
+                container.add(self._create_session(proxy, creds), self._last_session_id)
+                if session_idx == n - 1:
+                    break
+                session_idx += 1
+            except BadSession:
+                self._test_and_reset_resources_statuses(creds, proxy)
 
         self.sessions_containers.append(container)
 
@@ -40,17 +44,20 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
         session_data = self._get_session_data_by_id(session_id)
         if session_data is not None:  # will be None if already deleted this session
             creds, proxy = session_data.creds, session_data.proxy
-            creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
-            proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
-            if creds_test_succ:
-                self.creds_manager.mark_free(creds)
-            else:
-                self.creds_manager.mark_worked_out(creds)
-            if proxy_test_succ:
-                self.proxy_manager.mark_free(proxy)
-            else:
-                self.proxy_manager.mark_worked_out(proxy)
+            self._test_and_reset_resources_statuses(creds, proxy)
             self._replace_session(session_id)
+
+    def _test_and_reset_resources_statuses(self, creds, proxy):
+        creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
+        proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
+        if creds_test_succ:
+            self.creds_manager.mark_free(creds)
+        else:
+            self.creds_manager.mark_worked_out(creds)
+        if proxy_test_succ:
+            self.proxy_manager.mark_free(proxy)
+        else:
+            self.proxy_manager.mark_worked_out(proxy)
 
     def bad_password(self, session_id):
         session_data = self._get_session_data_by_id(session_id)

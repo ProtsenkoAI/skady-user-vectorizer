@@ -1,4 +1,4 @@
-from typing import Optional, Any
+from typing import Optional
 from abc import ABC, abstractmethod
 
 from .records import Record
@@ -22,6 +22,7 @@ class AuthRecordManager(ABC):
     def get_working(self, record_tester: Optional[ResourceTester] = None):
         for record in self.storage.get_records():
             if self._check_record_is_usable(record, record_tester):
+                print("yielding record", record)
                 self.storage.set_is_used(record)
                 yield record
 
@@ -32,8 +33,7 @@ class AuthRecordManager(ABC):
                     self.storage.add_record(record)
                 # recursion, so records handler should return empty records if can't obtain them
                 yield from self.get_working()
-            # else:
-            #     raise RuntimeError("Out of records")
+        print("Running out of records and exiting get_working()")
 
     def mark_free(self, record: Record):
         self.storage.set_is_free(record)
@@ -52,7 +52,8 @@ class AuthRecordManager(ABC):
                     record.time_since_status_change / seconds_in_hour >= self.hours_for_reload)
         test_res = False
         if reloaded:
-            record.status = RESOURCE_OK_STATUS
+            self.storage.set_is_free(record)
+
         if record.status == RESOURCE_WORKED_OUT_STATUS:
             time_to_check_working = record.time_since_status_change >= seconds_in_hour * self.hours_to_try_again
             if resource_tester is not None and time_to_check_working:

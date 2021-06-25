@@ -35,7 +35,10 @@ class VkApiErrorsHandler(ExternalErrorsHandler, SessionErrorNotifier, UserUnrela
 
         error_code = getattr(error, "code", None)
         wrapped_error = ErrorObj(error_code, error)
-        if isinstance(error, exceptions.Captcha) and self.process_captcha:
+        if isinstance(error, exceptions.Captcha):
+            if not self.process_captcha:
+                return
+
             print("captcha needed")
             print(f"Captcha url: {error.get_url()}")
             captcha_answer = input("Please enter captcha text: \n")
