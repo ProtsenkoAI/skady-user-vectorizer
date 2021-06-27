@@ -36,20 +36,23 @@ class VkApiErrorsHandler(ExternalErrorsHandler, SessionErrorNotifier, UserUnrela
         error_code = getattr(error, "code", None)
         wrapped_error = ErrorObj(error_code, error)
         if isinstance(error, exceptions.Captcha):
-            if not self.process_captcha:
-                return
-
-            print("captcha needed")
-            print(f"Captcha url: {error.get_url()}")
-            captcha_answer = input("Please enter captcha text: \n")
-            try:
-                error.try_again(captcha_answer)
-            except exceptions.VkApiError as exception:
-                self.tracker.error_occurred("can't handle auth error")
-            if session is None:
-                raise ValueError("Captcha error occurred, but you have not passed session object, thus can't auth")
+            if self.process_captcha:
+                print("captcha needed")
+                print(f"Captcha url: {error.get_url()}")
+                captcha_answer = input("Please enter captcha text: \n")
+                try:
+                    error.try_again(captcha_answer)
+                except exceptions.VkApiError as exception:
+                    self.tracker.error_occurred("can't handle auth error")
+                if session is None:
+                    raise ValueError("Captcha error occurred, but you have not passed session object, thus can't auth")
+                else:
+                    session.auth()
             else:
-                session.auth()
+                # TODO: at the moment marking proxy as bad if captcha error, but it's likely that only *pair* of proxy
+                #   and creds causes captcha, maybe we can use proxy with different creds and should process it properly
+                self.notify_proxy_error(session_id)
+                
         elif isinstance(error, exceptions.BadPassword):
             # Funny fact: vk_api can return Bad password even if it's not the problem.
             # One time it returned bad password when we didn't pass User agent in requests session

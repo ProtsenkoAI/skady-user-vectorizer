@@ -10,6 +10,8 @@ from .sessions_containers import SessionsContainer, BadSession
 
 
 class SessionManagerImpl(SessionManager, SessionErrorListener):
+    # TODO: (checked logs) sometimes we mark session as bad because of Captcha needed, then test creds and proxy,
+    #   and both of them succeed. Thus, we maybe should mark THE PAIR as bad, but not resources separately
     def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager,
                  tester: ResourceTester):
         self._last_session_id = -1
@@ -36,7 +38,9 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
                 session_idx += 1
 
             except BadSession:
-                self._test_and_reset_resources_statuses(creds, proxy)
+                pass
+                # do nothing, it's processed by errors handler
+                # self._handle_bad_session(creds, proxy, e)
 
         self.sessions_containers.append(container)
 
@@ -51,13 +55,18 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
             self._replace_session(session_id)
 
     def _test_and_reset_resources_statuses(self, creds, proxy):
+        self._test_and_reset_creds_status(creds)
+        self._test_and_reset_proxy_status(proxy)
+
+    def _test_and_reset_creds_status(self, creds):
         creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
-        proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
-        print("tester results", creds_test_succ, proxy_test_succ)
         if creds_test_succ:
             self.creds_manager.mark_free(creds)
         else:
             self.creds_manager.mark_worked_out(creds)
+
+    def _test_and_reset_proxy_status(self, proxy):
+        proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
         if proxy_test_succ:
             self.proxy_manager.mark_free(proxy)
         else:
@@ -99,8 +108,9 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
                             self._last_session_id += 1
                             break
                         except BadSession:
-                            print("bad session", creds, proxies)
-                            self._test_and_reset_resources_statuses(creds, proxies)
+                            pass
+                            # Do nothing, it's handled by errors_handler
+                            # self._handle_bad_session(creds, proxies, e)
 
                     except StopIteration:
                         print("have no creds/proxies, don't add new session")
