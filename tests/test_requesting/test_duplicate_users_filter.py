@@ -53,6 +53,31 @@ class TestDuplicateUsersFilter(unittest.TestCase):
         # print(f"Time to filter {nb_users} users: {time_to_filt} s")
         self.assertLessEqual(time_to_filt, nb_users / users_per_sec)
 
+    def test_checkpointing(self):
+        """Checkpoints filter, loads from checkpoint and checks that it works properly"""
+        nb_users = 10 ** 2
+        users_filt = DuplicateUsersFilter()
+        some_users = self._create_users(end=nb_users)
+
+        users_filtered_before_checkp = users_filt(some_users)
+
+        checkpoint = users_filt.get_checkpoint()
+        del users_filt
+        new_users_filt = DuplicateUsersFilter()
+        new_users_filt.load_checkpoint(checkpoint)
+
+        new_users = self._create_users(start=nb_users, end=2 * nb_users)
+        new_filtered_users = new_users_filt(new_users)
+
+        final_users_to_check_that_checkp_worked = self._create_users(start=0, end=3 * nb_users)
+        final_users_filtered = new_users_filt(final_users_to_check_that_checkp_worked)
+
+        all_filtered_before = [*users_filtered_before_checkp, *new_filtered_users]
+        for user in final_users_filtered:
+            self.assertNotIn(user, all_filtered_before)
+
+        self.assertEqual(len(final_users_filtered), nb_users)  # check that didn't filtered not-met-before users
+
     def _create_users(self, start=0, end=10 ** 3):
         start = int(start)
         end = int(end)

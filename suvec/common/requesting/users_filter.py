@@ -51,13 +51,15 @@ class DuplicateUsersFilter(UsersFilter):
     def _create_new_arr(self, size: Optional[int] = None):
         if size is None:
             size = self.expansion_size
-        return np.empty(size, dtype=np.int32)
+        return np.full(size, -1, dtype=np.int32)
 
     def get_checkpoint(self):
-        return self.already_added.tolist()
+        return self.already_added.tolist(), self.last_idx
 
     def load_checkpoint(self, checkp_data):
         # Caution: buggy place
         # TODO: possibility of loading checkpoint at the middle of work, not at the start can cause bugs, maybe can
         #   replace with object creator @classmethod all load_checkpoint() functions
-        self._add(np.array(checkp_data))
+        data, idx = checkp_data
+        self._add(np.array(data))
+        self.last_idx = idx

@@ -65,6 +65,44 @@ class TestSessionManagerImpl(unittest.TestCase):
         new_session_id, new_session = cont.get().copy()[0]
         self.assertEqual(new_session, bad_session)
 
+    def test_can_reuse_worked_out(self):
+        """Marks resources as bad, but then tests them and marks as good again. This tests checks that
+        session manager can retrieve same resources infinitely and tries to check them, thus reusing old resources in
+        production"""
+        session_manager = self._create(tester_fill_value=True)
+        container = SessionsContainer()
+        session_manager.allocate_sessions(1, container)
+
+        for _ in range(500):
+            sess_id, _ = container.get()[0]
+            session_manager.session_error_occurred(sess_id)
+
+    def test_stops_add_sessions_if_have_no_proxies(self):
+        """Marking all proxies as bad and check that at some moment raises error"""
+        session_manager = self._create(tester_fill_value=True)
+        container = SessionsContainer()
+        session_manager.allocate_sessions(1, container)
+
+        with self.assertRaises(RuntimeError):
+            for _ in range(500):
+                sess_id, _ = container.get()[0]
+                session_manager.proxy_error_occurred(sess_id)
+
+    def test_allocated_sessions_are_unique(self):
+        nb_sessions = 8
+
+        session_manager = self._create()
+        container = SessionsContainer()
+        session_manager.allocate_sessions(nb_sessions, container)
+
+        sessions = container.get()
+        met_sessions_data = []
+
+        for session_id, session in sessions:
+            sess_data = session.proxy.proxy, session.creds.creds
+            self.assertNotIn(sess_data, met_sessions_data)
+            met_sessions_data.append(sess_data)
+
     def _create(self, tester_fill_value=False):
         # TODO: maybe we can create session_manager easier? It becomes real problem to create all this stuff
         proxies_storage = ProxyStorage(str(testing_proxies_pth))

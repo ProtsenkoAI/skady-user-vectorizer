@@ -4,8 +4,6 @@
 import utils
 from suvec.vk_api_impl.session.records_managing.resources_import import WebshareFileProxyImporter, VkFileCredsImporter
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
-from suvec.vk_api_impl.session.records_managing.records_storing.serializers import ProxyRecordsSerializer, \
-    CredsRecordsSerializer
 
 
 def import_webshare_proxy(webshare_txt_pth: str, proxy_storage: ProxyStorage):
@@ -28,7 +26,7 @@ if __name__ == "__main__":
     settings_path = "./settings.json"
     res_path = utils.get_resources_path(settings_path)
 
-    proxy_file_pth = res_path / "other" / "webshare_proxy.txt"
+    proxy_file_pth = res_path / "other" / "Webshare-250.txt"
     accounts_file_pth = res_path / "other" / "vk_accounts.txt"
 
     proxies_save_pth, creds_save_pth = utils.get_proxy_and_creds_paths(settings_path)

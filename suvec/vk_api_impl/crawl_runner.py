@@ -79,7 +79,7 @@ class VkApiCrawlRunner(CrawlRunner):
             else:
 
                 self.executor = MultiSessionAsyncVkApiPoolExecutor(self.session_manager, responses_factory,
-                                                                   errors_handler)
+                                                                   errors_handler, nb_sessions=nb_sessions)
         else:
             responses_factory = VkApiResponsesFactory()
             self.executor = VkApiPoolExecutor(self.session_manager, responses_factory)

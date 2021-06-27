@@ -1,7 +1,6 @@
 from typing import List
 
 from suvec.common.listen_notify import SessionErrorListener
-from suvec.common.executing import ParseRes
 from .records_managing import ProxyManager, CredsManager
 from .session_manager import SessionManager
 from .records_managing.records import CredsRecord, ProxyRecord
@@ -18,6 +17,7 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
         self.proxy_manager = proxy_manager
         self.creds_manager = creds_manager
         self.sessions_containers: List[SessionsContainer] = []
+        self.resource_tester = None  # placing here otherwise allocate_sessions will not work
         self.allocate_sessions(1, tester.get_container())
         self.resource_tester = tester
 
@@ -25,13 +25,16 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
         # TODO: it's inconvenient to create container every time, but we need to support different container subclass,
         #   maybe we can find better solution
         session_idx = 0
-        for proxy, creds in zip(self.proxy_manager.get_working(), self.creds_manager.get_working()):
+        for proxy, creds in zip(self.proxy_manager.get_working(self.resource_tester),
+                                self.creds_manager.get_working(self.resource_tester)):
             self._last_session_id += 1
+            session = self._create_session(proxy, creds)
             try:
-                container.add(self._create_session(proxy, creds), self._last_session_id)
+                container.add(session, self._last_session_id)
                 if session_idx == n - 1:
                     break
                 session_idx += 1
+
             except BadSession:
                 self._test_and_reset_resources_statuses(creds, proxy)
 
@@ -50,6 +53,7 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
     def _test_and_reset_resources_statuses(self, creds, proxy):
         creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
         proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
+        print("tester results", creds_test_succ, proxy_test_succ)
         if creds_test_succ:
             self.creds_manager.mark_free(creds)
         else:
@@ -81,17 +85,30 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
                 return container.get_data(session_id)
 
     def _replace_session(self, session_id: int):
+        # TODO: refactor try/except
         for container in self.sessions_containers:
             if container.check_in(session_id):
                 container.remove(session_id)
-                try:
-                    creds, proxies = next(self.creds_manager.get_working()), next(self.proxy_manager.get_working())
-                    self._last_session_id += 1
-                    container.add(self._create_session(creds=creds, proxy=proxies), self._last_session_id)
-                except StopIteration:
-                    print("have no creds/proxies, don't add new session")
-                finally:
-                    break
+                working_creds = self.creds_manager.get_working(self.resource_tester)
+                working_proxies = self.proxy_manager.get_working(self.resource_tester)
+                while True:
+                    try:
+                        creds, proxies = next(working_creds), next(working_proxies)
+                        try:
+                            container.add(self._create_session(creds=creds, proxy=proxies), self._last_session_id)
+                            self._last_session_id += 1
+                            break
+                        except BadSession:
+                            print("bad session", creds, proxies)
+                            self._test_and_reset_resources_statuses(creds, proxies)
+
+                    except StopIteration:
+                        print("have no creds/proxies, don't add new session")
+                        raise RuntimeError("Out of session resources")
+                break
+
+        else:
+            raise RuntimeError(f"Session id {session_id} was not found in containers")
 
     def get_errors_handler(self):
         return self.errors_handler

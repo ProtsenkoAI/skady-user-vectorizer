@@ -2,6 +2,7 @@ from typing import List
 import asyncio
 from aiovk.pools import AsyncVkExecuteRequestPool
 from python_socks import ProxyConnectionError
+from aiohttp import client_exceptions
 
 from suvec.common.requesting import Request
 from suvec.common.utils import split
@@ -79,12 +80,17 @@ class AsyncVkApiPoolExecutor(Executor):
         responses = []
         try:
             await asyncio.gather(*[executes.pop(0) for _ in range(len(executes))])
+            # TODO: need to try to extract responses whose execute() didn't raised errors
             while reqs_and_raw_resps:
                 req, resp = reqs_and_raw_resps.pop(0)
                 responses.append(self.responses_factory.create(resp, req, session_id))
 
         except asyncio.TimeoutError:
             print("TimeoutError!")
+            pass
+        except client_exceptions.ContentTypeError as e:
+            # TODO: log, process in proper way
+            print("Content Type Error:", e)
             pass
 
         return responses

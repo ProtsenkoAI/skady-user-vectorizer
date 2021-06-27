@@ -55,7 +55,7 @@ class AuthRecordsStorage:
     def add_record(self, record: Record, allow_duplicates=False):
         if allow_duplicates or not record.is_in(self.records):
             self.records.append(record)
-        self.dump_records()
+            self.dump_records()
 
     def dump_records(self):
         serialized = [self.serializer.from_record(rec) for rec in self.records]
