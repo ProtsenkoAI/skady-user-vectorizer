@@ -51,8 +51,9 @@ class VkApiErrorsHandler(ExternalErrorsHandler, SessionErrorNotifier, UserUnrela
             else:
                 # TODO: at the moment marking proxy as bad if captcha error, but it's likely that only *pair* of proxy
                 #   and creds causes captcha, maybe we can use proxy with different creds and should process it properly
+                print("captcha error, notifying proxy error")
                 self.notify_proxy_error(session_id)
-                
+
         elif isinstance(error, exceptions.BadPassword):
             # Funny fact: vk_api can return Bad password even if it's not the problem.
             # One time it returned bad password when we didn't pass User agent in requests session

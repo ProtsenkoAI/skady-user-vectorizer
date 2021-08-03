@@ -7,6 +7,7 @@ from .records_managing.records import CredsRecord, ProxyRecord
 from .resource_testing import ResourceTester
 from .types import SessionData
 from .sessions_containers import SessionsContainer, BadSession
+from .records_managing.consts import RESOURCE_ALREADY_USED
 
 
 class SessionManagerImpl(SessionManager, SessionErrorListener):
@@ -38,9 +39,7 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
                 session_idx += 1
 
             except BadSession:
-                pass
-                # do nothing, it's processed by errors handler
-                # self._handle_bad_session(creds, proxy, e)
+                self._handle_bad_session(creds, proxy)
 
         self.sessions_containers.append(container)
 
@@ -108,9 +107,7 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
                             self._last_session_id += 1
                             break
                         except BadSession:
-                            pass
-                            # Do nothing, it's handled by errors_handler
-                            # self._handle_bad_session(creds, proxies, e)
+                            self._handle_bad_session(creds, proxies)
 
                     except StopIteration:
                         print("have no creds/proxies, don't add new session")
@@ -119,6 +116,17 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
 
         else:
             raise RuntimeError(f"Session id {session_id} was not found in containers")
+
+    def _handle_bad_session(self, creds, proxies):
+        # TODO: write tests, buggy place
+        print("handling bad session", "creds status", creds.status, "proxy status", proxies.status)
+        assert creds.status == RESOURCE_ALREADY_USED
+        assert proxies.status == RESOURCE_ALREADY_USED
+        # if creds.status == RESOURCE_ALREADY_USED:
+        self.creds_manager.mark_free(creds)
+        self.proxy_manager.mark_worked_out(proxies)
+        # if proxies.status == RESOURCE_ALREADY_USED:
+        #     self.proxy_manager.mark_free(proxies)
 
     def get_errors_handler(self):
         return self.errors_handler

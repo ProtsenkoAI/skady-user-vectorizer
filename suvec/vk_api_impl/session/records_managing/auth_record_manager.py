@@ -60,9 +60,7 @@ class AuthRecordManager(ABC):
             print("Conducting test on record", record)
             test_success = self.test_with_record_tester(resource_tester, record)
             if test_success:
-                print("test succeeded")
                 self.storage.set_is_free(record)
             else:
-                print("test failed")
                 self.storage.set_worked_out(record)
         return ok_status or test_success

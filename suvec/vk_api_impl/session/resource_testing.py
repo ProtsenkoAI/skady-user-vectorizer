@@ -4,6 +4,7 @@ from .auth import auth_vk_api
 from .sessions_containers import SessionsContainer
 from suvec.common.listen_notify import SessionErrorNotifier
 from .types import SessionData
+from .records_managing.consts import RESOURCE_WORKED_OUT_STATUS
 
 
 class ResourceTester(SessionErrorNotifier):
@@ -55,6 +56,7 @@ class ResourceTester(SessionErrorNotifier):
         return test_success
 
     def _test_own_resources(self):
+        print("testing own resources")
         own_creds, own_proxy = self._get_session_data()
         test_res = self._test_resources(own_creds, own_proxy)
         if not test_res:
@@ -69,11 +71,14 @@ class ResourceTester(SessionErrorNotifier):
     def _test_resources(self, creds, proxy):
         session = auth_vk_api(SessionData(creds=creds, proxy=proxy), self.errors_handler, session_id=-999)
         if session is None:
+            print(f"changing {proxy.obj_id} proxy status to worked out")
+            proxy.status = RESOURCE_WORKED_OUT_STATUS
             return False
         try:
             res = session.method("groups.get", values={"user_id": 1})
             res = session.method("friends.get", values={"user_id": 1})
+            print("Test succeeded")
             return True
         except exceptions.ApiError as e:
-            print("Test failed")
+            print("Test failed, error:", e)
             return False
