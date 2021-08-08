@@ -13,6 +13,13 @@ from .records_managing.consts import RESOURCE_ALREADY_USED
 class SessionManagerImpl(SessionManager, SessionErrorListener):
     # TODO: (checked logs) sometimes we mark session as bad because of Captcha needed, then test creds and proxy,
     #   and both of them succeed. Thus, we maybe should mark THE PAIR as bad, but not resources separately
+
+    # TODO: control number of authorizations on credentials and proxies. Captcha error occurs if ~ > 20 for creds from
+    #   different proxies is made or ~ 50 authorizations from proxies are made
+
+    # TODO: note that repeated authorizations of pair are not blocked by captcha
+
+    # TODO: separate access error managing for friends and groups requests
     def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager,
                  tester: ResourceTester):
         self._last_session_id = -1

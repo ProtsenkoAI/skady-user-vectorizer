@@ -9,6 +9,7 @@ from suvec.common.top_level_types import User, Group
 
 
 class TestRAMDataManager(unittest.TestCase):
+    # TODO: test backups are made
     def test_dumps_only_fully_parsed_users(self):
         """Adds some users, gets long term save and ensures that the save contains only users with all needed data
         """

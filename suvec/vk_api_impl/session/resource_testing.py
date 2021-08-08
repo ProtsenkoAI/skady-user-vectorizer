@@ -13,6 +13,9 @@ class ResourceTester(SessionErrorNotifier):
     # TODO: Do not have normal interface to replace working session of tester with session_manager, so using crutches
     #   in test_creds() and test_proxies(). Needs refactoring
 
+    # TODO: if auth from 1 proxy more frequent than 1 auth per second, captcha error is raised.
+    #   need to prevent this situation
+
     def __init__(self, errors_handler, check_own_resources_every=5):
         """
         :param check_own_resources_every: if test fails, increases count for proxy or credential, if n test are failed

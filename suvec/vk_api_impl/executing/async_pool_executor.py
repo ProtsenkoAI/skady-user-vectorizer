@@ -15,6 +15,9 @@ from suvec.common.executing import ResponsesFactory
 
 
 class AsyncVkApiPoolExecutor(Executor):
+    # TODO: if caught access error, need to stop requesting (for the errored requests type) and change requests to
+    #   not-banned type or change session
+    
     def __init__(self, session_manager: SessionManagerImpl, responses_factory: ResponsesFactory,
                  errors_handler: VkApiErrorsHandler, max_pool_size=25):
         self.max_pool_size = max_pool_size

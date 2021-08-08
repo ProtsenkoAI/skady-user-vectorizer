@@ -11,6 +11,9 @@ UserData = Dict[UserId, Any]
 
 class DataLongTermSaver:
     # TODO: add abstract classes, refactor etc.
+
+    # TODO: add data health test script
+
     def __init__(self, save_pth: str, backup_save_pth: str, backup_parsed_every: int = 3 * 10 ** 4):
         self.save_pth = save_pth
         self.backup_save_pth = backup_save_pth

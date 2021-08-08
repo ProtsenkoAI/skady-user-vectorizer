@@ -11,6 +11,7 @@ test_res_pth = get_resources_path("./settings.json") / "testing"
 
 
 class TestEcoRequester(unittest.TestCase):
+    # TODO: test that don't lose data in checkpointing process
     def test_error_processing(self):
         """Test that if access error occurred on user in will be requested again later"""
         requester = self._create()
