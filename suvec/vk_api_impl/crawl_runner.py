@@ -12,12 +12,10 @@ from suvec.common.postproc.data_managers.data_long_term_saver import DataLongTer
 
 from suvec.common.requesting.requested_users_storage import RequestedUsersFileStorage
 from suvec.common.requesting.users_filter import DuplicateUsersFilter
-from .executing.pool_executor import VkApiPoolExecutor
 from .executing.async_pool_executor import AsyncVkApiPoolExecutor
 from .executing.mutli_session_async_pool_executor import MultiSessionAsyncVkApiPoolExecutor
 from .executing.responses_factory import AioVkResponsesFactory
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
-from .executing.responses_factory import VkApiResponsesFactory
 from .requesting import VkApiRequestsCreator
 from .errors_handler import VkApiErrorsHandler
 from .session.records_managing.proxy_manager import ProxyManager
@@ -39,7 +37,7 @@ class VkApiCrawlRunner(CrawlRunner):
                  logs_pth: str = "../logs.txt",
                  tracker=None, requester_max_requests_per_loop=10000,
                  tracker_response_freq=500,
-                 access_resource_reload_hours=24, use_async=True, nb_sessions=1,
+                 access_resource_reload_hours=24, nb_sessions=1,
                  dmp_long_term_steps=2000):
 
         if tracker is None:
@@ -69,18 +67,15 @@ class VkApiCrawlRunner(CrawlRunner):
         creds_manager = CredsManager(creds_storage, tracker,
                                      hours_for_resource_reload=access_resource_reload_hours)
 
-        self.session_manager = SessionManagerImpl(errors_handler, proxy_manager, creds_manager)
-        if use_async:
-            responses_factory = AioVkResponsesFactory()
-            if nb_sessions == 1:
-                self.executor = AsyncVkApiPoolExecutor(self.session_manager, responses_factory, errors_handler)
-            else:
+        self.session_manager = SessionManagerImpl(proxy_manager, creds_manager)
 
-                self.executor = MultiSessionAsyncVkApiPoolExecutor(self.session_manager, responses_factory,
-                                                                   errors_handler, nb_sessions=nb_sessions)
+        responses_factory = AioVkResponsesFactory()
+        if nb_sessions == 1:
+            self.executor = AsyncVkApiPoolExecutor(responses_factory, self.session_manager,)
         else:
-            responses_factory = VkApiResponsesFactory()
-            self.executor = VkApiPoolExecutor(self.session_manager, responses_factory)
+
+            self.executor = MultiSessionAsyncVkApiPoolExecutor(responses_factory, self.session_manager,
+                                                               nb_sessions=nb_sessions)
 
         long_term_saver = DataLongTermSaver(long_term_save_pth, data_backup_path)
         self.data_manager = RAMDataManager(long_term_saver, dmp_long_term_every=dmp_long_term_steps)
@@ -93,7 +88,6 @@ class VkApiCrawlRunner(CrawlRunner):
 
         self.parsed_processor.add_process_success_hook(success_request_notifier_hook)
 
-        errors_handler.register_session_error_listener(self.session_manager)
         errors_handler.register_user_unrelated_listener(self.requester)
 
         self.continue_crawling = True

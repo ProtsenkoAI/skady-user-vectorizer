@@ -1,8 +1,19 @@
 from abc import ABC, abstractmethod
-from .sessions_containers import SessionsContainer
 
 
 class SessionManager(ABC):
     @abstractmethod
-    def allocate_sessions(self, n: int, container: SessionsContainer):
+    def next(self):
+        ...
+
+    @abstractmethod
+    def access_error(self, session_data):
+        ...
+
+    @abstractmethod
+    def bad_password(self, session_data):
+        ...
+
+    @abstractmethod
+    def captcha(self, session_data):
         ...

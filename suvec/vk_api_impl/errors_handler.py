@@ -1,16 +1,11 @@
-import logging
-
-from vk_api import exceptions
-from requests.exceptions import ProxyError
-
 from suvec.common.executing.error_codes import PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_ERROR, ACCESS_DENIED
-from suvec.common.executing import ParseRes, ErrorObj
+from suvec.common.executing import ParseRes
 from suvec.common.events_tracking import TerminalEventsTracker
 from suvec.common.external_errors_handling import ExternalErrorsHandler
-from suvec.common.listen_notify import SessionErrorNotifier, UserUnrelatedErrorNotifier
+from suvec.common.listen_notify import UserUnrelatedErrorNotifier
 
 
-class VkApiErrorsHandler(ExternalErrorsHandler, SessionErrorNotifier, UserUnrelatedErrorNotifier):
+class VkApiErrorsHandler(ExternalErrorsHandler, UserUnrelatedErrorNotifier):
     """The class to process errors sent by service (API, website) we work with"""
     # TODO: refactor logging/working with tracker
 
@@ -23,62 +18,13 @@ class VkApiErrorsHandler(ExternalErrorsHandler, SessionErrorNotifier, UserUnrela
     #  is not a good thing. Can change interfaces to process by batches
 
     def __init__(self, events_tracker: TerminalEventsTracker, process_captcha=False):
-        SessionErrorNotifier.__init__(self)
         UserUnrelatedErrorNotifier.__init__(self)
         self.process_captcha = process_captcha
 
         self.tracker = events_tracker
 
-    def auth_error(self, error: exceptions.VkApiError, auth_data: dict, session_id: int):
-        session = auth_data["session"]
-        del auth_data["session"]
-
-        error_code = getattr(error, "code", None)
-        wrapped_error = ErrorObj(error_code, error)
-        if isinstance(error, exceptions.Captcha):
-            if self.process_captcha:
-                print("captcha needed")
-                print(f"Captcha url: {error.get_url()}")
-                captcha_answer = input("Please enter captcha text: \n")
-                try:
-                    error.try_again(captcha_answer)
-                except exceptions.VkApiError as exception:
-                    self.tracker.error_occurred("can't handle auth error")
-                if session is None:
-                    raise ValueError("Captcha error occurred, but you have not passed session object, thus can't auth")
-                else:
-                    session.auth()
-            else:
-                # TODO: at the moment marking proxy as bad if captcha error, but it's likely that only *pair* of proxy
-                #   and creds causes captcha, maybe we can use proxy with different creds and should process it properly
-                print("captcha error, notifying proxy error")
-                self.notify_proxy_error(session_id)
-
-        elif isinstance(error, exceptions.BadPassword):
-            # Funny fact: vk_api can return Bad password even if it's not the problem.
-            # One time it returned bad password when we didn't pass User agent in requests session
-            # SO if there'll be bugs, consider find REAL root of the problem
-            self.notify_bad_password(session_id)
-
-        elif isinstance(error, ProxyError):
-            self.tracker.error_occurred("The proxy doesn't work. Try to send some request from it. "
-                                        f"Auth data: {auth_data}")
-
-        else:
-            self.tracker.error_occurred(f"Unknown auth error, error: {wrapped_error.code, wrapped_error.error}")
-            raise ValueError("Unknown auth error", error)
-
-        error_msg_to_log = f"Auth error: auth_data = {auth_data}"
-        logging.error(error_msg_to_log)
-
-    def proxy_error(self, requests, session_id):
-        self.notify_proxy_error(session_id)
-        for request in requests:
-            self.notify_user_unrelated_error(request)
-
     def response_error(self, parsed_results: ParseRes):
         if int(parsed_results.error.code) == ACCESS_ERROR:
-            self.notify_session_error(parsed_results.session_id)
             self.notify_user_unrelated_error(parsed_results.request)
 
         elif parsed_results.error.code in [PROFILE_IS_PRIVATE, ACCOUNT_IS_BLOCKED, ACCESS_DENIED]:

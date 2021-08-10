@@ -3,7 +3,6 @@ from suvec.vk_api_impl.crawl_runner_with_checkpoints import VkCrawlRunnerWithChe
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
 import logging
-import sys
 from time import time
 
 logging.basicConfig(filename=f"./resources/logs/vk_api_main_logs_{time()}.txt",
@@ -37,7 +36,6 @@ def run():
         long_term_save_pth=result_file,
         data_backup_path=str(backups_path / "parsed_backup.jsonl"),
         loops_per_checkpoint=3,
-        use_async=True,
         nb_sessions=4,
         dmp_long_term_steps=2000
     )
