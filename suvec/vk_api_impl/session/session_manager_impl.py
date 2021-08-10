@@ -25,6 +25,7 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
         self.proxy_manager = proxy_manager
         self.creds_manager = creds_manager
         self.sessions_containers: List[SessionsContainer] = []
+
     def allocate_sessions(self, n: int, container: SessionsContainer):
         # TODO: it's inconvenient to create container every time, but we need to support different container subclass,
         #   maybe we can find better solution
@@ -50,27 +51,13 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
     def session_error_occurred(self, session_id: int):
         session_data = self._get_session_data_by_id(session_id)
         if session_data is not None:  # will be None if already deleted this session
-            creds, proxy = session_data.creds, session_data.proxy
-            self._test_and_reset_resources_statuses(creds, proxy)
+            self.mark_worked_out(session_data)
             self._replace_session(session_id)
 
-    def _test_and_reset_resources_statuses(self, creds, proxy):
-        self._test_and_reset_creds_status(creds)
-        self._test_and_reset_proxy_status(proxy)
-
-    def _test_and_reset_creds_status(self, creds):
-        creds_test_succ = self.creds_manager.test_with_record_tester(self.resource_tester, creds)
-        if creds_test_succ:
-            self.creds_manager.mark_free(creds)
-        else:
-            self.creds_manager.mark_worked_out(creds)
-
-    def _test_and_reset_proxy_status(self, proxy):
-        proxy_test_succ = self.proxy_manager.test_with_record_tester(self.resource_tester, proxy)
-        if proxy_test_succ:
-            self.proxy_manager.mark_free(proxy)
-        else:
-            self.proxy_manager.mark_worked_out(proxy)
+    def mark_worked_out(self, session_data):
+        creds, proxy = session_data.creds, session_data.proxy
+        self.creds_manager.mark_worked_out(creds)
+        self.proxy_manager.mark_worked_out(proxy)
 
     def bad_password(self, session_id):
         session_data = self._get_session_data_by_id(session_id)
@@ -98,8 +85,8 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
         for container in self.sessions_containers:
             if container.check_in(session_id):
                 container.remove(session_id)
-                working_creds = self.creds_manager.get_working(self.resource_tester)
-                working_proxies = self.proxy_manager.get_working(self.resource_tester)
+                working_creds = self.creds_manager.get_working()
+                working_proxies = self.proxy_manager.get_working()
                 while True:
                     try:
                         creds, proxies = next(working_creds), next(working_proxies)
@@ -118,13 +105,28 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
         else:
             raise RuntimeError(f"Session id {session_id} was not found in containers")
 
+    def get_new_session(self):
+        # TODO: dirty function for replace() realization in containers, will refactor later
+        working_creds = self.creds_manager.get_working()
+        working_proxies = self.proxy_manager.get_working()
+        try:
+            creds, proxies = next(working_creds), next(working_proxies)
+            try:
+                session = self._create_session(creds=creds, proxy=proxies)
+                self._last_session_id += 1
+                return session, self._last_session_id
+            except BadSession:
+                self._handle_bad_session(creds, proxies)
+        except StopIteration:
+            return None, None
+
     def _handle_bad_session(self, creds, proxies):
         # TODO: write tests, buggy place
         print("handling bad session", "creds status", creds.status, "proxy status", proxies.status)
         assert creds.status == RESOURCE_ALREADY_USED
         assert proxies.status == RESOURCE_ALREADY_USED
         # if creds.status == RESOURCE_ALREADY_USED:
-        self.creds_manager.mark_free(creds)
+        self.creds_manager.mark_worked_out(creds)
         self.proxy_manager.mark_worked_out(proxies)
         # if proxies.status == RESOURCE_ALREADY_USED:
         #     self.proxy_manager.mark_free(proxies)

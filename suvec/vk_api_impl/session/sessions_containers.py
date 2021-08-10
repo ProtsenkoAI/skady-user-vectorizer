@@ -63,9 +63,10 @@ class AioVkSessionsContainer(SessionsContainer):
 
     # TODO: add test, that if bad session was added, then both self.aiovk_sessions dict and self.sessions_data aren't
     #   updated
-    def __init__(self, *args, errors_handler, **kwargs):
+    def __init__(self, *args, errors_handler, session_manager, **kwargs):
         super().__init__()
         self.errors_handler = errors_handler
+        self.session_manager = session_manager
         self.aiovk_sessions: Dict[int, AioSession] = {}
 
     def add(self, session_data: SessionData, session_id):
@@ -82,6 +83,21 @@ class AioVkSessionsContainer(SessionsContainer):
     def remove(self, session_id: int):
         super().remove(session_id)
         del self.aiovk_sessions[session_id]
+
+    def replace(self, session_id: int):
+        # TODO: tests
+        self.remove(session_id)
+        session_data = self.session_manager._get_session_data_by_id(session_id)
+        if session_data is not None:
+            self.session_manager.mark_worked_out(session_data)
+        while True:
+            session_data, session_id = self.session_manager.get_new_session()
+            if session_id is not None and session_data is not None:
+                try:
+                    self.add(session_data, session_id)
+                    return session_id, self.aiovk_sessions[session_id]
+                except BadSession:
+                    self.session_manager._handle_bad_session(session_data.creds, session_data.proxy)
 
     def _create_aio_session(self, session_data: SessionData, session_id) -> AioSession:
         vk_session = auth_vk_api(session_data, self.errors_handler, session_id)

@@ -11,7 +11,7 @@ logging.basicConfig(filename=f"./resources/logs/vk_api_main_logs_{time()}.txt",
                     format='%(asctime)s, %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
                     level=logging.INFO)
-logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
+# logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 def run():

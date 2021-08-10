@@ -17,7 +17,8 @@ class ResponsesFactoryImpl(ResponsesFactory):
             resp_data = self.request_data_retriever.get_resp_data(request_res)
             friends = self.friends_parser.parse(resp_data)
 
-        return FriendsParseRes(friends=friends, error=error, request=req, session_id=session_id)
+        is_access_error = error is not None and error.code == 29
+        return FriendsParseRes(friends=friends, error=error, request=req, session_id=session_id), is_access_error
 
     def create_groups_response(self, request_res: RequestResult, req: Request, session_id):
         error = self.request_data_retriever.get_error(request_res)
@@ -27,4 +28,5 @@ class ResponsesFactoryImpl(ResponsesFactory):
             resp_data = self.request_data_retriever.get_resp_data(request_res)
             groups = self.groups_parser.parse(resp_data)
 
-        return GroupsParseRes(groups=groups, error=error, request=req, session_id=session_id)
+        is_access_error = error is not None and error.code == 29
+        return GroupsParseRes(groups=groups, error=error, request=req, session_id=session_id), is_access_error
