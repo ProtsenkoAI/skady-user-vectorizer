@@ -9,6 +9,3 @@ class ProxyManager(AuthRecordManager):
         else:
             out_of_proxy_manager = None
         super().__init__(*args, out_of_records_handler=out_of_proxy_manager, **kwargs)
-
-    def test_with_record_tester(self, record_tester, proxy):
-        return record_tester.test_proxy(proxy)

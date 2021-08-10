@@ -14,6 +14,3 @@ class CredsManager(AuthRecordManager):
     def mark_bad_password(self, creds_id):
         self.storage: CredsStorage
         self.storage.set_bad_password(creds_id)
-
-    def test_with_record_tester(self, record_tester, creds):
-        return record_tester.test_creds(creds)

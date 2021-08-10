@@ -4,7 +4,6 @@ from suvec.common.listen_notify import SessionErrorListener
 from .records_managing import ProxyManager, CredsManager
 from .session_manager import SessionManager
 from .records_managing.records import CredsRecord, ProxyRecord
-from .resource_testing import ResourceTester
 from .types import SessionData
 from .sessions_containers import SessionsContainer, BadSession
 from .records_managing.consts import RESOURCE_ALREADY_USED
@@ -20,23 +19,18 @@ class SessionManagerImpl(SessionManager, SessionErrorListener):
     # TODO: note that repeated authorizations of pair are not blocked by captcha
 
     # TODO: separate access error managing for friends and groups requests
-    def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager,
-                 tester: ResourceTester):
+    def __init__(self, errors_handler, proxy_manager: ProxyManager, creds_manager: CredsManager):
         self._last_session_id = -1
         self.errors_handler = errors_handler
         self.proxy_manager = proxy_manager
         self.creds_manager = creds_manager
         self.sessions_containers: List[SessionsContainer] = []
-        self.resource_tester = None  # placing here otherwise allocate_sessions will not work
-        self.allocate_sessions(1, tester.get_container())
-        self.resource_tester = tester
-
     def allocate_sessions(self, n: int, container: SessionsContainer):
         # TODO: it's inconvenient to create container every time, but we need to support different container subclass,
         #   maybe we can find better solution
         session_idx = 0
-        for proxy, creds in zip(self.proxy_manager.get_working(self.resource_tester),
-                                self.creds_manager.get_working(self.resource_tester)):
+        for proxy, creds in zip(self.proxy_manager.get_working(),
+                                self.creds_manager.get_working()):
             self._last_session_id += 1
             session = self._create_session(proxy, creds)
             try:

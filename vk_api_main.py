@@ -3,13 +3,15 @@ from suvec.vk_api_impl.crawl_runner_with_checkpoints import VkCrawlRunnerWithChe
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
 import logging
-from time import timt
+import sys
+from time import time
 
 logging.basicConfig(filename=f"./resources/logs/vk_api_main_logs_{time()}.txt",
                     filemode='a',
                     format='%(asctime)s, %(name)s %(levelname)s %(message)s',
                     datefmt='%H:%M:%S',
-                    level=logging.DEBUG)
+                    level=logging.INFO)
+logging.getLogger().addHandler(logging.StreamHandler(sys.stdout))
 
 
 def run():

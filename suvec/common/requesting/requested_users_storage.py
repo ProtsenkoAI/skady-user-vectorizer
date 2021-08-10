@@ -39,7 +39,7 @@ class RequestedUsersFileStorage(RequestedUsersStorage):
 
     def _dump_users(self, users: List[int]):
         with open(self.save_pth, "a") as f:
-            logging.info(f"Dump {len(users)} users to file {self.save_pth}")
+            logging.debug(f"Dump {len(users)} users to file {self.save_pth}")
             for user in users:
                 f.write(str(user) + "\n")
 

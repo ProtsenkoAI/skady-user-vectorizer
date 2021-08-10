@@ -17,7 +17,6 @@ from .executing.async_pool_executor import AsyncVkApiPoolExecutor
 from .executing.mutli_session_async_pool_executor import MultiSessionAsyncVkApiPoolExecutor
 from .executing.responses_factory import AioVkResponsesFactory
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
-from suvec.vk_api_impl.session.resource_testing import ResourceTester
 from .executing.responses_factory import VkApiResponsesFactory
 from .requesting import VkApiRequestsCreator
 from .errors_handler import VkApiErrorsHandler
@@ -70,8 +69,7 @@ class VkApiCrawlRunner(CrawlRunner):
         creds_manager = CredsManager(creds_storage, tracker,
                                      hours_for_resource_reload=access_resource_reload_hours)
 
-        tester = ResourceTester(errors_handler)
-        self.session_manager = SessionManagerImpl(errors_handler, proxy_manager, creds_manager, tester)
+        self.session_manager = SessionManagerImpl(errors_handler, proxy_manager, creds_manager)
         if use_async:
             responses_factory = AioVkResponsesFactory()
             if nb_sessions == 1:

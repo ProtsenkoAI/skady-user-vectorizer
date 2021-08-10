@@ -1,12 +1,11 @@
 from typing import Optional
-from abc import ABC, abstractmethod
+from abc import ABC
 
 from .records import Record
-from ..resource_testing import ResourceTester
 from .records_storing import AuthRecordsStorage
 from .out_of_records_handler import OutOfRecordsHandler
 from suvec.common.events_tracking import TerminalEventsTracker
-from .consts import RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
+from .consts import RESOURCE_OK_STATUS
 
 
 class AuthRecordManager(ABC):
@@ -19,10 +18,10 @@ class AuthRecordManager(ABC):
         self.hours_for_reload = hours_for_resource_reload
         self.out_of_records_handler = out_of_records_handler
 
-    def get_working(self, record_tester: Optional[ResourceTester] = None):
+    def get_working(self):
         nb_good_found = 0
         for record in self.storage.get_records():
-            if self._check_record_is_usable(record, record_tester):
+            if self._check_record_is_usable(record):
                 print("yielding record", record)
                 self.storage.set_is_used(record)
                 nb_good_found += 1
@@ -36,7 +35,7 @@ class AuthRecordManager(ABC):
                         self.storage.add_record(record)
         # recursion, so records handler should return empty records if can't obtain them
         if nb_good_found > 0:  # if hadn't found any resources it's useless to call recursion again, we just needed loop
-            yield from self.get_working(record_tester)
+            yield from self.get_working()
 
     def mark_free(self, record: Record):
         print(f"mark record {record.obj_id} as free")
@@ -46,20 +45,8 @@ class AuthRecordManager(ABC):
         print(f"mark record {record.obj_id} as worked out")
         self.storage.set_worked_out(record)
 
-    @abstractmethod
-    def test_with_record_tester(self, resource_tester, record):
-        ...
-
-    def _check_record_is_usable(self, record: Record, resource_tester: Optional[ResourceTester]):
+    def _check_record_is_usable(self, record: Record):
         seconds_in_hour = 60 ** 2
         reloaded = record.time_since_status_change / seconds_in_hour >= self.hours_for_reload
         ok_status = record.status == RESOURCE_OK_STATUS or reloaded
-        test_success = False
-        if record.status == RESOURCE_WORKED_OUT_STATUS and resource_tester is not None:
-            print("Conducting test on record", record)
-            test_success = self.test_with_record_tester(resource_tester, record)
-            if test_success:
-                self.storage.set_is_free(record)
-            else:
-                self.storage.set_worked_out(record)
-        return ok_status or test_success
+        return ok_status
