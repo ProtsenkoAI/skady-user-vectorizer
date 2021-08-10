@@ -37,8 +37,8 @@ class TerminalEventsTracker(EventsTracker, metaclass=Singleton):
 
     def state_report(self):
         time_passed = time.time() - self.prev_report_time
-        # TODO: maybe save full list of skipped users and reasons somewhere
-        # TODO: check that nb users parsed in logs is adequate
+        # later_TODO: maybe save full list of skipped users and reasons somewhere
+        # later_TODO: check that nb users parsed in logs is adequate
         msg_lines = (f"State Report",
                      f"Nb users parsed: {self.nb_users_parsed}",
                      f"Total errors: {self.errors_cnt}",

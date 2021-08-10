@@ -5,6 +5,9 @@ from aiovk import drivers
 import vk_api
 from vk_api.requests_pool import VkRequestsPool
 
+import logging
+import json
+
 from .auth import auth_vk_api
 from .types import SessionData
 
@@ -19,9 +22,11 @@ class SessionsContainer:
         return session_id in self.sessions_data
 
     def remove(self, session_id: int):
+        logging.info(f"Session removed: {self.sessions_data[session_id], session_id}")
         del self.sessions_data[session_id]
 
     def add(self, session_data: SessionData, session_id):
+        logging.info(f"Session created: {session_data, session_id}")
         self.sessions_data[session_id] = session_data
 
     def get_data(self, session_id):

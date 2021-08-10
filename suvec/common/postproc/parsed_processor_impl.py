@@ -24,6 +24,7 @@ class ParsedProcessorImpl(ParsedProcessor):
             self.process_success(parsed_results)
 
     def process_success(self, res: ParseRes):
+        logging.info(f"Request success, session_id: {res.session_id}")
         if res.request_type == "friends":
             res: FriendsParseRes
             self._proc_friends(res)

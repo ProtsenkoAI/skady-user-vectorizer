@@ -2,6 +2,14 @@ import utils
 from suvec.vk_api_impl.crawl_runner_with_checkpoints import VkCrawlRunnerWithCheckpoints
 from suvec.common.events_tracking.terminal_events_tracker import TerminalEventsTracker
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
+import logging
+from time import timt
+
+logging.basicConfig(filename=f"./resources/logs/vk_api_main_logs_{time()}.txt",
+                    filemode='a',
+                    format='%(asctime)s, %(name)s %(levelname)s %(message)s',
+                    datefmt='%H:%M:%S',
+                    level=logging.DEBUG)
 
 
 def run():
@@ -23,12 +31,12 @@ def run():
         proxy_storage=proxy_storage,
         creds_storage=creds_storage,
         requester_checkpoints_path=checkp_requester,
-        requester_max_requests_per_loop=4000,
+        requester_max_requests_per_loop=2000,
         long_term_save_pth=result_file,
         data_backup_path=str(backups_path / "parsed_backup.jsonl"),
         loops_per_checkpoint=3,
         use_async=True,
-        nb_sessions=8,
+        nb_sessions=4,
         dmp_long_term_steps=2000
     )
     runner.run()

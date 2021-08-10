@@ -40,7 +40,7 @@ class VkApiCrawlRunner(CrawlRunner):
                  logs_pth: str = "../logs.txt",
                  tracker=None, requester_max_requests_per_loop=10000,
                  tracker_response_freq=500,
-                 access_resource_reload_hours=1, use_async=True, nb_sessions=1,
+                 access_resource_reload_hours=24, use_async=True, nb_sessions=1,
                  dmp_long_term_steps=2000):
 
         if tracker is None:

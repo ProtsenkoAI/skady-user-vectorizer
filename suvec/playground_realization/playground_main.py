@@ -1,6 +1,3 @@
-# TODO: add Captcha needed procession (get new proxy)
-
-import json
 import vk_api
 from vk_api import exceptions as vk_excepts
 import traceback
@@ -14,7 +11,6 @@ user_agent = 'Mozilla/5.0 (Windows NT 6.1; rv:52.0) Gecko/20100101 Firefox/52.0'
 
 
 def get_resources():
-    # TODO: logs
     creds_pth = "/home/arseny/Projects/skady-user-vectorizer/resources/access/creds.json"
     proxy_pth = "/home/arseny/Projects/skady-user-vectorizer/resources/access/Webshare 100 proxies.txt"
 

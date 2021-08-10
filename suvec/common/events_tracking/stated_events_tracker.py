@@ -16,9 +16,9 @@ class TrackerState(TypedDict):
 
 
 class StatedEventsTracker(EventsTracker):
-    # TODO: need to get working_proxies_cnt and working_creds_cnt at init stage from storages
-    # TODO: separate creds session change and proxy session change
-    # TODO: maybe delete friends added and groups added methods
+    # later_TODO: need to get working_proxies_cnt and working_creds_cnt at init stage from storages
+    # later_TODO: separate creds session change and proxy session change
+    # later_TODO: maybe delete friends added and groups added methods
     def __init__(self, log_pth: str, num_parse_speed_points_stored: int = 200):
         super().__init__(log_pth)
         self._sessions_requests_cnt = []

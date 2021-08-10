@@ -8,7 +8,7 @@ from ..utils import AbstractSingleton
 
 
 class EventsTracker(ABC, metaclass=AbstractSingleton):
-    # TODO: need tracker checkpoints if robust stats are needed
+    # LATER_TODO: need tracker checkpoints if robust stats are needed
 
     def __init__(self, log_pth: str):
         logging.basicConfig(filename=log_pth, level="INFO")

@@ -26,11 +26,10 @@ if __name__ == "__main__":
     settings_path = "./settings.json"
     res_path = utils.get_resources_path(settings_path)
 
-    proxy_file_pth = res_path / "other" / "Webshare-250.txt"
+    proxy_file_pth = res_path / "other" / "Webshare 100 proxies.txt"
     accounts_file_pth = res_path / "other" / "vk_accounts.txt"
 
     proxies_save_pth, creds_save_pth = utils.get_proxy_and_creds_paths(settings_path)
-
     proxy_storage = ProxyStorage(str(proxies_save_pth))
     creds_storage = CredsStorage(str(creds_save_pth))
 

@@ -10,6 +10,7 @@ from .consts import RESOURCE_OK_STATUS, RESOURCE_WORKED_OUT_STATUS
 
 
 class AuthRecordManager(ABC):
+    # TODO: replace out_of_records handler with just exiting till the next day
     def __init__(self, storage: AuthRecordsStorage, events_tracker: TerminalEventsTracker,
                  out_of_records_handler: Optional[OutOfRecordsHandler],
                  hours_for_resource_reload=24):
@@ -51,12 +52,10 @@ class AuthRecordManager(ABC):
 
     def _check_record_is_usable(self, record: Record, resource_tester: Optional[ResourceTester]):
         seconds_in_hour = 60 ** 2
-        ok_status = record.status == RESOURCE_OK_STATUS
-        can_be_tested = (record.status == RESOURCE_WORKED_OUT_STATUS and
-                         record.time_since_status_change / seconds_in_hour >= self.hours_for_reload)
-
+        reloaded = record.time_since_status_change / seconds_in_hour >= self.hours_for_reload
+        ok_status = record.status == RESOURCE_OK_STATUS or reloaded
         test_success = False
-        if can_be_tested and resource_tester is not None:
+        if record.status == RESOURCE_WORKED_OUT_STATUS and resource_tester is not None:
             print("Conducting test on record", record)
             test_success = self.test_with_record_tester(resource_tester, record)
             if test_success:
