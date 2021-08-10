@@ -10,4 +10,4 @@ def run_tests(start_dir):
 
 
 if __name__ == "__main__":
-    run_tests("./tests/")
+    run_tests("unit_tests/")

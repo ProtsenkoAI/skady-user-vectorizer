@@ -12,9 +12,6 @@ class UsersFilter(ABC):
 
 
 class DuplicateUsersFilter(UsersFilter):
-    # TODO: at the moment costs too much memory per user because of python objects and set memory usage.
-    #   should use numpy arrays/ reduce cost of py objects
-
     def __init__(self, expansion_size: int = 1000):
         """
         :param expansion_size: the filter uses arrays of fixed shape, so if there's not enough place for users to
@@ -58,8 +55,8 @@ class DuplicateUsersFilter(UsersFilter):
 
     def load_checkpoint(self, checkp_data):
         # Caution: buggy place
-        # TODO: possibility of loading checkpoint at the middle of work, not at the start can cause bugs, maybe can
-        #   replace with object creator @classmethod all load_checkpoint() functions
+        # possibility of loading checkpoint at the middle of work, not at the start can cause bugs, so raise error
+        assert self.last_idx == 0
         data, idx = checkp_data
         self._add(np.array(data))
         self.last_idx = idx

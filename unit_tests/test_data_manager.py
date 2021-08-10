@@ -4,7 +4,7 @@ import random
 import json
 from typing import Callable, Optional
 
-from suvec.common.postproc.data_managers.ram_data_manager import RAMDataManager, UsersData
+from suvec.common.postproc.data_managers.ram_data_manager import RAMDataManager, UsersData, DataLongTermSaver
 from suvec.common.top_level_types import User, Group
 
 
@@ -23,7 +23,7 @@ class TestRAMDataManager(unittest.TestCase):
             inspect_was_called = True
 
             self.assertEqual(len(save), nb_users_saved)
-            for user_id, saved_data in save.items():
+            for user_id, saved_data in save:
                 self.assertIsNotNone(saved_data["friends"])
                 self.assertIsNotNone(saved_data["groups"])
 
@@ -39,7 +39,7 @@ class TestRAMDataManager(unittest.TestCase):
 
     def test_counts_fully_parsed(self):
         """Checks that data manager increases cnt_fully_parsed correctly"""
-        data_manager = RAMDataManager(None, dmp_long_term_every=100)
+        data_manager = RAMDataManager(MockLongTermSaver(), dmp_long_term_every=100)
 
         user1, user2, user3, user4 = [User(usr_id) for usr_id in range(4)]
         friends_to_save = self._create_friends()
@@ -51,11 +51,11 @@ class TestRAMDataManager(unittest.TestCase):
         data_manager.save_user_friends(user4, friends_to_save)
 
         data_manager.save_user_groups(user1, groups_to_save)
-        self.assertEqual(data_manager.cnt_fully_parsed, 1)
+        self.assertEqual(len(data_manager.fully_parsed), 1)
 
         data_manager.save_user_groups(user3, groups_to_save)  # saving groups again
         data_manager.save_user_groups(user2, groups_to_save)
-        self.assertEqual(data_manager.cnt_fully_parsed, 2)
+        self.assertEqual(len(data_manager.fully_parsed), 2)
 
     def test_deletes_fully_parsed_from_mem(self):
         max_parsed_users_in_ram = 100
@@ -124,10 +124,10 @@ class TestRAMDataManager(unittest.TestCase):
         data_manager.load_checkpoint(loaded_checkp)
 
         data_manager.save_user_friends(the_user, friends=[])
-        self.assertEqual(data_manager.cnt_fully_parsed, 1)
+        self.assertEqual(len(data_manager.fully_parsed), 1)
 
 
-class MockLongTermSaver:
+class MockLongTermSaver(DataLongTermSaver):
     def __init__(self, save_callback: Optional[Callable] = None):
         if save_callback is None:
             save_callback = self._do_nothing

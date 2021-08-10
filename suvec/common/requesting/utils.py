@@ -1,5 +1,4 @@
 import os
-# TODO: refactor
 
 
 def get_and_delete_last_file_line(file):
@@ -14,7 +13,7 @@ def get_and_delete_last_file_line(file):
             f.seek(-1, os.SEEK_CUR)
             char = f.read(1)
             if char != b'\n' and f.tell() == end:
-                print("No change: file does not end with a newline")
+                # file does not end with a newline, so just exit
                 return
             if char == b'\n':
                 count += 1
@@ -28,6 +27,6 @@ def get_and_delete_last_file_line(file):
 
 
 if __name__ == "__main__":
-    # some tests
+    # some unit_tests
     file_pth = "../../../resources/other/test_last_line.txt"
     print(get_and_delete_last_file_line(file_pth))

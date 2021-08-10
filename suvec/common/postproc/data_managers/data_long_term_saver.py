@@ -10,10 +10,6 @@ UserData = Dict[UserId, Any]
 
 
 class DataLongTermSaver:
-    # TODO: add abstract classes, refactor etc.
-
-    # TODO: add data health test script
-
     def __init__(self, save_pth: str, backup_save_pth: str, backup_parsed_every: int = 3 * 10 ** 4):
         self.save_pth = save_pth
         self.backup_save_pth = backup_save_pth
@@ -31,7 +27,7 @@ class DataLongTermSaver:
     @shield_from_termination
     def _write_long_term(self, data: UsersData):
         with open(self.save_pth, "a") as f:
-            for user, user_data in data.items():
+            for user, user_data in data:
                 saved_line = json.dumps({"user_id": user, "data": user_data})
                 f.write(saved_line + "\n")
                 self.cnt_saved_data += 1

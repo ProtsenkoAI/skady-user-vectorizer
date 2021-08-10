@@ -4,7 +4,6 @@ from aiovk.pools import AsyncResult
 
 
 class VkApiRequestDataRetriever:
-    # TODO: add interface
     @staticmethod
     def get_resp_data(raw_resp: RequestResult):
         return raw_resp.result["items"]

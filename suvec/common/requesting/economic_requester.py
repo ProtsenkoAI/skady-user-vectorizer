@@ -9,13 +9,7 @@ from .request import Request
 
 
 class EconomicRequester(BaseRequester, RequestSuccessListener, UserUnrelatedErrorListener):
-    # TODO: instead of requester -> executor -> processor chain with plenty of Listener-Notifier relations
-    #   use global entity (pool of tasks). Requester will create tasks, executor and processor will edit them.
-    #   Processors will also dump obtained results so some plugin of system connected to results can take them.
-    #   This entity will monitor that every task connected to some worker, and CrawlRunner will manage components
-    #   To take new tasks, process them
-
-    # TODO: at the moment gets only first 1000 of groups and friends (because doesn't use offset)
+    # NOTE: at the moment gets only first 1000 of groups and friends (because doesn't use offset)
     """When user is added, first schedules one type of request and if it succeeds sends all other.
     Also checks that users are unique"""
 

@@ -9,6 +9,7 @@ from suvec.common import utils
 from ..session.session_units import AioVkSessionUnit
 
 from suvec.common.executing.executor import Executor
+from ..session.session_manager_impl import OutOfRecords
 
 
 class MultiSessionAsyncVkApiPoolExecutor(Executor):
@@ -17,26 +18,35 @@ class MultiSessionAsyncVkApiPoolExecutor(Executor):
 
     def __init__(self,
                  responses_factory: ResponsesFactory,
-                 session_manager,
-                 nb_sessions=2,
+                 session_units: List[AioVkSessionUnit],
                  max_pool_size=25):
         self.max_pool_size = max_pool_size
-        self.ses_units = [AioVkSessionUnit(session_manager) for _ in range(nb_sessions)]
+        self.ses_units = session_units
         self.responses_factory = responses_factory
-        # TODO: Refactor this place (pass allocated sessions, not session_manager)
         self.requests_per_second_limit = 3
 
     def execute(self, requests: List[Request]) -> List[ParseRes]:
         return asyncio.run(self._multi_session_execute(requests))
 
     async def _multi_session_execute(self, requests: List[Request]) -> List[ParseRes]:
-        # TODO: refactor working with idxs and sessions objects
         requests_parts = utils.split(requests, parts=len(self.ses_units))
         execute_results = []
-        for part, ses_unit in zip(requests_parts, self.ses_units):
-            responses = execute_async(self.responses_factory, part, ses_unit, self.max_pool_size,
-                                      self.requests_per_second_limit)
-            execute_results.append(responses)
+
+        while requests_parts:  # filling with requests that were failed by some sessions
+            new_requests_parts = []
+            for idx, part, ses_unit in enumerate(zip(requests_parts, self.ses_units)):
+                try:
+                    responses = execute_async(self.responses_factory, part, ses_unit, self.max_pool_size,
+                                              self.requests_per_second_limit)
+                except OutOfRecords:
+                    self.ses_units.pop(idx)
+                    if len(self.ses_units) == 0:
+                        raise OutOfRecords
+                    new_requests_parts.append(part)
+                else:
+                    execute_results.append(responses)
+
+            requests_parts = new_requests_parts
 
         awaited_execute_results = await asyncio.gather(*execute_results)
         responses = []

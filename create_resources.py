@@ -6,7 +6,6 @@ import utils
 
 
 def _create_resources_dir(settings_path="./settings.json", force_create: bool = False):
-    # TODO: refactor
     """
     :param force_create: deletes existing directory and creates new if True
     """

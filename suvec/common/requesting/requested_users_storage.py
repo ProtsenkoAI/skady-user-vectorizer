@@ -18,7 +18,7 @@ class RequestedUsersStorage(ABC):
 
 
 class RequestedUsersFileStorage(RequestedUsersStorage):
-    # TODO: dealing with python overhead to store each integer as separate object. If need more memory-effective
+    # NOTE: dealing with python overhead to store each integer as separate object. If need more memory-effective
     #   solution, should use np.array to store req_users and unused_users
     def __init__(self, save_pth, max_users_storing: int = 3 * 10 ** 4, save_unused_users_every=10 ** 3):
         self.save_unused_users_every = save_unused_users_every

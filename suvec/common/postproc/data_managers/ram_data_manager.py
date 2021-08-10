@@ -12,12 +12,12 @@ ArrayUsersData = Dict[int, ArrayUserData]
 
 
 class RAMDataManager(DataManager):
-    # TODO: users_data costs a lot of memory for hashtable, can push fully parsed users to list
-    # TODO: refactor from/to array conversion
+    # NOTE: sometimes have mem-leakage issues, because when deleting user data from self.users_data dict,
+    #   for some reason gc doesn't free memory
 
     def __init__(self, long_term_saver: DataLongTermSaver, dmp_long_term_every: int = 2000):
         self.users_data: ArrayUsersData = {}
-        self.cnt_fully_parsed = 0
+        self.fully_parsed = []
         self.long_term_saver = long_term_saver
         self.dmp_long_term_every = dmp_long_term_every
 
@@ -38,41 +38,27 @@ class RAMDataManager(DataManager):
         self._user_parsed(user)
 
     def _user_parsed(self, user: User):
-        self._maybe_cnt_fully_parsed(user)
-        if self.cnt_fully_parsed % self.dmp_long_term_every == 0 and self.cnt_fully_parsed != 0:
-            self.dump_long_term()
-
-    def _maybe_cnt_fully_parsed(self, user: User):
         if self._check_fully_parsed(user.id):
-            self.cnt_fully_parsed += 1
+            user_data = self.users_data.pop(user.id)
+            self.fully_parsed.append((user.id, user_data))
+
+        if len(self.fully_parsed) % self.dmp_long_term_every == 0 and len(self.fully_parsed) != 0:
+            self.long_term_saver.save(self.fully_parsed)
+            self.fully_parsed = []
 
     def _check_fully_parsed(self, user_id: int):
         user_data = self.users_data[user_id]
         return user_data.friends is not None and user_data.groups is not None
-
-    def dump_long_term(self):
-        # using new dict to free memory, otherwise some python internal gc-feature keeps objects in ram
-        long_term_data = {}
-        new_users_data = {}
-        for user, data in self.users_data.items():
-            if self._check_fully_parsed(user):
-                long_term_data[user] = self._from_arr(data)
-            else:
-                new_users_data[user] = data
-
-        self.users_data = new_users_data
-
-        self.long_term_saver.save(long_term_data)
 
     def get_checkpoint(self) -> UsersData:
         logging.info(f"Number of unpaired users in data_manager checkpoint: {len(self.users_data)}")
         checkp = []
         for user, data in self.users_data.items():
             checkp.append((user, self._from_arr(data)))
-        return dict(checkp)
+        return checkp
 
     def load_checkpoint(self, checkp_data: UsersData):
-        for user, user_data in checkp_data.items():
+        for user, user_data in checkp_data:
             friends, groups = user_data["friends"], user_data["groups"]
             if friends is not None:
                 friends = self._to_arr(friends)

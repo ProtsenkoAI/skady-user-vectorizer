@@ -7,14 +7,10 @@ from suvec.common.listen_notify import UserUnrelatedErrorNotifier
 
 class VkApiErrorsHandler(ExternalErrorsHandler, UserUnrelatedErrorNotifier):
     """The class to process errors sent by service (API, website) we work with"""
-    # TODO: refactor logging/working with tracker
+    # IMPROVEMENT: add method for errors not specific to any instrument or operation
+    #   (JSONDecodeError, RemoteDisconnected, etc)
+    # IMPROVEMENT: if 600 responses have access error, the notify_access_error() will be called 600 times, which
 
-    # TODO: add method for errors not specific to any instrument or operation (JSONDecodeError, RemoteDisconnected, etc)
-
-    # TODO: issue with listener-notifier pattern: if we'll make request not from executor (for example, creds tester),
-    #   and then process session_error, executor will get notification, despite it has no connection with the request
-
-    # TODO: if 600 responses have access error, the notify_access_error() will be called 600 times, which
     #  is not a good thing. Can change interfaces to process by batches
 
     def __init__(self, events_tracker: TerminalEventsTracker, process_captcha=False):

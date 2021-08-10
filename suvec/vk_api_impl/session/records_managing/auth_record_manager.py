@@ -7,7 +7,6 @@ from .consts import RESOURCE_OK_STATUS
 
 
 class AuthRecordManager(ABC):
-    # TODO: replace out_of_records handler with just exiting till the next day
     def __init__(self, storage: AuthRecordsStorage, events_tracker: TerminalEventsTracker,
                  hours_for_resource_reload=24):
         self.storage = storage
@@ -37,5 +36,5 @@ class AuthRecordManager(ABC):
     def _check_record_is_usable(self, record: Record):
         seconds_in_hour = 60 ** 2
         reloaded = record.time_since_status_change / seconds_in_hour >= self.hours_for_reload
-        ok_status = record.status == RESOURCE_OK_STATUS or reloaded
-        return ok_status
+        ok_status = record.status == RESOURCE_OK_STATUS
+        return ok_status or reloaded

@@ -3,11 +3,10 @@ import shutil
 
 import utils
 from suvec.vk_api_impl.session.session_units import SessionUnit
-from suvec.vk_api_impl.session.session_manager_impl import SessionManagerImpl
+from suvec.vk_api_impl.session.session_manager_impl import SessionManagerImpl, OutOfRecords
 from suvec.vk_api_impl.session.records_managing import ProxyManager, CredsManager
 from suvec.vk_api_impl.session.records_managing.records_storing import ProxyStorage, CredsStorage
 from suvec.common.events_tracking import TerminalEventsTracker
-from suvec.vk_api_impl.errors_handler import VkApiErrorsHandler
 
 settings_path = "./settings.json"
 proxies_save_pth, creds_save_pth = utils.get_proxy_and_creds_paths(settings_path)
@@ -22,12 +21,17 @@ class TestSessionManagerImpl(unittest.TestCase):
         shutil.copy(proxies_save_pth, testing_proxies_pth)
         shutil.copy(creds_save_pth, testing_creds_pth)
 
+    def test_can_retrieve_sessions(self):
+        session_manager = self._create()
+        for _ in range(3):
+            session_manager.next()
+
     def test_unique_sessions(self):
         """Allocates sessions to multiple containers and checks they don't intersect
         """
-        # TODO: move to SessionUnit tests
+        # TODO: move to SessionUnit unit_tests
         session_manager = self._create()
-        n_units = 10
+        n_units = 3
         unit_sessions = [SessionUnit(session_manager).get() for _ in range(n_units)]
         creds, proxies = zip(*unit_sessions)
         self.assertTrue(len(set(unit_sessions)) == n_units == len(set(creds)) == len(set(proxies)))
@@ -37,7 +41,9 @@ class TestSessionManagerImpl(unittest.TestCase):
         session_manager = self._create()
         unit = SessionUnit(session_manager)
         old_bad_sessions = []
-        for _ in range(5):
+        print(session_manager.proxy_manager.storage.records)
+        print(session_manager.creds_manager.storage.records)
+        for _ in range(3):
             old_bad_sessions.append(unit.get())
             unit.access_error_occurred()
 
@@ -49,7 +55,7 @@ class TestSessionManagerImpl(unittest.TestCase):
         session_manager = self._create()
         unit = SessionUnit(session_manager)
 
-        with self.assertRaises(StopIteration):
+        with self.assertRaises(OutOfRecords):
             for _ in range(500):
                 unit.access_error_occurred()
 
@@ -61,5 +67,4 @@ class TestSessionManagerImpl(unittest.TestCase):
 
         proxies_manager = ProxyManager(proxies_storage, tracker)
         creds_manager = CredsManager(creds_storage, tracker)
-        errors_handler = VkApiErrorsHandler(events_tracker=tracker)
         return SessionManagerImpl(proxy_manager=proxies_manager, creds_manager=creds_manager)

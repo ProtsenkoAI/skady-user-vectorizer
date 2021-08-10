@@ -41,8 +41,7 @@ async def execute_async(responses_factory, requests: List[Request], session_unit
                 if met_access_err:
                     print("met access error", met_access_err)
                     session_unit.access_error_occurred()
-                    session = session_unit.get()
-                    token_session, access_tokzen = session.session, session.access_token
+                    token_session, access_token = session.session, session.access_token
 
             except ProxyConnectionError as e:
                 # TODO: maybe should call only with unsuccessful requests, if error can occur
@@ -51,7 +50,6 @@ async def execute_async(responses_factory, requests: List[Request], session_unit
             if awaited_requests_and_raw_responses:
                 # if there are still requests without response (some aio issue,
                 # need to investigate), should add them to requests again
-                # TODO: refactor
                 not_executed_requests, _ = zip(*awaited_requests_and_raw_responses)
                 requests.extend(not_executed_requests)
                 awaited_requests_and_raw_responses = []
@@ -73,11 +71,11 @@ async def _gather_responses(responses_factory, reqs_and_raw_resps, executes):
     responses = []
     met_access_error = False
     try:
-        await asyncio.gather(*[executes.pop(0) for _ in range(len(executes))])
         # TODO: need to try to extract responses whose execute() didn't raised errors
+        await asyncio.gather(*[executes.pop(0) for _ in range(len(executes))])
         while reqs_and_raw_resps:
             req, resp = reqs_and_raw_resps.pop(0)
-            # TODO: don't need folded responses factory inside executor (bad design + not async),
+            # IMPROVE: don't need folded responses factory inside executor (bad design + not async),
             #   need to move it to CrawlRunner loop
             resp, access_error = responses_factory.create(resp, req)
             met_access_error = met_access_error or access_error

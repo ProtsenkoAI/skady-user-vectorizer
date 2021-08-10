@@ -1,11 +1,11 @@
 from abc import ABC, abstractmethod
-from typing import List, Dict
+from typing import List, Tuple
 
 from suvec.common.top_level_types import User, Group
 
 
 UserData = dict
-UsersData = Dict[int, UserData]
+UsersData = List[Tuple[int, UserData]]
 
 
 class DataManager(ABC):
