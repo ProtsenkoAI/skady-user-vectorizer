@@ -3,6 +3,12 @@ from vk_api_main import run
 import os
 from time import time, sleep
 
+import sys
+sys.stdout = open(f'./resources/logs/schedule_main_runs_stdout_{int(time())}.txt', 'w')
+sys.stderr = open(f'./resources/logs/schedule_main_runs_stderr_{int(time())}.txt', 'w')
+
+print('test')
+
 
 def run_main_every(n_hours):
     while True:

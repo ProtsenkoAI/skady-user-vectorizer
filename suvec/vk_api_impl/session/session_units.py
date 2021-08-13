@@ -56,6 +56,10 @@ class AioVkSessionUnit(SessionUnit):
         except CaptchaError:
             self.session_manager.captcha(self.session_data)
             self.refresh_data()
+        except ConnectionResetError:
+            print("ConnectionResetError!")
+            # Caution: can enter infinite loop if server always will give this error
+            self.refresh_data()
         else:
             proxy_ip, proxy_port = self._extract_proxy(vk_session)
             token_session = TokenSessionWithProxyMaker(proxy_ip, proxy_port)

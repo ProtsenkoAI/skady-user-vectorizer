@@ -40,7 +40,7 @@ class RAMDataManager(DataManager):
     def _user_parsed(self, user: User):
         if self._check_fully_parsed(user.id):
             user_data = self.users_data.pop(user.id)
-            self.fully_parsed.append((user.id, user_data))
+            self.fully_parsed.append((user.id, self._from_arr(user_data)))
 
         if len(self.fully_parsed) % self.dmp_long_term_every == 0 and len(self.fully_parsed) != 0:
             self.long_term_saver.save(self.fully_parsed)

@@ -34,7 +34,7 @@ class MultiSessionAsyncVkApiPoolExecutor(Executor):
 
         while requests_parts:  # filling with requests that were failed by some sessions
             new_requests_parts = []
-            for idx, part, ses_unit in enumerate(zip(requests_parts, self.ses_units)):
+            for idx, (part, ses_unit) in enumerate(zip(requests_parts, self.ses_units)):
                 try:
                     responses = execute_async(self.responses_factory, part, ses_unit, self.max_pool_size,
                                               self.requests_per_second_limit)

@@ -84,6 +84,9 @@ async def _gather_responses(responses_factory, reqs_and_raw_resps, executes):
     except asyncio.TimeoutError:
         print("TimeoutError!")
         pass
+    except ConnectionResetError:
+        print("ConnectionResetError!")
+        pass
     except client_exceptions.ContentTypeError as e:
         # TODO: log, process in proper way
         print("Content Type Error:", e)

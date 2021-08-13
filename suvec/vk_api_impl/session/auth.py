@@ -30,3 +30,8 @@ def auth_vk_api(session_data: SessionData,
         raise BadPasswordError
     except vk_excepts.Captcha:
         raise CaptchaError
+    except requests.exceptions.ProxyError:
+        # caution: can get into infinite recursion if raises ProxyError every time
+        # TODO: handle properly with ProxyError
+        print("Proxy error occurred")
+        raise CaptchaError
